@@ -17,7 +17,7 @@ import {
     <div class="flex mt-16 flex-wrap items-center gap-2 md:flex-row">
       <Button
         @click="
-          toast.message('Welcome To Fibonacci Gallery', {
+          toast.success('Welcome To Fibonacci Gallery', {
             description: 'The Place way to get your chart art enhanced',
           })
         "
@@ -34,10 +34,7 @@ import {
       </Button>
       <ThemeToggle />
     </div>
-    <div>
-      <h1 class="font-semibold">Payout Threshold</h1>
-      <p class="">Set the minimum balance required before a payout is triggered.</p>
-    </div>
+    <div></div>
 
     <Accordion type="single" collapsible class="w-full" default-value="item-1">
       <AccordionItem value="item-1">
