@@ -87,6 +87,9 @@ const courseVideos = [
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4',
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260325_132944_a0d124bb-eaa1-4082-aa30-2310efb42b4b.mp4',
 ]
+const footerSectionVideo = [
+  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260423_161253_c72b1869-400f-45ed-ac0c-52f68c2ed5bd.mp4',
+]
 
 const features = [
   {
@@ -755,7 +758,7 @@ of Trading"
 
     <!-- ═══════ FINAL CTA SECTION ═══════ -->
     <section id="cta" data-animate class="relative py-24 lg:py-32 px-6 md:px-12 lg:px-16">
-      <VideoBackground :src="courseVideos[2] || ''" :overlay-opacity="0.6" />
+      <VideoBackground :src="footerSectionVideo[0] || ''" :overlay-opacity="0.6" />
 
       <div
         class="relative z-10 max-w-4xl mx-auto text-center transition-all duration-700"

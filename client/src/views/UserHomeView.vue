@@ -20,16 +20,13 @@ const {
 </script>
 
 <template>
-  <div class="min-h-screen bg-background flex flex-col md:flex-row font-primary">
+  <div class="h-screen overflow-hidden bg-background flex flex-col md:flex-row font-primary">
     <!-- Desktop Sidebar -->
-    <AppSidebar
-      :activeTab="activeTab"
-      @update:activeTab="setActiveTab"
-    />
+    <AppSidebar :activeTab="activeTab" @update:activeTab="setActiveTab" />
 
     <!-- Main Content Area -->
-    <main class="flex-1 md:ml-64 w-full relative">
-      <div class="max-w-6xl mx-auto px-6 pt-10 pb-24 md:pb-12">
+    <main class="flex-1 h-screen overflow-y-auto w-full relative">
+      <div class="w-full px-6 lg:px-10 pt-10 pb-24 md:pb-12">
         <!-- Dashboard Content (only visible when 'home' tab is active, as requested for static demo) -->
         <div v-if="activeTab === 'home'" class="w-full">
           <WelcomeBar :studentName="student.name" :currentDate="currentDate" />
@@ -40,21 +37,19 @@ const {
         </div>
 
         <!-- Placeholder for other tabs -->
-        <div v-else class="animate-fade-in-up flex flex-col items-center justify-center py-32 text-center">
+        <div
+          v-else
+          class="animate-fade-in-up flex flex-col items-center justify-center py-32 text-center"
+        >
           <h2 class="text-2xl font-bold tracking-tight text-foreground mb-2">
             {{ activeTab.charAt(0).toUpperCase() + activeTab.slice(1) }} Section
           </h2>
-          <p class="text-muted-foreground text-sm">
-            This section is under construction.
-          </p>
+          <p class="text-muted-foreground text-sm">This section is under construction.</p>
         </div>
       </div>
     </main>
 
     <!-- Mobile Bottom Navigation -->
-    <BottomNav
-      :activeTab="activeTab"
-      @update:activeTab="setActiveTab"
-    />
+    <BottomNav :activeTab="activeTab" @update:activeTab="setActiveTab" />
   </div>
 </template>

@@ -14,7 +14,7 @@ const authStore = useAuthStore()
 const showPassword = ref(false)
 
 const bgVideoUrl =
-  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260423_084718_72a17915-4964-4059-afcd-22d59399b72e.mp4'
+  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260325_094440_a3592600-bd1e-49e5-9bce-a73662061d83.mp4'
 </script>
 
 <template>
@@ -50,22 +50,27 @@ const bgVideoUrl =
           <form @submit.prevent="authStore.handleLogin()" class="space-y-6">
             <div class="space-y-4">
               <div class="space-y-2">
-                <label for="login-email" class="text-sm font-medium text-foreground">Email Address</label>
+                <label for="login-email" class="text-sm font-medium text-foreground"
+                  >Email Address</label
+                >
                 <Input
                   id="login-email"
-                  type="email"
                   v-model="authStore.loginForm.state.values.email"
                   placeholder="name@example.com"
                   :class="{ 'border-destructive': authStore.errors.email }"
                   class="bg-background/50 border-border/40 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
                   @input="authStore.clearError('email')"
                 />
-                <p v-if="authStore.errors.email" class="text-xs text-destructive mt-1">{{ authStore.errors.email }}</p>
+                <p v-if="authStore.errors.email" class="text-xs text-destructive mt-1">
+                  {{ authStore.errors.email }}
+                </p>
               </div>
-              
+
               <div class="space-y-2">
                 <div class="flex items-center justify-between">
-                  <label for="login-password" class="text-sm font-medium text-foreground">Password</label>
+                  <label for="login-password" class="text-sm font-medium text-foreground"
+                    >Password</label
+                  >
                   <a href="#" class="text-xs text-primary hover:text-primary/80 transition-colors">
                     Forgot password?
                   </a>
@@ -90,11 +95,17 @@ const bgVideoUrl =
                     <PhEyeSlash v-else class="h-4 w-4" />
                   </button>
                 </div>
-                <p v-if="authStore.errors.password" class="text-xs text-destructive mt-1">{{ authStore.errors.password }}</p>
+                <p v-if="authStore.errors.password" class="text-xs text-destructive mt-1">
+                  {{ authStore.errors.password }}
+                </p>
               </div>
             </div>
 
-            <Button type="submit" class="w-full h-11 text-base font-medium" :disabled="authStore.isLoading">
+            <Button
+              type="submit"
+              class="w-full h-11 text-base font-medium"
+              :disabled="authStore.isLoading"
+            >
               <span v-if="authStore.isLoading">Signing In...</span>
               <span v-else>
                 Sign In
@@ -104,7 +115,10 @@ const bgVideoUrl =
 
             <div class="text-center text-sm text-muted-foreground pt-4 border-t border-border/20">
               Don't have an account?
-              <RouterLink to="/register" class="text-foreground hover:text-primary transition-colors font-medium ml-1">
+              <RouterLink
+                to="/register"
+                class="text-foreground hover:text-primary transition-colors font-medium ml-1"
+              >
                 Create one now
               </RouterLink>
             </div>

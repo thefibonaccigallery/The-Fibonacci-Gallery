@@ -24,10 +24,14 @@ const navItems = [
 </script>
 
 <template>
-  <aside class="hidden md:flex flex-col w-64 h-screen fixed left-0 top-0 z-30 liquid-glass border-r border-border/20 p-6">
+  <aside
+    class="hidden md:flex flex-col w-64 h-full shrink-0 z-30 liquid-glass border-r border-border/20 p-6"
+  >
     <!-- Header -->
     <div class="flex items-center gap-3 mb-10">
-      <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30">
+      <div
+        class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30"
+      >
         <span class="text-primary font-bold text-lg">Φ</span>
       </div>
       <div>
@@ -46,10 +50,14 @@ const navItems = [
         :class="[
           activeTab === item.id
             ? 'bg-primary/10 text-primary border border-primary/20'
-            : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50 border border-transparent'
+            : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50 border border-transparent',
         ]"
       >
-        <component :is="item.icon" class="h-5 w-5" :weight="activeTab === item.id ? 'fill' : 'regular'" />
+        <component
+          :is="item.icon"
+          class="h-5 w-5"
+          :weight="activeTab === item.id ? 'fill' : 'regular'"
+        />
         {{ item.label }}
       </button>
     </nav>
