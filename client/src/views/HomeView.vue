@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import ThemeToggle from '@/components/blocks/ThemeToggle.vue'
 import AnimatedHeading from '@/components/blocks/AnimatedHeading.vue'
@@ -44,7 +45,7 @@ const statsRef = ref<HTMLElement | null>(null)
 onMounted(() => {
   const observer = new IntersectionObserver(
     ([entry]) => {
-      if (entry.isIntersecting) {
+      if (entry?.isIntersecting) {
         statsVisible.value = true
         observer.disconnect()
       }
@@ -76,9 +77,9 @@ const heroVideoUrl =
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260423_084718_72a17915-4964-4059-afcd-22d59399b72e.mp4'
 
 const featureVideos = [
-  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260418_094631_d30ab262-45ee-4b7d-99f3-5d5848c8ef13.mp4',
-  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260418_115655_b4d9cd77-feed-43cd-a198-af78ebdf1f7a.mp4',
+  'https://res.cloudinary.com/dqxy77qks/video/upload/v1777545513/204306-923909642_medium_zpfrhy.mp4',
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260421_072701_f6a01abb-eb30-4559-9d6e-774362defbc3.mp4',
+  'https://res.cloudinary.com/dqxy77qks/video/upload/v1778869902/308080_medium_gzownl.mp4',
 ]
 
 const courseVideos = [
@@ -234,9 +235,11 @@ const navLinks = [
         <!-- Right Side -->
         <div class="flex items-center gap-3">
           <ThemeToggle />
-          <Button class="hidden md:inline-flex" size="sm">
-            Get Started
-            <PhArrowRight class="ml-1 h-4 w-4" />
+          <Button class="hidden md:inline-flex" size="sm" as-child>
+            <RouterLink to="/login">
+              Get Started
+              <PhArrowRight class="ml-1 h-4 w-4" />
+            </RouterLink>
           </Button>
           <!-- Mobile Menu Toggle -->
           <Button
@@ -264,9 +267,11 @@ const navLinks = [
           >
             {{ link.label }}
           </a>
-          <Button class="mt-2 w-full" size="sm">
-            Get Started
-            <PhArrowRight class="ml-1 h-4 w-4" />
+          <Button class="mt-2 w-full" size="sm" as-child>
+            <RouterLink to="/register">
+              Get Started
+              <PhArrowRight class="ml-1 h-4 w-4" />
+            </RouterLink>
           </Button>
         </div>
       </div>
@@ -310,9 +315,11 @@ of Trading"
         <!-- CTAs -->
         <FadeIn :delay="1400" :duration="1000">
           <div class="flex flex-wrap gap-4 justify-center">
-            <Button size="lg" class="px-8 py-3 rounded-lg font-medium text-base">
-              Start Learning
-              <PhArrowRight class="ml-2 h-4 w-4" />
+            <Button size="lg" class="px-8 py-3 rounded-lg font-medium text-base" as-child>
+              <RouterLink to="/register">
+                Start Learning
+                <PhArrowRight class="ml-2 h-4 w-4" />
+              </RouterLink>
             </Button>
             <Button
               variant="outline"
@@ -406,7 +413,7 @@ of Trading"
           <div
             v-for="(feature, i) in features"
             :key="feature.title"
-            class="group relative rounded-2xl overflow-hidden border border-border/20 transition-all duration-500 hover:border-primary/30 min-h-[380px]"
+            class="group relative rounded-2xl overflow-hidden border border-border/30 dark:border-border/20 transition-all duration-500 hover:border-primary/40 min-h-[380px]"
             :style="{
               opacity: visibleSections.has('features') ? 1 : 0,
               transform: visibleSections.has('features') ? 'translateY(0)' : 'translateY(30px)',
@@ -424,20 +431,21 @@ of Trading"
               >
                 <source :src="feature.video" type="video/mp4" />
               </video>
+              <!-- Light mode: heavy overlay so text stays readable; dark: darker cinematic tone -->
               <div
-                class="absolute inset-0 bg-background/80 dark:bg-black/70 transition-opacity duration-500 group-hover:opacity-90"
+                class="absolute inset-0 bg-background/60 dark:bg-black/75 transition-opacity duration-500 group-hover:opacity-60 dark:group-hover:opacity-90"
               />
             </div>
 
             <!-- Card content -->
             <div class="relative z-10 p-8 flex flex-col h-full justify-end">
               <div
-                class="inline-flex items-center justify-center w-12 h-12 rounded-xl liquid-glass border border-border/20 mb-4"
+                class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 dark:liquid-glass border border-primary/20 dark:border-border/20 mb-4"
               >
                 <component :is="feature.icon" class="h-6 w-6 text-primary" />
               </div>
-              <h3 class="text-xl font-medium mb-3 text-foreground">{{ feature.title }}</h3>
-              <p class="text-sm text-muted-foreground leading-relaxed">
+              <h3 class="text-xl font-semibold mb-3 text-foreground">{{ feature.title }}</h3>
+              <p class="text-sm text-foreground/70 dark:text-muted-foreground leading-relaxed">
                 {{ feature.description }}
               </p>
             </div>
@@ -542,9 +550,11 @@ of Trading"
               <!-- Price & CTA -->
               <div class="flex items-center justify-between pt-4 border-t border-border/20">
                 <span class="text-2xl font-semibold text-foreground">{{ course.price }}</span>
-                <Button size="sm" class="rounded-lg">
-                  Enroll Now
-                  <PhArrowRight class="ml-1 h-3.5 w-3.5" />
+                <Button size="sm" class="rounded-lg" as-child>
+                  <RouterLink to="/register">
+                    Enroll Now
+                    <PhArrowRight class="ml-1 h-3.5 w-3.5" />
+                  </RouterLink>
                 </Button>
               </div>
             </div>
@@ -745,7 +755,7 @@ of Trading"
 
     <!-- ═══════ FINAL CTA SECTION ═══════ -->
     <section id="cta" data-animate class="relative py-24 lg:py-32 px-6 md:px-12 lg:px-16">
-      <VideoBackground :src="courseVideos[2]" :overlay-opacity="0.6" />
+      <VideoBackground :src="courseVideos[2] || ''" :overlay-opacity="0.6" />
 
       <div
         class="relative z-10 max-w-4xl mx-auto text-center transition-all duration-700"
@@ -775,9 +785,11 @@ of Trading"
         </p>
 
         <div class="flex flex-wrap gap-4 justify-center">
-          <Button size="lg" class="px-10 py-4 rounded-lg font-medium text-base">
-            Start Learning Now
-            <PhArrowRight class="ml-2 h-4 w-4" />
+          <Button size="lg" class="px-10 py-4 rounded-lg font-medium text-base" as-child>
+            <RouterLink to="/register">
+              Start Learning Now
+              <PhArrowRight class="ml-2 h-4 w-4" />
+            </RouterLink>
           </Button>
           <Button
             variant="outline"

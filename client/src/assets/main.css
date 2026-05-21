@@ -226,3 +226,7 @@
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.8s ease-out forwards;
+}
