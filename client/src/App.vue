@@ -12,6 +12,7 @@ const toasterTheme = computed(() => {
 </script>
 
 <template>
-  <Toaster :theme="toasterTheme" :closeButton="true" closeButtonPosition="top-right" richColors position="top-right" />
+  <Toaster  :closeButton="true" closeButtonPosition="top-right" richColors position="top-right" />
   <RouterView />
 </template>
+  

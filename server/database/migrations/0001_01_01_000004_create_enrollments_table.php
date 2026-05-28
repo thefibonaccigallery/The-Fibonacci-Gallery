@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -14,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('enrollments', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->uuid()->unique()->default(DB::raw('gen_random_uuid()'));
+            $table->uuid()->unique();
             $table->bigInteger('user_id')->constrained('users')->onDelete('cascade');
             $table->bigInteger('course_id')->constrained('courses')->onDelete('cascade');
             $table->timestamp('enrolled_at')->useCurrent();

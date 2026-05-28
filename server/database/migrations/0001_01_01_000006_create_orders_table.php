@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -14,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->uuid()->unique()->default(DB::raw('gen_random_uuid()'));
+            $table->uuid()->unique();
             $table->bigInteger('user_id')->constrained('users')->onDelete('cascade');
             $table->bigInteger('course_id')->constrained('courses')->onDelete('cascade');
             $table->decimal('amount', 10, 2);
@@ -24,7 +23,7 @@ return new class extends Migration
             $table->string('pay_currency')->nullable();
             $table->decimal('pay_amount', 20, 8)->nullable();
             $table->decimal('actually_paid', 20, 8)->default(0);
-            $table->enum('status', ['waiting', 'confirming', 'confirmed', 'sending', 'partially_paid', 'finished', 'failed', 'refunded', 'expired'])->default('waiting');
+            $table->string('status')->default('waiting');
             $table->timestamp('paid_at')->nullable();
             $table->timestamps();
             $table->index('user_id');

@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -14,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('course_videos', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->uuid()->unique()->default(DB::raw('gen_random_uuid()'));
+            $table->uuid()->unique();
             $table->bigInteger('chapter_id')->constrained('chapters')->onDelete('cascade');
             $table->string('title');
-            $table->enum('level', ['beginner', 'intermediate', 'advanced'])->nullable();
+            $table->string('youtube_video_id', 20)->nullable();
+            $table->string('level')->nullable();
             $table->integer('order')->default(1);
             $table->integer('duration_seconds')->default(0);
             $table->boolean('is_published')->default(false);

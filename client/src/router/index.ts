@@ -30,6 +30,11 @@ const router = createRouter({
       component: UserHomeView,
     },
     {
+      path: '/courses/:courseId/player',
+      name: 'course-player',
+      component: () => import('@/views/CoursePlayerPage.vue'),
+    },
+    {
       path: '/admin-home',
       redirect: '/admin/dashboard',
     },
@@ -52,14 +57,44 @@ const router = createRouter({
           component: () => import('@/views/admin/AdminCoursesPage.vue'),
         },
         {
+          path: 'courses/create',
+          name: 'admin-courses-create',
+          component: () => import('@/views/admin/AdminCourseFormPage.vue'),
+        },
+        {
+          path: 'courses/:id/edit',
+          name: 'admin-courses-edit',
+          component: () => import('@/views/admin/AdminCourseFormPage.vue'),
+        },
+        {
           path: 'chapters',
           name: 'admin-chapters',
           component: () => import('@/views/admin/AdminChaptersPage.vue'),
         },
         {
+          path: 'chapters/create',
+          name: 'admin-chapters-create',
+          component: () => import('@/views/admin/AdminChapterFormPage.vue'),
+        },
+        {
+          path: 'chapters/:id/edit',
+          name: 'admin-chapters-edit',
+          component: () => import('@/views/admin/AdminChapterFormPage.vue'),
+        },
+        {
           path: 'videos',
           name: 'admin-videos',
           component: () => import('@/views/admin/AdminVideosPage.vue'),
+        },
+        {
+          path: 'videos/create',
+          name: 'admin-videos-create',
+          component: () => import('@/views/admin/AdminVideoFormPage.vue'),
+        },
+        {
+          path: 'videos/:id/edit',
+          name: 'admin-videos-edit',
+          component: () => import('@/views/admin/AdminVideoFormPage.vue'),
         },
         {
           path: 'students',
