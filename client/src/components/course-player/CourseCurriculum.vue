@@ -2,13 +2,15 @@
 import { computed } from 'vue'
 import { PhBook } from '@phosphor-icons/vue'
 import ChapterItem from './ChapterItem.vue'
-import type { CoursePlayerChapter } from '@/types/CoursePlayerTypes'
+import type { CoursePlayerChapter, CoursePlayerVideo } from '@/types/CoursePlayerTypes'
 
 interface Props {
   chapters: CoursePlayerChapter[]
   activeVideoId: number | null
   isChapterUnlocked: (chapterIndex: number) => boolean
   isVideoUnlocked: (chapterIndex: number, videoIndex: number) => boolean
+  isVideoInCooldown: (video: CoursePlayerVideo) => boolean
+  getCooldownLabel: (video: CoursePlayerVideo) => string
 }
 
 interface Emits {
@@ -56,6 +58,8 @@ const handleSelectVideo = (payload: { videoId: number; chapterId: number }) => {
         :is-unlocked="isChapterUnlocked(index)"
         :active-video-id="activeVideoId"
         :is-video-unlocked="isVideoUnlocked"
+        :is-video-in-cooldown="isVideoInCooldown"
+        :get-cooldown-label="getCooldownLabel"
         @select-video="handleSelectVideo"
       />
     </div>

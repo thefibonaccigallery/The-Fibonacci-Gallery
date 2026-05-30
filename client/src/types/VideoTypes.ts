@@ -9,6 +9,7 @@ export interface VideoType {
   level: 'beginner' | 'intermediate' | 'advanced' | null
   order: number
   duration_seconds: number
+  cooldown_hours: number
   is_published: boolean
   is_preview: boolean
   created_at: string
@@ -33,6 +34,7 @@ export interface VideoFormData {
   level: 'beginner' | 'intermediate' | 'advanced' | null
   order: number
   duration_seconds: number
+  cooldown_hours: number
   is_published: boolean
   is_preview: boolean
 }

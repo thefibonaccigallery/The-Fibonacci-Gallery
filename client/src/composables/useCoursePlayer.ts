@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import axiosInstance from '@/api/axiosInstance'
 import type {
@@ -47,6 +47,24 @@ export function useCoursePlayer(courseId: number) {
     return chapters.value.find((c) => c.id === activeChapterId.value) || null
   })
 
+  // Reactive ref for current time, updating every minute
+  const now = ref(new Date())
+
+  // Update time every minute
+  onMounted(() => {
+    const interval = setInterval(() => {
+      now.value = new Date()
+    }, 60000)
+
+    onUnmounted(() => clearInterval(interval))
+  })
+
+  // Check if a video is in cooldown
+  const isVideoInCooldown = (video: CoursePlayerVideo): boolean => {
+    if (!video.progress?.cooldown_until) return false
+    return new Date(video.progress.cooldown_until) > now.value
+  }
+
   // Check if a video is unlocked
   const isVideoUnlocked = (chapterIndex: number, videoIndex: number): boolean => {
     // First video of first chapter is always unlocked
@@ -54,6 +72,12 @@ export function useCoursePlayer(courseId: number) {
 
     const chapter = chapters.value[chapterIndex]
     if (!chapter) return false
+
+    const video = chapter.videos[videoIndex]
+    if (!video) return false
+    
+    // Locked by cooldown
+    if (isVideoInCooldown(video)) return false
 
     // If it's not the first video in the chapter, check previous video
     if (videoIndex > 0) {
@@ -66,6 +90,16 @@ export function useCoursePlayer(courseId: number) {
     if (!previousChapter) return false
 
     return previousChapter.videos.every((v) => v.progress?.is_completed === true)
+  }
+
+  // Remaining cooldown time as a human readable string
+  const getCooldownLabel = (video: CoursePlayerVideo): string => {
+    if (!video.progress?.cooldown_until) return ''
+    const diff = new Date(video.progress.cooldown_until).getTime() - now.value.getTime()
+    if (diff <= 0) return ''
+    const hours = Math.floor(diff / 1000 / 60 / 60)
+    const minutes = Math.floor((diff / 1000 / 60) % 60)
+    return `Available in ${hours}h ${minutes}m`
   }
 
   // Check if a chapter is unlocked
@@ -105,14 +139,15 @@ export function useCoursePlayer(courseId: number) {
     // Check if there's a next video in the current chapter
     if (currentVideoIndex < activeChapter.value.videos.length - 1) {
       const nextVideo = activeChapter.value.videos[currentVideoIndex + 1]
-      return { video: nextVideo, chapter: activeChapter.value }
+      if (nextVideo) return { video: nextVideo, chapter: activeChapter.value }
     }
 
     // Check if there's a next chapter
     if (currentChapterIndex < chapters.value.length - 1) {
       const nextChapter = chapters.value[currentChapterIndex + 1]
-      if (nextChapter.videos.length > 0) {
-        return { video: nextChapter.videos[0], chapter: nextChapter }
+      if (nextChapter && nextChapter.videos.length > 0) {
+        const firstVideo = nextChapter.videos[0]
+        if (firstVideo) return { video: firstVideo, chapter: nextChapter }
       }
     }
 
@@ -133,15 +168,15 @@ export function useCoursePlayer(courseId: number) {
     // Check if there's a previous video in the current chapter
     if (currentVideoIndex > 0) {
       const prevVideo = activeChapter.value.videos[currentVideoIndex - 1]
-      return { video: prevVideo, chapter: activeChapter.value }
+      if (prevVideo) return { video: prevVideo, chapter: activeChapter.value }
     }
 
     // Check if there's a previous chapter
     if (currentChapterIndex > 0) {
       const prevChapter = chapters.value[currentChapterIndex - 1]
-      if (prevChapter.videos.length > 0) {
+      if (prevChapter && prevChapter.videos.length > 0) {
         const lastVideo = prevChapter.videos[prevChapter.videos.length - 1]
-        return { video: lastVideo, chapter: prevChapter }
+        if (lastVideo) return { video: lastVideo, chapter: prevChapter }
       }
     }
 
@@ -175,9 +210,11 @@ export function useCoursePlayer(courseId: number) {
 
     for (let chapterIndex = 0; chapterIndex < chapters.value.length; chapterIndex++) {
       const chapter = chapters.value[chapterIndex]
+      if (!chapter) continue
 
       for (let videoIndex = 0; videoIndex < chapter.videos.length; videoIndex++) {
-        const video = chapter.videos[videoIndex]
+        const video = chapter?.videos[videoIndex]
+        if (!video) continue
 
         // Set to first incomplete unlocked video
         if (!video.progress?.is_completed && isVideoUnlocked(chapterIndex, videoIndex)) {
@@ -191,8 +228,11 @@ export function useCoursePlayer(courseId: number) {
     }
 
     // If all videos are completed or no incomplete found, set to first video
-    if (!foundVideo && chapters.value[0]?.videos[0]) {
-      setActiveVideo(chapters.value[0].videos[0].id, chapters.value[0].id)
+    if (!foundVideo && chapters.value[0]?.videos && chapters.value[0].videos.length > 0) {
+      const firstVideo = chapters.value[0].videos[0]
+      if (firstVideo) {
+        setActiveVideo(firstVideo.id, chapters.value[0].id)
+      }
     }
   }
 
@@ -221,5 +261,7 @@ export function useCoursePlayer(courseId: number) {
     updateProgress,
     initializePlayer,
     refetch,
+    isVideoInCooldown,
+    getCooldownLabel,
   }
 }

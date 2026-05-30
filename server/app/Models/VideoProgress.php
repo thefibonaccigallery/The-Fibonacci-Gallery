@@ -20,6 +20,7 @@ class VideoProgress extends Model
         'watch_time_seconds',
         'watch_percentage',
         'last_watched_at',
+        'cooldown_until',
     ];
 
     protected $casts = [
@@ -30,6 +31,7 @@ class VideoProgress extends Model
         'watch_time_seconds' => 'integer',
         'watch_percentage' => 'decimal:2',
         'last_watched_at' => 'datetime',
+        'cooldown_until' => 'datetime',
     ];
 
     public function user()

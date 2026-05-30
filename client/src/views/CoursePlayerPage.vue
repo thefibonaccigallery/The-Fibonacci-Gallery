@@ -28,6 +28,8 @@ const {
   getPreviousVideo,
   updateProgress,
   initializePlayer,
+  isVideoInCooldown,
+  getCooldownLabel,
 } = useCoursePlayer(courseId.value)
 
 // Navigation
@@ -130,6 +132,8 @@ onMounted(() => {
           :active-video-id="activeVideoId"
           :is-chapter-unlocked="isChapterUnlocked"
           :is-video-unlocked="isVideoUnlocked"
+          :is-video-in-cooldown="isVideoInCooldown"
+          :get-cooldown-label="getCooldownLabel"
           @select-video="handleSelectVideo"
         />
       </aside>
@@ -228,6 +232,8 @@ onMounted(() => {
                 :active-video-id="activeVideoId"
                 :is-chapter-unlocked="isChapterUnlocked"
                 :is-video-unlocked="isVideoUnlocked"
+                :is-video-in-cooldown="isVideoInCooldown"
+                :get-cooldown-label="getCooldownLabel"
                 @select-video="handleSelectVideo"
               />
             </div>

@@ -11,7 +11,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->mergeConfigFrom(base_path('config/types/user.php'), 'types_user');
+        $this->mergeConfigFrom(base_path('config/types/course.php'), 'types_course');
+        $this->mergeConfigFrom(base_path('config/types/order.php'), 'types_order');
     }
 
     /**

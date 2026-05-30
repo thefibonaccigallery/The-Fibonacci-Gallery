@@ -20,10 +20,20 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email|max:255',
             'password' => 'required|string|min:8|confirmed',
             'country' => 'required|string|max:255',
         ]);
+
+        // Check if email already exists using find query
+        $existingUser = User::where('email', $request->email)->first();
+        if ($existingUser) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors',
+                'errors' => 'There is a validation error'
+            ], 422);
+        }
 
         if ($validator->fails()) {
             return response()->json([
@@ -33,13 +43,15 @@ class AuthController extends Controller
             ], 422);
         }
 
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'country' => $request->country,
-            'role' => 'user',
         ]);
+
+        $user->assignRole('user');
 
         // Create a Passport personal access token
         $token = $user->createToken('auth_token')->accessToken;
@@ -102,7 +114,7 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'country' => $user->country,
-                'role' => $user->role,
+                'roles' => $user->getRoleNames(),
             ]
         ], 200);
     }

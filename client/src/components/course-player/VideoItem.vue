@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { PhLock, PhCheckCircle, PhPlay } from '@phosphor-icons/vue'
+import { PhLock, PhCheckCircle, PhPlay, PhClock } from '@phosphor-icons/vue'
 import type { CoursePlayerVideo } from '@/types/CoursePlayerTypes'
 
 interface Props {
   video: CoursePlayerVideo
   isUnlocked: boolean
   isActive: boolean
+  isInCooldown: boolean
+  cooldownLabel: string
 }
 
 interface Emits {
@@ -25,7 +27,7 @@ const formatDuration = (seconds: number) => {
 }
 
 const handleClick = () => {
-  if (props.isUnlocked) {
+  if (props.isUnlocked && !props.isInCooldown) {
     emit('select')
   }
 }
@@ -34,14 +36,15 @@ const handleClick = () => {
 <template>
   <button
     @click="handleClick"
-    :disabled="!isUnlocked"
+    :disabled="!isUnlocked || isInCooldown"
     :class="[
       'w-full text-left px-4 py-3 rounded-lg transition-all',
       'flex items-center gap-3',
       isActive
         ? 'bg-primary/10 border-2 border-primary'
         : 'hover:bg-muted/50 border-2 border-transparent',
-      !isUnlocked && 'opacity-50 cursor-not-allowed',
+      !isUnlocked && !isInCooldown && 'opacity-50 cursor-not-allowed',
+      isInCooldown && 'opacity-60 cursor-not-allowed',
     ]"
   >
     <!-- Status Icon -->
@@ -52,16 +55,21 @@ const handleClick = () => {
         weight="fill"
         class="text-primary"
       />
-      <PhPlay
-        v-else-if="isActive"
+      <PhClock
+        v-else-if="isInCooldown"
         :size="20"
-        weight="fill"
-        class="text-primary"
+        class="text-yellow-500"
       />
       <PhLock
         v-else-if="!isUnlocked"
         :size="20"
         class="text-muted-foreground"
+      />
+      <PhPlay
+        v-else-if="isActive"
+        :size="20"
+        weight="fill"
+        class="text-primary"
       />
       <div
         v-else
@@ -79,7 +87,11 @@ const handleClick = () => {
       >
         {{ video.title }}
       </p>
-      <div class="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+      
+      <div v-if="isInCooldown" class="text-xs text-yellow-500 mt-0.5">
+        {{ cooldownLabel }}
+      </div>
+      <div v-else class="flex items-center gap-2 text-xs text-muted-foreground mt-1">
         <span>{{ formatDuration(video.duration_seconds) }}</span>
         <span v-if="video.progress && !isCompleted">
           • {{ video.progress.watch_percentage.toFixed(0) }}%

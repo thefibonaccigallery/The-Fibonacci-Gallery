@@ -66,11 +66,14 @@ class CoursePlayerController extends Controller
                             'level' => $video->level,
                             'order' => $video->order,
                             'duration_seconds' => $video->duration_seconds,
+                            'cooldown_hours' => $video->cooldown_hours,
                             'progress' => $video->progress ? [
                                 'watch_time_seconds' => $video->progress->watch_time_seconds,
                                 'watch_percentage' => (float) $video->progress->watch_percentage,
                                 'is_completed' => $video->progress->is_completed,
                                 'last_watched_at' => $video->progress->last_watched_at,
+                                'cooldown_until' => $video->progress->cooldown_until,
+                                'is_in_cooldown' => $video->progress->cooldown_until && now()->lt($video->progress->cooldown_until),
                             ] : null,
                         ];
                     }),
@@ -109,6 +112,30 @@ class CoursePlayerController extends Controller
             ]
         );
 
+        // If just completed, set cooldown on next video
+        if ($isCompleted) {
+            $nextVideo = $this->getNextVideo($video);
+
+            if ($nextVideo && $nextVideo->cooldown_hours > 0) {
+                // Only set cooldown if not already set
+                $nextProgress = VideoProgress::where('user_id', $user->id)
+                    ->where('course_video_id', $nextVideo->id)
+                    ->first();
+
+                if (!$nextProgress || !$nextProgress->cooldown_until) {
+                    VideoProgress::updateOrCreate(
+                        [
+                            'user_id' => $user->id,
+                            'course_video_id' => $nextVideo->id,
+                        ],
+                        [
+                            'cooldown_until' => now()->addHours($nextVideo->cooldown_hours),
+                        ]
+                    );
+                }
+            }
+        }
+
         return response()->json([
             'success' => true,
             'progress' => [
@@ -116,7 +143,31 @@ class CoursePlayerController extends Controller
                 'watch_percentage' => (float) $progress->watch_percentage,
                 'is_completed' => $progress->is_completed,
                 'last_watched_at' => $progress->last_watched_at,
+                'cooldown_until' => $progress->cooldown_until,
+                'is_in_cooldown' => $progress->cooldown_until && now()->lt($progress->cooldown_until),
             ],
         ]);
+    }
+
+    /**
+     * Find the next video in sequence
+     */
+    private function getNextVideo(CourseVideo $current): ?CourseVideo
+    {
+        // Try next video in same chapter
+        $next = CourseVideo::where('chapter_id', $current->chapter_id)
+            ->where('order', '>', $current->order)
+            ->orderBy('order')
+            ->first();
+
+        if ($next) return $next;
+
+        // Try first video of next chapter
+        $nextChapter = \App\Models\Chapter::where('course_id', $current->chapter->course_id)
+            ->where('order', '>', $current->chapter->order)
+            ->orderBy('order')
+            ->first();
+
+        return $nextChapter?->videos()->orderBy('order')->first();
     }
 }

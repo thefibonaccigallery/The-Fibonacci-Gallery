@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('watch_time_seconds')->default(0);
             $table->decimal('watch_percentage', 5, 2)->default(0.00);
             $table->timestamp('last_watched_at')->nullable();
+            $table->timestamp('cooldown_until')->nullable();
             $table->unique(['user_id', 'course_video_id']);
             $table->index('user_id');
             $table->index('course_video_id');

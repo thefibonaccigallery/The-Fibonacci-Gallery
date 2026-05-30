@@ -47,6 +47,7 @@ const form = ref<VideoFormState>({
   duration_seconds: 0,
   is_published: false,
   is_preview: false,
+  cooldown_hours: 0,
 })
 
 // Fetch courses for dropdown
@@ -92,6 +93,7 @@ watch(videoData, (data) => {
       duration_seconds: data.duration_seconds,
       is_published: data.is_published,
       is_preview: data.is_preview,
+      cooldown_hours: data.cooldown_hours || 0,
     }
     // Set the course ID based on the chapter's course
     if (data.chapter?.course_id) {
@@ -141,9 +143,9 @@ const durationDisplay = computed({
   set: (value: string) => {
     const parts = value.split(':')
     if (parts.length === 3) {
-      const hours = parseInt(parts[0]) || 0
-      const minutes = parseInt(parts[1]) || 0
-      const seconds = parseInt(parts[2]) || 0
+      const hours = parseInt(parts[0] ?? '0') || 0
+      const minutes = parseInt(parts[1] ?? '0') || 0
+      const seconds = parseInt(parts[2] ?? '0') || 0
       form.value.duration_seconds = hours * 3600 + minutes * 60 + seconds
     }
   },
@@ -243,7 +245,8 @@ const durationDisplay = computed({
         <Label for="youtube_video_id">YouTube Video ID</Label>
         <Input
           id="youtube_video_id"
-          v-model="form.youtube_video_id"
+          :model-value="form.youtube_video_id || ''"
+          @update:model-value="(val) => form.youtube_video_id = val ? String(val) : null"
           @input="clearError('youtube_video_id')"
           placeholder="e.g., dQw4w9WgXcQ"
           :class="errors.youtube_video_id ? 'border-destructive' : ''"
@@ -308,6 +311,25 @@ const durationDisplay = computed({
           </p>
           <p v-if="errors.duration_seconds" class="text-sm text-destructive">
             {{ errors.duration_seconds }}
+          </p>
+        </div>
+
+        <!-- Cooldown -->
+        <div class="space-y-2">
+          <Label for="cooldown_hours">Cooldown (Hours)</Label>
+          <Input
+            id="cooldown_hours"
+            type="number"
+            v-model.number="form.cooldown_hours"
+            @input="clearError('cooldown_hours')"
+            placeholder="0"
+            :class="errors.cooldown_hours ? 'border-destructive' : ''"
+          />
+          <p class="text-xs text-muted-foreground">
+            0 = no cooldown. Students must wait this many hours before watching.
+          </p>
+          <p v-if="errors.cooldown_hours" class="text-sm text-destructive">
+            {{ errors.cooldown_hours }}
           </p>
         </div>
       </div>

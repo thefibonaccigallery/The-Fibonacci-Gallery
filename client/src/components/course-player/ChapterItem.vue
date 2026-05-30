@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { PhCaretDown, PhLock } from '@phosphor-icons/vue'
 import VideoItem from './VideoItem.vue'
-import type { CoursePlayerChapter } from '@/types/CoursePlayerTypes'
+import type { CoursePlayerChapter, CoursePlayerVideo } from '@/types/CoursePlayerTypes'
 
 interface Props {
   chapter: CoursePlayerChapter
@@ -10,6 +10,8 @@ interface Props {
   isUnlocked: boolean
   activeVideoId: number | null
   isVideoUnlocked: (chapterIndex: number, videoIndex: number) => boolean
+  isVideoInCooldown: (video: CoursePlayerVideo) => boolean
+  getCooldownLabel: (video: CoursePlayerVideo) => string
 }
 
 interface Emits {
@@ -102,6 +104,8 @@ const handleSelectVideo = (videoId: number) => {
         :video="video"
         :is-unlocked="isVideoUnlocked(chapterIndex, videoIndex)"
         :is-active="video.id === activeVideoId"
+        :is-in-cooldown="isVideoInCooldown(video)"
+        :cooldown-label="getCooldownLabel(video)"
         @select="handleSelectVideo(video.id)"
       />
     </div>

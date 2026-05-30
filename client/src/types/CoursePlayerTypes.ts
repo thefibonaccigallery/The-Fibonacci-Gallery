@@ -3,6 +3,8 @@ export interface VideoProgress {
   watch_percentage: number
   is_completed: boolean
   last_watched_at: string | null
+  cooldown_until: string | null
+  is_in_cooldown: boolean
 }
 
 export interface CoursePlayerVideo {
@@ -12,6 +14,7 @@ export interface CoursePlayerVideo {
   level: 'beginner' | 'intermediate' | 'advanced' | null
   order: number
   duration_seconds: number
+  cooldown_hours: number
   progress: VideoProgress | null
 }
 

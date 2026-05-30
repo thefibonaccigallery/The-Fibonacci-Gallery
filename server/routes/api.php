@@ -8,16 +8,6 @@ use App\Http\Controllers\Admin\ChapterController;
 use App\Http\Controllers\Admin\VideoController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -35,7 +25,7 @@ Route::middleware('auth:api')->group(function () {
 });
 
 // Admin routes (protected by auth and admin middleware)
-Route::middleware(['auth:api', 'admin'])->prefix('admin')->group(function () {
+Route::middleware(['auth:api', 'role:admin|super_admin'])->prefix('admin')->group(function () {
     // Course routes
     Route::get('/courses', [CourseController::class, 'index']);
     Route::post('/courses', [CourseController::class, 'store']);
