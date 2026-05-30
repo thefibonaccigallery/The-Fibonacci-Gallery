@@ -84,7 +84,7 @@ const validateForm = (): boolean => {
     errors.value.title = 'Title is required'
   }
 
-  if (!form.value.slug.trim()) {
+  if (form.value.slug && !form.value.slug.trim()) {
     errors.value.slug = 'Slug is required'
   }
 
@@ -146,9 +146,7 @@ const handleDeleteThumbnail = () => {
   }
 }
 
-const isSaving = computed(
-  () => isCreating.value || isUpdating.value || isUploadingThumbnail.value,
-)
+const isSaving = computed(() => isCreating.value || isUpdating.value || isUploadingThumbnail.value)
 </script>
 
 <template>
@@ -225,9 +223,7 @@ const isSaving = computed(
 
         <!-- Description -->
         <div class="space-y-2">
-          <label for="description" class="text-sm font-medium text-foreground">
-            Description
-          </label>
+          <label for="description" class="text-sm font-medium text-foreground"> Description </label>
           <textarea
             id="description"
             v-model="form.description"
