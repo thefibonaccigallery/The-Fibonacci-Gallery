@@ -381,7 +381,7 @@ export const useAuthStore = defineStore('auth', () => {
       return
     }
 
-    register(registerForm.state.values)
+    register(registerForm.state.values as RegisterData)
   }
 
   const handleLogin = () => {
@@ -392,7 +392,7 @@ export const useAuthStore = defineStore('auth', () => {
       return
     }
 
-    login(loginForm.state.values)
+    login(loginForm.state.values as LoginData)
   }
 
   // Initialize auth on store creation
