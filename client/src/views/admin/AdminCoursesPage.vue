@@ -95,30 +95,21 @@ const formatDuration = (seconds: number) => {
       <div class="flex gap-2">
         <Button
           :variant="filterPublished === undefined ? 'default' : 'outline'"
-          @click="
-            filterPublished = undefined
-            page = 1
-          "
+          @click="((filterPublished = undefined), (page = 1))"
           size="sm"
         >
           All
         </Button>
         <Button
           :variant="filterPublished === true ? 'default' : 'outline'"
-          @click="
-            filterPublished = true
-            page = 1
-          "
+          @click="((filterPublished = true), (page = 1))"
           size="sm"
         >
           Published
         </Button>
         <Button
           :variant="filterPublished === false ? 'default' : 'outline'"
-          @click="
-            filterPublished = false
-            page = 1
-          "
+          @click="((filterPublished = false), (page = 1))"
           size="sm"
         >
           Draft
