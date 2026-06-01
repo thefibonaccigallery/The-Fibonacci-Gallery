@@ -118,7 +118,9 @@ onMounted(() => {
     <!-- Loading State -->
     <div v-if="isLoading" class="flex items-center justify-center min-h-screen">
       <div class="text-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <div
+          class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"
+        ></div>
         <p class="text-muted-foreground">Loading course...</p>
       </div>
     </div>
@@ -141,7 +143,9 @@ onMounted(() => {
       <!-- Main Player Area -->
       <main class="flex-1 flex flex-col overflow-hidden">
         <!-- Top Bar -->
-        <header class="border-b border-border bg-background px-4 py-3 flex items-center justify-between">
+        <header
+          class="border-b border-border bg-background px-4 py-3 flex items-center justify-between"
+        >
           <div class="flex items-center gap-3">
             <Button @click="goBack" variant="ghost" size="sm" class="gap-2">
               <PhArrowLeft :size="20" />

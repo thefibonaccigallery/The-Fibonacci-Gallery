@@ -30,9 +30,7 @@ const formatDate = (dateString: string) => {
           <tr class="border-b border-border/50">
             <th class="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Name</th>
             <th class="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Email</th>
-            <th class="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
-              Country
-            </th>
+            <th class="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Country</th>
             <th class="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
               Enrolled Courses
             </th>

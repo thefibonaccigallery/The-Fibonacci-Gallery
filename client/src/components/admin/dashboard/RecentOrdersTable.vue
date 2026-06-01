@@ -60,21 +60,11 @@ const formatDate = (dateString: string) => {
       <table class="w-full">
         <thead>
           <tr class="border-b border-border/50">
-            <th class="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
-              Student
-            </th>
-            <th class="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
-              Course
-            </th>
-            <th class="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
-              Amount
-            </th>
-            <th class="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
-              Crypto
-            </th>
-            <th class="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">
-              Status
-            </th>
+            <th class="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Student</th>
+            <th class="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Course</th>
+            <th class="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Amount</th>
+            <th class="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Crypto</th>
+            <th class="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Status</th>
             <th class="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Date</th>
           </tr>
         </thead>

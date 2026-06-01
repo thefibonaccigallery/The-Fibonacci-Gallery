@@ -75,7 +75,7 @@ export function useCoursePlayer(courseId: number) {
 
     const video = chapter.videos[videoIndex]
     if (!video) return false
-    
+
     // Locked by cooldown
     if (isVideoInCooldown(video)) return false
 
@@ -155,9 +155,10 @@ export function useCoursePlayer(courseId: number) {
   }
 
   // Get previous video
-  const getPreviousVideo = ():
-    | { video: CoursePlayerVideo; chapter: CoursePlayerChapter }
-    | null => {
+  const getPreviousVideo = (): {
+    video: CoursePlayerVideo
+    chapter: CoursePlayerChapter
+  } | null => {
     if (!activeVideo.value || !activeChapter.value) return null
 
     const currentChapterIndex = chapters.value.findIndex((c) => c.id === activeChapter.value!.id)

@@ -96,10 +96,7 @@ const handleLogout = () => {
     <nav class="flex-1 overflow-y-auto p-4 space-y-6">
       <div v-for="section in navSections" :key="section.label" class="space-y-1">
         <transition name="fade">
-          <h3
-            v-if="!isCollapsed"
-            class="px-3 text-xs font-semibold text-muted-foreground mb-2"
-          >
+          <h3 v-if="!isCollapsed" class="px-3 text-xs font-semibold text-muted-foreground mb-2">
             {{ section.label }}
           </h3>
         </transition>

@@ -5,12 +5,14 @@ import { useQuery } from '@tanstack/vue-query'
 import { useVideos } from '@/composables/admin/useVideos'
 import { useChapters } from '@/composables/admin/useChapters'
 import { useCourses } from '@/composables/admin/useCourses'
-import { PhArrowLeft, PhFloppyDisk } from '@phosphor-icons/vue'
+import { PhArrowLeft, PhFloppyDisk, PhPlay } from '@phosphor-icons/vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import AdminVideoPreviewModal from '@/components/admin/shared/AdminVideoPreviewModal.vue'
 import type { VideoFormState } from '@/schemas/videoSchemas'
+import type { VideoType } from '@/types/VideoTypes'
 
 const route = useRoute()
 const router = useRouter()
@@ -82,27 +84,33 @@ const { data: videoData, isLoading: isLoadingVideo } = useQuery({
 })
 
 // Populate form when video data is loaded
-watch(videoData, (data) => {
-  if (data) {
-    form.value = {
-      chapter_id: data.chapter_id,
-      title: data.title,
-      youtube_video_id: data.youtube_video_id,
-      level: data.level,
-      order: data.order,
-      duration_seconds: data.duration_seconds,
-      is_published: data.is_published,
-      is_preview: data.is_preview,
-      cooldown_hours: data.cooldown_hours || 0,
+watch(
+  videoData,
+  (data) => {
+    if (data) {
+      form.value = {
+        chapter_id: data.chapter_id,
+        title: data.title,
+        youtube_video_id: data.youtube_video_id,
+        level: data.level,
+        order: data.order,
+        duration_seconds: data.duration_seconds,
+        is_published: data.is_published,
+        is_preview: data.is_preview,
+        cooldown_hours: data.cooldown_hours || 0,
+      }
+      // Set the course ID based on the chapter's course
+      if (data.chapter?.course_id) {
+        selectedCourseId.value = data.chapter.course_id
+      }
     }
-    // Set the course ID based on the chapter's course
-    if (data.chapter?.course_id) {
-      selectedCourseId.value = data.chapter.course_id
-    }
-  }
-}, { immediate: true })
+  },
+  { immediate: true },
+)
 
-const isLoading = computed(() => isLoadingCourses.value || isLoadingChapters.value || isLoadingVideo.value)
+const isLoading = computed(
+  () => isLoadingCourses.value || isLoadingChapters.value || isLoadingVideo.value,
+)
 const isSaving = computed(() => isCreating.value || isUpdating.value)
 
 const handleSubmit = () => {
@@ -131,6 +139,29 @@ const handleSubmit = () => {
 const goBack = () => {
   router.push('/admin/videos')
 }
+
+// Preview modal state
+const previewOpen = ref(false)
+
+// Build a minimal VideoType from the form for the preview modal
+const previewVideoData = computed<VideoType | null>(() => {
+  if (!form.value.youtube_video_id) return null
+  return {
+    id: videoId.value ?? 0,
+    uuid: '',
+    chapter_id: form.value.chapter_id,
+    title: form.value.title || 'Untitled Video',
+    youtube_video_id: form.value.youtube_video_id,
+    level: form.value.level ?? null,
+    order: form.value.order,
+    duration_seconds: form.value.duration_seconds,
+    cooldown_hours: form.value.cooldown_hours,
+    is_published: form.value.is_published,
+    is_preview: form.value.is_preview,
+    created_at: '',
+    updated_at: '',
+  }
+})
 
 // Convert duration from seconds to HH:MM:SS format for display
 const durationDisplay = computed({
@@ -190,9 +221,7 @@ const durationDisplay = computed({
             {{ course.title }}
           </option>
         </select>
-        <p class="text-xs text-muted-foreground">
-          Select a course to see its chapters
-        </p>
+        <p class="text-xs text-muted-foreground">Select a course to see its chapters</p>
       </div>
 
       <!-- Chapter Selection -->
@@ -217,7 +246,10 @@ const durationDisplay = computed({
             {{ chapter.title }}
           </option>
         </select>
-        <p v-if="selectedCourseId && chapters.length === 0 && !isLoadingChapters" class="text-xs text-muted-foreground">
+        <p
+          v-if="selectedCourseId && chapters.length === 0 && !isLoadingChapters"
+          class="text-xs text-muted-foreground"
+        >
           No chapters found in this course. Create a chapter first.
         </p>
         <p v-if="errors.chapter_id" class="text-sm text-destructive">
@@ -246,13 +278,14 @@ const durationDisplay = computed({
         <Input
           id="youtube_video_id"
           :model-value="form.youtube_video_id || ''"
-          @update:model-value="(val) => form.youtube_video_id = val ? String(val) : null"
+          @update:model-value="(val) => (form.youtube_video_id = val ? String(val) : null)"
           @input="clearError('youtube_video_id')"
           placeholder="e.g., dQw4w9WgXcQ"
           :class="errors.youtube_video_id ? 'border-destructive' : ''"
         />
         <p class="text-xs text-muted-foreground">
-          The 11-character ID from the YouTube URL (e.g., youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong>)
+          The 11-character ID from the YouTube URL (e.g.,
+          youtube.com/watch?v=<strong>dQw4w9WgXcQ</strong>)
         </p>
         <p v-if="errors.youtube_video_id" class="text-sm text-destructive">
           {{ errors.youtube_video_id }}
@@ -306,9 +339,7 @@ const durationDisplay = computed({
             placeholder="00:05:30"
             :class="errors.duration_seconds ? 'border-destructive' : ''"
           />
-          <p class="text-xs text-muted-foreground">
-            {{ form.duration_seconds }} seconds
-          </p>
+          <p class="text-xs text-muted-foreground">{{ form.duration_seconds }} seconds</p>
           <p v-if="errors.duration_seconds" class="text-sm text-destructive">
             {{ errors.duration_seconds }}
           </p>
@@ -340,9 +371,7 @@ const durationDisplay = computed({
         <div class="flex items-center justify-between p-4 rounded-lg border border-border">
           <div class="space-y-0.5">
             <Label for="is_published">Published</Label>
-            <p class="text-sm text-muted-foreground">
-              Make this video visible to students
-            </p>
+            <p class="text-sm text-muted-foreground">Make this video visible to students</p>
           </div>
           <Switch
             id="is_published"
@@ -369,14 +398,25 @@ const durationDisplay = computed({
 
       <!-- Actions -->
       <div class="flex gap-3 pt-4">
-        <Button @click="goBack" variant="outline" class="flex-1">
-          Cancel
+        <Button @click="goBack" variant="outline" class="flex-1"> Cancel </Button>
+        <Button
+          v-if="form.youtube_video_id"
+          @click="previewOpen = true"
+          variant="outline"
+          class="gap-2"
+          type="button"
+        >
+          <PhPlay :size="18" />
+          Preview
         </Button>
         <Button @click="handleSubmit" :disabled="isSaving" class="flex-1 gap-2">
           <PhFloppyDisk :size="20" />
           {{ isSaving ? 'Saving...' : isEditMode ? 'Update Video' : 'Create Video' }}
         </Button>
       </div>
+
+      <!-- Preview Modal -->
+      <AdminVideoPreviewModal v-model:open="previewOpen" :video="previewVideoData" />
     </div>
   </div>
 </template>

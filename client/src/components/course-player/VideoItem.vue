@@ -49,45 +49,19 @@ const handleClick = () => {
   >
     <!-- Status Icon -->
     <div class="flex-shrink-0">
-      <PhCheckCircle
-        v-if="isCompleted"
-        :size="20"
-        weight="fill"
-        class="text-primary"
-      />
-      <PhClock
-        v-else-if="isInCooldown"
-        :size="20"
-        class="text-yellow-500"
-      />
-      <PhLock
-        v-else-if="!isUnlocked"
-        :size="20"
-        class="text-muted-foreground"
-      />
-      <PhPlay
-        v-else-if="isActive"
-        :size="20"
-        weight="fill"
-        class="text-primary"
-      />
-      <div
-        v-else
-        class="w-5 h-5 rounded-full border-2 border-muted-foreground"
-      ></div>
+      <PhCheckCircle v-if="isCompleted" :size="20" weight="fill" class="text-primary" />
+      <PhClock v-else-if="isInCooldown" :size="20" class="text-yellow-500" />
+      <PhLock v-else-if="!isUnlocked" :size="20" class="text-muted-foreground" />
+      <PhPlay v-else-if="isActive" :size="20" weight="fill" class="text-primary" />
+      <div v-else class="w-5 h-5 rounded-full border-2 border-muted-foreground"></div>
     </div>
 
     <!-- Video Info -->
     <div class="flex-1 min-w-0">
-      <p
-        :class="[
-          'font-medium truncate',
-          isActive ? 'text-primary' : 'text-foreground',
-        ]"
-      >
+      <p :class="['font-medium truncate', isActive ? 'text-primary' : 'text-foreground']">
         {{ video.title }}
       </p>
-      
+
       <div v-if="isInCooldown" class="text-xs text-yellow-500 mt-0.5">
         {{ cooldownLabel }}
       </div>

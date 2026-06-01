@@ -4,10 +4,22 @@ import { useRouter } from 'vue-router'
 import { useQuery } from '@tanstack/vue-query'
 import { useVideos } from '@/composables/admin/useVideos'
 import { useChapters } from '@/composables/admin/useChapters'
-import { PhVideo, PhPlus, PhPencil, PhTrash, PhEye, PhEyeSlash, PhLock, PhLockOpen } from '@phosphor-icons/vue'
+import {
+  PhVideo,
+  PhPlus,
+  PhPencil,
+  PhTrash,
+  PhEye,
+  PhEyeSlash,
+  PhLock,
+  PhLockOpen,
+  PhPlay,
+} from '@phosphor-icons/vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import ConfirmDialog from '@/components/admin/shared/ConfirmDialog.vue'
+import AdminVideoPreviewModal from '@/components/admin/shared/AdminVideoPreviewModal.vue'
+import type { VideoType } from '@/types/VideoTypes'
 
 const router = useRouter()
 const { fetchVideos, deleteVideo, isDeleting } = useVideos()
@@ -22,6 +34,15 @@ const filterPublished = ref<boolean | undefined>(undefined)
 const deleteDialogOpen = ref(false)
 const videoToDelete = ref<{ id: number; title: string } | null>(null)
 
+// Preview modal state
+const previewOpen = ref(false)
+const previewVideo = ref<VideoType | null>(null)
+
+const handlePreview = (video: VideoType) => {
+  previewVideo.value = video
+  previewOpen.value = true
+}
+
 // Fetch chapters for filter dropdown
 const { data: chaptersData } = useQuery({
   queryKey: ['chapters-list'],
@@ -31,7 +52,11 @@ const { data: chaptersData } = useQuery({
 const chapters = computed(() => chaptersData.value?.data || [])
 
 // Fetch videos
-const { data: videosData, isLoading, refetch } = useQuery({
+const {
+  data: videosData,
+  isLoading,
+  refetch,
+} = useQuery({
   queryKey: ['videos', page, search, selectedChapterId, filterPublished],
   queryFn: () =>
     fetchVideos({
@@ -106,16 +131,11 @@ const getLevelColor = (level: string | null) => {
     <!-- Filters -->
     <div class="liquid-glass rounded-xl p-4 space-y-4">
       <div class="flex flex-col sm:flex-row gap-4">
-        <Input
-          v-model="search"
-          placeholder="Search videos..."
-          class="flex-1"
-          @input="page = 1"
-        />
+        <Input v-model="search" placeholder="Search videos..." class="flex-1" @input="page = 1" />
         <select
           v-model="selectedChapterId"
           @change="page = 1"
-          class="px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary min-w-[200px]"
+          class="px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary min-w-50"
         >
           <option :value="undefined">All Chapters</option>
           <option v-for="chapter in chapters" :key="chapter.id" :value="chapter.id">
@@ -127,21 +147,21 @@ const getLevelColor = (level: string | null) => {
       <div class="flex gap-2">
         <Button
           :variant="filterPublished === undefined ? 'default' : 'outline'"
-          @click="filterPublished = undefined; page = 1"
+          @click="((filterPublished = undefined), (page = 1))"
           size="sm"
         >
           All
         </Button>
         <Button
           :variant="filterPublished === true ? 'default' : 'outline'"
-          @click="filterPublished = true; page = 1"
+          @click="((filterPublished = true), (page = 1))"
           size="sm"
         >
           Published
         </Button>
         <Button
           :variant="filterPublished === false ? 'default' : 'outline'"
-          @click="filterPublished = false; page = 1"
+          @click="((filterPublished = false), (page = 1))"
           size="sm"
         >
           Draft
@@ -160,7 +180,11 @@ const getLevelColor = (level: string | null) => {
       <PhVideo :size="64" class="mx-auto text-muted-foreground mb-4" />
       <h3 class="text-xl font-semibold text-foreground mb-2">No videos found</h3>
       <p class="text-muted-foreground mb-6">
-        {{ selectedChapterId ? 'No videos in this chapter yet' : 'Get started by creating your first video' }}
+        {{
+          selectedChapterId
+            ? 'No videos in this chapter yet'
+            : 'Get started by creating your first video'
+        }}
       </p>
       <Button @click="router.push('/admin/videos/create')">
         <PhPlus :size="20" class="mr-2" />
@@ -180,7 +204,7 @@ const getLevelColor = (level: string | null) => {
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-3 mb-2">
               <span
-                class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold text-sm flex-shrink-0"
+                class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold text-sm shrink-0"
               >
                 {{ video.order }}
               </span>
@@ -244,6 +268,16 @@ const getLevelColor = (level: string | null) => {
           <!-- Actions -->
           <div class="flex gap-2 flex-shrink-0">
             <Button
+              v-if="video.youtube_video_id"
+              @click="handlePreview(video)"
+              variant="outline"
+              size="sm"
+              class="gap-1"
+            >
+              <PhPlay :size="16" />
+              Preview
+            </Button>
+            <Button
               @click="router.push(`/admin/videos/${video.id}/edit`)"
               variant="outline"
               size="sm"
@@ -275,12 +309,7 @@ const getLevelColor = (level: string | null) => {
         {{ Math.min(pagination.current * 15, pagination.total) }} of {{ pagination.total }} videos
       </p>
       <div class="flex gap-2">
-        <Button
-          @click="page--"
-          :disabled="pagination.current === 1"
-          variant="outline"
-          size="sm"
-        >
+        <Button @click="page--" :disabled="pagination.current === 1" variant="outline" size="sm">
           Previous
         </Button>
         <Button
@@ -305,5 +334,8 @@ const getLevelColor = (level: string | null) => {
       :loading="isDeleting"
       @confirm="confirmDelete"
     />
+
+    <!-- Video Preview Modal -->
+    <AdminVideoPreviewModal v-model:open="previewOpen" :video="previewVideo" />
   </div>
 </template>

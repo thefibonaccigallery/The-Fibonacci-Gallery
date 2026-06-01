@@ -30,7 +30,11 @@ const { data: coursesData } = useQuery({
 const courses = computed(() => coursesData.value?.data || [])
 
 // Fetch chapters
-const { data: chaptersData, isLoading, refetch } = useQuery({
+const {
+  data: chaptersData,
+  isLoading,
+  refetch,
+} = useQuery({
   queryKey: ['chapters', page, search, selectedCourseId],
   queryFn: () =>
     fetchChapters({
@@ -101,12 +105,7 @@ const getLevelColor = (level: string | null) => {
 
     <!-- Filters -->
     <div class="liquid-glass rounded-xl p-4 flex flex-col sm:flex-row gap-4">
-      <Input
-        v-model="search"
-        placeholder="Search chapters..."
-        class="flex-1"
-        @input="page = 1"
-      />
+      <Input v-model="search" placeholder="Search chapters..." class="flex-1" @input="page = 1" />
       <select
         v-model="selectedCourseId"
         @change="page = 1"
@@ -130,7 +129,11 @@ const getLevelColor = (level: string | null) => {
       <PhBookOpen :size="64" class="mx-auto text-muted-foreground mb-4" />
       <h3 class="text-xl font-semibold text-foreground mb-2">No chapters found</h3>
       <p class="text-muted-foreground mb-6">
-        {{ selectedCourseId ? 'No chapters in this course yet' : 'Get started by creating your first chapter' }}
+        {{
+          selectedCourseId
+            ? 'No chapters in this course yet'
+            : 'Get started by creating your first chapter'
+        }}
       </p>
       <Button @click="router.push('/admin/chapters/create')">
         <PhPlus :size="20" class="mr-2" />
@@ -174,9 +177,7 @@ const getLevelColor = (level: string | null) => {
               >
                 {{ chapter.level }}
               </span>
-              <span class="text-muted-foreground">
-                {{ chapter.videos?.length || 0 }} videos
-              </span>
+              <span class="text-muted-foreground"> {{ chapter.videos?.length || 0 }} videos </span>
               <span class="text-muted-foreground">
                 {{ formatDuration(chapter.length_seconds) }}
               </span>
@@ -217,12 +218,7 @@ const getLevelColor = (level: string | null) => {
         {{ Math.min(pagination.current * 15, pagination.total) }} of {{ pagination.total }} chapters
       </p>
       <div class="flex gap-2">
-        <Button
-          @click="page--"
-          :disabled="pagination.current === 1"
-          variant="outline"
-          size="sm"
-        >
+        <Button @click="page--" :disabled="pagination.current === 1" variant="outline" size="sm">
           Previous
         </Button>
         <Button
@@ -249,4 +245,3 @@ const getLevelColor = (level: string | null) => {
     />
   </div>
 </template>
-

@@ -84,7 +84,7 @@ const validateForm = (): boolean => {
     errors.value.title = 'Title is required'
   }
 
-  if (form.value.slug && !form.value.slug.trim()) {
+  if (!form.value.slug?.trim()) {
     errors.value.slug = 'Slug is required'
   }
 

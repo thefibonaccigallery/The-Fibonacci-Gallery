@@ -211,9 +211,7 @@ const isSaving = computed(() => isCreating.value || isUpdating.value)
 
         <!-- Order -->
         <div class="space-y-2">
-          <label for="order" class="text-sm font-medium text-foreground">
-            Order (Optional)
-          </label>
+          <label for="order" class="text-sm font-medium text-foreground"> Order (Optional) </label>
           <Input
             id="order"
             v-model.number="form.order"

@@ -19,7 +19,11 @@ const filterPublished = ref<boolean | undefined>(undefined)
 const deleteDialogOpen = ref(false)
 const courseToDelete = ref<{ id: number; title: string } | null>(null)
 
-const { data: coursesData, isLoading, refetch } = useQuery({
+const {
+  data: coursesData,
+  isLoading,
+  refetch,
+} = useQuery({
   queryKey: ['courses', page, search, filterPublished],
   queryFn: () =>
     fetchCourses({
@@ -87,30 +91,34 @@ const formatDuration = (seconds: number) => {
 
     <!-- Filters -->
     <div class="liquid-glass rounded-xl p-4 flex flex-col sm:flex-row gap-4">
-      <Input
-        v-model="search"
-        placeholder="Search courses..."
-        class="flex-1"
-        @input="page = 1"
-      />
+      <Input v-model="search" placeholder="Search courses..." class="flex-1" @input="page = 1" />
       <div class="flex gap-2">
         <Button
           :variant="filterPublished === undefined ? 'default' : 'outline'"
-          @click="filterPublished = undefined; page = 1"
+          @click="
+            filterPublished = undefined
+            page = 1
+          "
           size="sm"
         >
           All
         </Button>
         <Button
           :variant="filterPublished === true ? 'default' : 'outline'"
-          @click="filterPublished = true; page = 1"
+          @click="
+            filterPublished = true
+            page = 1
+          "
           size="sm"
         >
           Published
         </Button>
         <Button
           :variant="filterPublished === false ? 'default' : 'outline'"
-          @click="filterPublished = false; page = 1"
+          @click="
+            filterPublished = false
+            page = 1
+          "
           size="sm"
         >
           Draft
@@ -229,12 +237,7 @@ const formatDuration = (seconds: number) => {
         {{ Math.min(pagination.current * 10, pagination.total) }} of {{ pagination.total }} courses
       </p>
       <div class="flex gap-2">
-        <Button
-          @click="page--"
-          :disabled="pagination.current === 1"
-          variant="outline"
-          size="sm"
-        >
+        <Button @click="page--" :disabled="pagination.current === 1" variant="outline" size="sm">
           Previous
         </Button>
         <Button
@@ -261,4 +264,3 @@ const formatDuration = (seconds: number) => {
     />
   </div>
 </template>
-

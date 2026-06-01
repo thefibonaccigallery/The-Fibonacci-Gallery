@@ -18,9 +18,7 @@ const isActive = (path: string) => {
 </script>
 
 <template>
-  <nav
-    class="fixed bottom-0 left-0 right-0 z-50 lg:hidden liquid-glass border-t border-border/50"
-  >
+  <nav class="fixed bottom-0 left-0 right-0 z-50 lg:hidden liquid-glass border-t border-border/50">
     <div class="flex items-center justify-around px-2 py-3">
       <RouterLink
         v-for="item in navItems"
@@ -33,11 +31,7 @@ const isActive = (path: string) => {
             : 'text-foreground/60 hover:text-foreground hover:bg-accent/30',
         ]"
       >
-        <component
-          :is="item.icon"
-          :size="22"
-          :weight="isActive(item.path) ? 'fill' : 'regular'"
-        />
+        <component :is="item.icon" :size="22" :weight="isActive(item.path) ? 'fill' : 'regular'" />
         <span class="text-[10px] font-medium">{{ item.name }}</span>
       </RouterLink>
     </div>

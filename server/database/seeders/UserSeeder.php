@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
             'country' => 'US',
             'uuid' => Str::uuid(),
         ]);
-        $user2->assignRole('super_admin');
+        $user2->assignRole('admin');
 
         // Create Test User
         $user3 = User::create([

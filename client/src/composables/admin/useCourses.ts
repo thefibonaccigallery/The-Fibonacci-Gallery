@@ -2,11 +2,7 @@ import { ref } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import axiosInstance from '@/api/axiosInstance'
 import { toast } from 'vue-sonner'
-import type {
-  Course,
-  CourseFormData,
-  PaginatedResponse,
-} from '@/types/CourseTypes'
+import type { Course, CourseFormData, PaginatedResponse } from '@/types/CourseTypes'
 
 export function useCourses() {
   const queryClient = useQueryClient()

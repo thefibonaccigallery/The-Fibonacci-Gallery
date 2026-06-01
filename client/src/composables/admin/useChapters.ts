@@ -1,12 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import axiosInstance from '@/api/axiosInstance'
 import { toast } from 'vue-sonner'
-import type {
-  Chapter,
-  ChapterFormData,
-  PaginatedResponse,
-  ReorderItem,
-} from '@/types/CourseTypes'
+import type { Chapter, ChapterFormData, PaginatedResponse, ReorderItem } from '@/types/CourseTypes'
 
 export function useChapters() {
   const queryClient = useQueryClient()

@@ -28,11 +28,7 @@ onMounted(() => {
 
 <template>
   <component :is="tag" :class="props.class">
-    <span
-      v-for="(line, lineIndex) in lines"
-      :key="lineIndex"
-      class="flex flex-wrap justify-center"
-    >
+    <span v-for="(line, lineIndex) in lines" :key="lineIndex" class="flex flex-wrap justify-center">
       <span
         v-for="(char, charIndex) in line.split('')"
         :key="`${lineIndex}-${charIndex}`"

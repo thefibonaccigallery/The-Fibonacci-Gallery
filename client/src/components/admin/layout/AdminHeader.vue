@@ -2,15 +2,7 @@
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useColorMode } from '@vueuse/core'
-import {
-  PhBell,
-  PhMoon,
-  PhSun,
-  PhUser,
-  PhSignOut,
-  PhCaretRight,
-  PhList,
-} from '@phosphor-icons/vue'
+import { PhBell, PhMoon, PhSun, PhUser, PhSignOut, PhCaretRight, PhList } from '@phosphor-icons/vue'
 
 const route = useRoute()
 const router = useRouter()

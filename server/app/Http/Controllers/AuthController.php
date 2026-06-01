@@ -92,18 +92,20 @@ class AuthController extends Controller
         }
 
         $credentials = $request->only('email', 'password');
+        $user = User::where('email', $credentials['email'])->first();
 
-        if (!Auth::attempt($credentials)) {
+        if (!$user || !Hash::check($credentials['password'], $user->password)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid credentials'
             ], 401);
         }
 
-        $user = Auth::user();
-
         // Create a Passport personal access token
         $token = $user->createToken('auth_token')->accessToken;
+
+        $roles = $user->getRoleNames();
+        $role = $roles->isEmpty() ? null : $roles->first();
 
         return response()->json([
             'success' => true,
@@ -114,7 +116,7 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'country' => $user->country,
-                'roles' => $user->getRoleNames(),
+                'role' => $role,
             ]
         ], 200);
     }

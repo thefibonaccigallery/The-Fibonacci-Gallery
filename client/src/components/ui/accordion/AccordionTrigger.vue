@@ -1,17 +1,14 @@
 <script setup lang="ts">
-import type { AccordionTriggerProps } from "reka-ui"
-import type { HTMLAttributes } from "vue"
-import { reactiveOmit } from "@vueuse/core"
+import type { AccordionTriggerProps } from 'reka-ui'
+import type { HTMLAttributes } from 'vue'
+import { reactiveOmit } from '@vueuse/core'
 import { PhCaretDown } from '@phosphor-icons/vue'
-import {
-  AccordionHeader,
-  AccordionTrigger,
-} from "reka-ui"
-import { cn } from "@/lib/utils"
+import { AccordionHeader, AccordionTrigger } from 'reka-ui'
+import { cn } from '@/lib/utils'
 
-const props = defineProps<AccordionTriggerProps & { class?: HTMLAttributes["class"] }>()
+const props = defineProps<AccordionTriggerProps & { class?: HTMLAttributes['class'] }>()
 
-const delegatedProps = reactiveOmit(props, "class")
+const delegatedProps = reactiveOmit(props, 'class')
 </script>
 
 <template>
@@ -28,7 +25,9 @@ const delegatedProps = reactiveOmit(props, "class")
     >
       <slot />
       <slot name="icon">
-        <PhCaretDown class="text-muted-foreground pointer-events-none size-4 shrink-0 translate-y-0.5 transition-transform duration-200" />
+        <PhCaretDown
+          class="text-muted-foreground pointer-events-none size-4 shrink-0 translate-y-0.5 transition-transform duration-200"
+        />
       </slot>
     </AccordionTrigger>
   </AccordionHeader>

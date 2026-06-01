@@ -19,7 +19,9 @@ const navItems = [
 </script>
 
 <template>
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-30 liquid-glass border-t border-border/20 px-6 py-2 flex justify-around items-center pb-safe">
+  <nav
+    class="md:hidden fixed bottom-0 left-0 right-0 z-30 liquid-glass border-t border-border/20 px-6 py-2 flex justify-around items-center pb-safe"
+  >
     <button
       v-for="item in navItems"
       :key="item.id"
@@ -27,7 +29,11 @@ const navItems = [
       class="flex flex-col items-center justify-center py-1 transition-all duration-300 relative"
       :class="[activeTab === item.id ? 'text-primary' : 'text-muted-foreground']"
     >
-      <component :is="item.icon" class="h-5 w-5 mb-1" :weight="activeTab === item.id ? 'fill' : 'regular'" />
+      <component
+        :is="item.icon"
+        class="h-5 w-5 mb-1"
+        :weight="activeTab === item.id ? 'fill' : 'regular'"
+      />
       <span class="text-[10px] font-medium tracking-tight">{{ item.label }}</span>
       <span
         v-if="activeTab === item.id"

@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   'update:modelValue': [file: File | null]
-  'delete': []
+  delete: []
 }>()
 
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -117,13 +117,7 @@ const triggerFileInput = () => {
     </div>
 
     <!-- Hidden File Input -->
-    <input
-      ref="fileInput"
-      type="file"
-      :accept="accept"
-      @change="handleFileSelect"
-      class="hidden"
-    />
+    <input ref="fileInput" type="file" :accept="accept" @change="handleFileSelect" class="hidden" />
 
     <!-- Error Message -->
     <p v-if="error" class="text-sm text-destructive">{{ error }}</p>

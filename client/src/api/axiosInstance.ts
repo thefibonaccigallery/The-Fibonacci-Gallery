@@ -25,21 +25,22 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      localStorage.removeItem('auth');
-      Cookies.remove('access_token');
-      Cookies.remove('lang');
+      localStorage.removeItem('auth')
+      Cookies.remove('access_token')
+      Cookies.remove('lang')
 
       // Do not hard redirect if the failed request was the login attempt itself
       // or if the user is already on the login/register pages
-      const isAuthEndpoint = error.config && error.config.url && error.config.url.includes('/login');
-      const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/register';
+      const isAuthEndpoint = error.config && error.config.url && error.config.url.includes('/login')
+      const isAuthPage =
+        window.location.pathname === '/login' || window.location.pathname === '/register'
 
       if (!isAuthEndpoint && !isAuthPage) {
-        window.location.href = '/login';
+        window.location.href = '/login'
       }
     }
-    return Promise.reject(error);
-  }
-);
+    return Promise.reject(error)
+  },
+)
 
 export default axiosInstance

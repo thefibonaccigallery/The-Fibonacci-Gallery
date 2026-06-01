@@ -34,7 +34,9 @@ const formattedValue = computed(() => {
         <h3 class="text-3xl font-bold text-foreground mb-1">{{ formattedValue }}</h3>
         <p v-if="trend" class="text-xs text-primary font-medium">{{ trend }}</p>
       </div>
-      <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+      <div
+        class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"
+      >
         <component :is="icon" :size="24" weight="bold" class="text-primary" />
       </div>
     </div>
