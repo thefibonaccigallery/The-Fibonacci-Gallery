@@ -2,9 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
-import UserHomeView from '@/views/UserHomeView.vue'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 import AdminDashboardPage from '@/views/admin/AdminDashboardPage.vue'
+import Cookies from 'js-cookie'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,12 +27,37 @@ const router = createRouter({
     {
       path: '/user-home',
       name: 'user-home',
-      component: UserHomeView,
+      redirect: '/dashboard',
+    },
+    {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: () => import('@/views/DashboardPage.vue'),
+    },
+    {
+      path: '/my-courses',
+      name: 'my-courses',
+      component: () => import('@/views/MyCoursesPage.vue'),
+    },
+    {
+      path: '/explore',
+      name: 'explore-courses',
+      component: () => import('@/views/ExploreCoursesPage.vue'),
+    },
+    {
+      path: '/courses/:id/details',
+      name: 'course-details',
+      component: () => import('@/views/CourseDetailsPage.vue'),
     },
     {
       path: '/courses/:courseId/player',
       name: 'course-player',
       component: () => import('@/views/CoursePlayerPage.vue'),
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: () => import('@/views/ProfilePage.vue'),
     },
     {
       path: '/admin-home',
@@ -119,6 +144,26 @@ const router = createRouter({
       ],
     },
   ],
+})
+
+router.beforeEach((to, from, next) => {
+  const token = Cookies.get('access_token')
+  const userStr = localStorage.getItem('auth')
+
+  if (to.path === '/' && token && userStr) {
+    try {
+      const user = JSON.parse(userStr)
+      if (user.role === 'admin') {
+        next('/admin/dashboard')
+      } else {
+        next('/dashboard')
+      }
+      return
+    } catch (e) {
+      // Ignore parse error and proceed
+    }
+  }
+  next()
 })
 
 export default router

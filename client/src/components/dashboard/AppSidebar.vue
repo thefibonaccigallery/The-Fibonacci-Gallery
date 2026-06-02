@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { useRouter, useRoute } from 'vue-router'
 import type { DashboardTab } from '@/types/DashboardType'
 import ThemeToggle from '@/components/blocks/ThemeToggle.vue'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/auth'
 import { PhHouse, PhGraduationCap, PhCompass, PhUser, PhSignOut } from '@phosphor-icons/vue'
 
-defineProps<{
+const props = defineProps<{
   activeTab: DashboardTab
 }>()
 
@@ -13,14 +14,31 @@ const emit = defineEmits<{
   (e: 'update:activeTab', tab: DashboardTab): void
 }>()
 
+const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 
 const navItems = [
-  { id: 'home' as DashboardTab, label: 'Dashboard', icon: PhHouse },
-  { id: 'courses' as DashboardTab, label: 'My Courses', icon: PhGraduationCap },
-  { id: 'explore' as DashboardTab, label: 'Explore', icon: PhCompass },
-  { id: 'profile' as DashboardTab, label: 'Profile', icon: PhUser },
+  { id: 'home' as DashboardTab, label: 'Dashboard', icon: PhHouse, route: '/dashboard' },
+  { id: 'courses' as DashboardTab, label: 'My Courses', icon: PhGraduationCap, route: '/my-courses' },
+  { id: 'explore' as DashboardTab, label: 'Explore', icon: PhCompass, route: '/explore' },
+  { id: 'profile' as DashboardTab, label: 'Profile', icon: PhUser, route: '/profile' },
 ]
+
+const handleNavClick = (item: typeof navItems[0]) => {
+  if (item.route) {
+    router.push(item.route)
+  } else {
+    emit('update:activeTab', item.id)
+  }
+}
+
+const isActive = (item: typeof navItems[0]) => {
+  if (item.route) {
+    return route.path === item.route
+  }
+  return props.activeTab === item.id
+}
 </script>
 
 <template>
@@ -45,10 +63,10 @@ const navItems = [
       <button
         v-for="item in navItems"
         :key="item.id"
-        @click="emit('update:activeTab', item.id)"
+        @click="handleNavClick(item)"
         class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300"
         :class="[
-          activeTab === item.id
+          isActive(item)
             ? 'bg-primary/10 text-primary border border-primary/20'
             : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50 border border-transparent',
         ]"
@@ -56,7 +74,7 @@ const navItems = [
         <component
           :is="item.icon"
           class="h-5 w-5"
-          :weight="activeTab === item.id ? 'fill' : 'regular'"
+          :weight="isActive(item) ? 'fill' : 'regular'"
         />
         {{ item.label }}
       </button>

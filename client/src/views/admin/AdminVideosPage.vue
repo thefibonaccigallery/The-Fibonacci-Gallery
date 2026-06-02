@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useQuery } from '@tanstack/vue-query'
 import { useVideos } from '@/composables/admin/useVideos'
 import { useChapters } from '@/composables/admin/useChapters'
+import { useCourses } from '@/composables/admin/useCourses'
 import {
   PhVideo,
   PhPlus,
@@ -24,9 +25,11 @@ import type { VideoType } from '@/types/VideoTypes'
 const router = useRouter()
 const { fetchVideos, deleteVideo, isDeleting } = useVideos()
 const { fetchChapters } = useChapters()
+const { fetchCourses } = useCourses()
 
 const page = ref(1)
 const search = ref('')
+const selectedCourseId = ref<number | undefined>(undefined)
 const selectedChapterId = ref<number | undefined>(undefined)
 const filterPublished = ref<boolean | undefined>(undefined)
 
@@ -43,10 +46,18 @@ const handlePreview = (video: VideoType) => {
   previewOpen.value = true
 }
 
+// Fetch courses for filter dropdown
+const { data: coursesData } = useQuery({
+  queryKey: ['courses-list'],
+  queryFn: () => fetchCourses({ per_page: 100 }),
+})
+
+const courses = computed(() => coursesData.value?.data || [])
+
 // Fetch chapters for filter dropdown
 const { data: chaptersData } = useQuery({
-  queryKey: ['chapters-list'],
-  queryFn: () => fetchChapters({ per_page: 100 }),
+  queryKey: ['chapters-list', selectedCourseId],
+  queryFn: () => fetchChapters({ per_page: 100, course_id: selectedCourseId.value }),
 })
 
 const chapters = computed(() => chaptersData.value?.data || [])
@@ -57,12 +68,13 @@ const {
   isLoading,
   refetch,
 } = useQuery({
-  queryKey: ['videos', page, search, selectedChapterId, filterPublished],
+  queryKey: ['videos', page, search, selectedCourseId, selectedChapterId, filterPublished],
   queryFn: () =>
     fetchVideos({
       page: page.value,
       per_page: 15,
       search: search.value || undefined,
+      course_id: selectedCourseId.value,
       chapter_id: selectedChapterId.value,
       is_published: filterPublished.value,
     }),
@@ -133,6 +145,16 @@ const getLevelColor = (level: string | null) => {
       <div class="flex flex-col sm:flex-row gap-4">
         <Input v-model="search" placeholder="Search videos..." class="flex-1" @input="page = 1" />
         <select
+          v-model="selectedCourseId"
+          @change="page = 1; selectedChapterId = undefined"
+          class="px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary min-w-50"
+        >
+          <option :value="undefined">All Courses</option>
+          <option v-for="course in courses" :key="course.id" :value="course.id">
+            {{ course.title }}
+          </option>
+        </select>
+        <select
           v-model="selectedChapterId"
           @change="page = 1"
           class="px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary min-w-50"
@@ -181,8 +203,8 @@ const getLevelColor = (level: string | null) => {
       <h3 class="text-xl font-semibold text-foreground mb-2">No videos found</h3>
       <p class="text-muted-foreground mb-6">
         {{
-          selectedChapterId
-            ? 'No videos in this chapter yet'
+          selectedChapterId || selectedCourseId
+            ? 'No videos found with the selected filters'
             : 'Get started by creating your first video'
         }}
       </p>

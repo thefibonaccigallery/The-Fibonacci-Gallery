@@ -41,7 +41,7 @@ class CourseController extends Controller
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|unique:courses,slug',
             'description' => 'nullable|string',
-            'level' => ['required', Rule::in(config('types/course.levels'))],
+            'level' => ['required', Rule::in(config('types_course.levels'))],
             'price' => 'required|numeric|min:0',
             'is_published' => 'boolean',
         ]);

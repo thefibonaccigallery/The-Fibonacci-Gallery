@@ -1,15 +1,27 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { EnrolledCourse } from '@/types/DashboardType'
+import { useRouter } from 'vue-router'
+import { useUserCourses } from '@/composables/useUserCourses'
 import { Button } from '@/components/ui/button'
-import { PhPlay } from '@phosphor-icons/vue'
+import { PhPlay, PhSpinner } from '@phosphor-icons/vue'
 
-defineProps<{
-  courses: EnrolledCourse[]
-}>()
+const router = useRouter()
+const { useMyEnrolledCourses } = useUserCourses()
+
+const { data, isLoading } = useMyEnrolledCourses()
+
+const courses = computed(() => data.value?.courses?.slice(0, 3) || [])
 
 const getProgress = (completed: number, total: number) => {
   return Math.round((completed / total) * 100)
+}
+
+const goToCoursePlayer = (courseId: number) => {
+  router.push(`/courses/${courseId}/player`)
+}
+
+const viewAllCourses = () => {
+  router.push('/my-courses')
 }
 </script>
 
@@ -19,10 +31,36 @@ const getProgress = (completed: number, total: number) => {
       <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
         My Enrolled Courses
       </h3>
+      <Button
+        v-if="courses.length > 0"
+        @click="viewAllCourses"
+        variant="ghost"
+        size="sm"
+        class="text-xs text-primary hover:text-primary/80"
+      >
+        View All
+      </Button>
+    </div>
+
+    <!-- Loading State -->
+    <div v-if="isLoading" class="flex items-center justify-center py-10">
+      <PhSpinner class="h-6 w-6 animate-spin text-primary" />
+    </div>
+
+    <!-- Empty State -->
+    <div
+      v-else-if="courses.length === 0"
+      class="text-center py-10 liquid-glass rounded-2xl border border-border/20 p-6"
+    >
+      <p class="text-muted-foreground mb-4">You haven't enrolled in any courses yet</p>
+      <Button @click="router.push('/explore')" class="bg-primary hover:bg-primary/90">
+        Explore Courses
+      </Button>
     </div>
 
     <!-- Scrollable container on mobile, grids on larger screens -->
     <div
+      v-else
       class="flex overflow-x-auto pb-4 gap-6 md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-x-visible md:pb-0 scrollbar-none snap-x"
     >
       <div
@@ -36,7 +74,14 @@ const getProgress = (completed: number, total: number) => {
           <div
             class="relative w-full h-36 rounded-xl overflow-hidden bg-zinc-950 border border-primary/10 flex items-center justify-center"
           >
+            <img
+              v-if="course.thumbnail_url"
+              :src="course.thumbnail_url"
+              :alt="course.title"
+              class="w-full h-full object-cover"
+            />
             <svg
+              v-else
               class="absolute inset-0 w-full h-full opacity-40"
               viewBox="0 0 100 100"
               fill="none"
@@ -116,6 +161,7 @@ const getProgress = (completed: number, total: number) => {
           </div>
 
           <Button
+            @click="goToCoursePlayer(course.id)"
             variant="outline"
             class="w-full text-xs font-semibold rounded-xl flex items-center justify-center gap-2 hover:bg-primary hover:text-primary-foreground border-primary/30 text-primary"
           >

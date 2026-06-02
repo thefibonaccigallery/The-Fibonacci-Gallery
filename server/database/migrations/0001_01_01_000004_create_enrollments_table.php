@@ -18,9 +18,11 @@ return new class extends Migration
             $table->bigInteger('course_id')->constrained('courses')->onDelete('cascade');
             $table->timestamp('enrolled_at')->useCurrent();
             $table->timestamp('completed_at')->nullable();
+            $table->decimal('progress_percentage', 5, 2)->default(0.00);
             $table->unique(['user_id', 'course_id']);
             $table->index('user_id');
             $table->index('course_id');
+            $table->timestamps();
         });
     }
 

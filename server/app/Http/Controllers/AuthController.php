@@ -164,4 +164,93 @@ class AuthController extends Controller
             ]
         ], 200);
     }
+
+    /**
+     * Update authenticated user's profile
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated'
+            ], 401);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'country' => 'required|string|max:255',
+        ]);
+
+        $user->update($validated);
+
+        $responseUser = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'country' => $user->country,
+            'role' => $user->role,
+        ];
+
+        $responseData = [
+            'success' => true,
+            'message' => 'Profile updated successfully',
+            'user' => $responseUser,
+        ];
+
+        return response()->json($responseData, 200);
+    }
+
+    /**
+     * Update authenticated user's password
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updatePassword(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated'
+            ], 401);
+        }
+
+        $validated = $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $currentPassword = $request->input('current_password');
+        $isValidPassword = Hash::check($currentPassword, $user->password);
+
+        if (!$isValidPassword) {
+            $responseData = [
+                'success' => false,
+                'message' => 'Validation errors',
+                'errors' => [
+                    'current_password' => ['Current password is incorrect']
+                ]
+            ];
+
+            return response()->json($responseData, 422);
+        }
+
+        $user->password = Hash::make($validated['new_password']);
+        $user->save();
+
+        $responseData = [
+            'success' => true,
+            'message' => 'Password updated successfully'
+        ];
+
+        return response()->json($responseData, 200);
+    }
 }

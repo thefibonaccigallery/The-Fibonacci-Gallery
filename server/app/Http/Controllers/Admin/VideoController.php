@@ -15,6 +15,13 @@ class VideoController extends Controller
     {
         $query = CourseVideo::with('chapter.course');
 
+        // Filter by course
+        if ($request->has('course_id')) {
+            $query->whereHas('chapter', function ($q) use ($request) {
+                $q->where('course_id', $request->course_id);
+            });
+        }
+
         // Filter by chapter
         if ($request->has('chapter_id')) {
             $query->where('chapter_id', $request->chapter_id);

@@ -21,6 +21,7 @@ export interface VideoListParams {
   page?: number
   per_page?: number
   search?: string
+  course_id?: number
   chapter_id?: number
   is_published?: boolean
   sort_by?: string

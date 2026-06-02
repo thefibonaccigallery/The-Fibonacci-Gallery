@@ -1,21 +1,40 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { EnrolledCourse } from '@/types/DashboardType'
+import { useRouter } from 'vue-router'
+import { useUserCourses } from '@/composables/useUserCourses'
 import { Button } from '@/components/ui/button'
-import { PhPlay } from '@phosphor-icons/vue'
+import { PhPlay, PhSpinner } from '@phosphor-icons/vue'
 
-const props = defineProps<{
-  course: EnrolledCourse | null
-}>()
+const router = useRouter()
+const { useContinueLearning } = useUserCourses()
+
+const { data, isLoading } = useContinueLearning()
+
+const course = computed(() => data.value?.course)
 
 const progressPercentage = computed(() => {
-  if (!props.course) return 0
-  return Math.round((props.course.completedLessons / props.course.totalLessons) * 100)
+  if (!course.value) return 0
+  return Math.round((course.value.completedLessons / course.value.totalLessons) * 100)
 })
+
+const goToCoursePlayer = () => {
+  if (course.value) {
+    router.push(`/courses/${course.value.id}/player`)
+  }
+}
 </script>
 
 <template>
-  <div v-if="course" class="animate-fade-in-up mb-8" style="animation-delay: 450ms">
+  <div v-if="isLoading" class="animate-fade-in-up mb-8" style="animation-delay: 450ms">
+    <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+      Continue Learning
+    </h3>
+    <div class="liquid-glass rounded-2xl p-6 border border-border/20 flex items-center justify-center">
+      <PhSpinner class="h-6 w-6 animate-spin text-primary" />
+    </div>
+  </div>
+
+  <div v-else-if="course" class="animate-fade-in-up mb-8" style="animation-delay: 450ms">
     <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
       Continue Learning
     </h3>
@@ -26,7 +45,14 @@ const progressPercentage = computed(() => {
       <div
         class="relative w-full lg:w-48 h-32 rounded-xl overflow-hidden bg-zinc-950 border border-primary/20 flex items-center justify-center group shrink-0"
       >
+        <img
+          v-if="course.thumbnail_url"
+          :src="course.thumbnail_url"
+          :alt="course.title"
+          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+        />
         <svg
+          v-else
           class="absolute inset-0 w-full h-full opacity-60 transition-transform duration-700 group-hover:scale-110"
           viewBox="0 0 100 100"
           fill="none"
@@ -97,9 +123,10 @@ const progressPercentage = computed(() => {
         <!-- Button -->
         <div class="flex items-center justify-between gap-4 pt-2">
           <span class="text-xs text-muted-foreground font-medium">
-            Next Lesson: Fibonacci Retracement Golden Ratios
+            Next: {{ course.next_video_title }}
           </span>
           <Button
+            @click="goToCoursePlayer"
             class="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl px-5 flex items-center gap-2"
           >
             <PhPlay class="h-4 w-4" weight="fill" />

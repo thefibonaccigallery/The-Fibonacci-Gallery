@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CoursePlayerController;
+use App\Http\Controllers\UserCourseController;
 use App\Http\Controllers\TypesController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\ChapterController;
@@ -18,10 +19,19 @@ Route::get('/types', [TypesController::class, 'index']);
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+    Route::put('/user', [AuthController::class, 'updateProfile']);
+    Route::put('/user/password', [AuthController::class, 'updatePassword']);
 
     // Course player routes
     Route::get('/courses/{courseId}/player', [CoursePlayerController::class, 'show']);
     Route::post('/progress/{videoId}', [CoursePlayerController::class, 'updateProgress']);
+
+    // User course routes
+    Route::get('/my-courses', [UserCourseController::class, 'myEnrolledCourses']);
+    Route::get('/explore-courses', [UserCourseController::class, 'exploreCourses']);
+    Route::get('/courses/{id}', [UserCourseController::class, 'showCourse']);
+    Route::post('/courses/{courseId}/enroll', [UserCourseController::class, 'enrollCourse']);
+    Route::get('/continue-learning', [UserCourseController::class, 'continueLearningSuggestion']);
 });
 
 // Admin routes (protected by auth and admin middleware)

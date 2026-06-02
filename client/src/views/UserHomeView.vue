@@ -8,15 +8,7 @@ import ContinueLearning from '@/components/dashboard/ContinueLearning.vue'
 import MyCourses from '@/components/dashboard/MyCourses.vue'
 import ExploreCourses from '@/components/dashboard/ExploreCourses.vue'
 
-const {
-  student,
-  enrolledCourses,
-  exploreCourses,
-  activeTab,
-  setActiveTab,
-  currentDate,
-  continueLearningCourse,
-} = useDashboard()
+const { student, activeTab, setActiveTab, currentDate } = useDashboard()
 </script>
 
 <template>
@@ -27,13 +19,13 @@ const {
     <!-- Main Content Area -->
     <main class="flex-1 h-screen overflow-y-auto w-full relative">
       <div class="w-full px-6 lg:px-10 pt-10 pb-24 md:pb-12">
-        <!-- Dashboard Content (only visible when 'home' tab is active, as requested for static demo) -->
+        <!-- Dashboard Content (only visible when 'home' tab is active) -->
         <div v-if="activeTab === 'home'" class="w-full">
           <WelcomeBar :studentName="student.name" :currentDate="currentDate" />
           <StatsRow />
-          <ContinueLearning :course="continueLearningCourse" />
-          <MyCourses :courses="enrolledCourses" />
-          <ExploreCourses :courses="exploreCourses" />
+          <ContinueLearning />
+          <MyCourses />
+          <ExploreCourses />
         </div>
 
         <!-- Placeholder for other tabs -->
@@ -53,3 +45,4 @@ const {
     <BottomNav :activeTab="activeTab" @update:activeTab="setActiveTab" />
   </div>
 </template>
+

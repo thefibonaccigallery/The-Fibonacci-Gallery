@@ -13,5 +13,5 @@ const toasterTheme = computed(() => {
 
 <template>
   <Toaster :closeButton="true" closeButtonPosition="top-right" richColors position="top-right" />
-  <RouterView />
+  <RouterView :key="$route.fullPath" />
 </template>
