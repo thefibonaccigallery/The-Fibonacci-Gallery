@@ -22,7 +22,7 @@ return new class extends Migration
             $table->unique(['user_id', 'course_id']);
             $table->index('user_id');
             $table->index('course_id');
-            $table->timestamps();
+            // No timestamps() — model uses enrolled_at / completed_at instead
         });
     }
 

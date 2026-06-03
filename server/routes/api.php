@@ -7,6 +7,7 @@ use App\Http\Controllers\TypesController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\ChapterController;
 use App\Http\Controllers\Admin\VideoController;
+use App\Http\Controllers\EnrollmentController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -32,6 +33,10 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/courses/{id}', [UserCourseController::class, 'showCourse']);
     Route::post('/courses/{courseId}/enroll', [UserCourseController::class, 'enrollCourse']);
     Route::get('/continue-learning', [UserCourseController::class, 'continueLearningSuggestion']);
+
+    // Enrollment routes
+    Route::post('/enroll/{courseId}', [EnrollmentController::class, 'enroll']);
+    Route::get('/enroll/{courseId}/status', [EnrollmentController::class, 'status']);
 });
 
 // Admin routes (protected by auth and admin middleware)

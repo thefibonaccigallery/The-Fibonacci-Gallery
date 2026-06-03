@@ -61,6 +61,23 @@ export const useLanguageStore = defineStore('language', () => {
     common: {
       notAvailable: 'Not available',
     },
+    enrollment: {
+      success: 'Successfully enrolled.',
+      go_to_course: 'Go to Course',
+      enroll_free: 'Enroll Now',
+      buy_now: 'Buy Now',
+      already_enrolled: 'You are already enrolled in this course.',
+    },
+    checkout: {
+      title: 'Checkout Summary',
+      courseTitle: 'Course Title',
+      courseLevel: 'Course Level',
+      price: 'Price',
+      completePayment: 'Complete Payment',
+      comingSoon: 'Coming Soon',
+      comingSoonNote: 'Payment integration is coming soon.',
+      backToCourse: 'Back to Course details',
+    },
   }
 
   return {

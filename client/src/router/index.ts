@@ -55,6 +55,12 @@ const router = createRouter({
       component: () => import('@/views/CoursePlayerPage.vue'),
     },
     {
+      path: '/checkout/:courseId',
+      name: 'checkout',
+      component: () => import('@/pages/CheckoutPage.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/profile',
       name: 'profile',
       component: () => import('@/views/ProfilePage.vue'),

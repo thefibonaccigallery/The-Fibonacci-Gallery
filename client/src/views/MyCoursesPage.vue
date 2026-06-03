@@ -29,7 +29,7 @@ const formatDate = (dateString: string) => {
 
 <template>
   <DashboardLayout>
-    <div class="min-h-screen px-8 bg-background">
+    <div class="min-h-screen bg-background">
       <!-- Header -->
       <div class="border-b border-border/40 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div class="container mx-auto px-4 py-6">

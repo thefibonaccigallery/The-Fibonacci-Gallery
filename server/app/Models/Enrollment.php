@@ -10,6 +10,8 @@ class Enrollment extends Model
 {
     use HasFactory, HasUuid;
 
+    public $timestamps = false;
+
     protected $fillable = [
         'user_id',
         'course_id',

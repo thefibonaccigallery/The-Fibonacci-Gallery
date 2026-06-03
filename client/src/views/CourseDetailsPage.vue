@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useUserCourses } from '@/composables/useUserCourses'
 import { Button } from '@/components/ui/button'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import EnrollButton from '@/components/enrollment/EnrollButton.vue'
 import {
   PhSpinner,
   PhArrowLeft,
@@ -15,11 +16,10 @@ import {
 
 const route = useRoute()
 const router = useRouter()
-const { useCourseDetail, useEnrollCourse } = useUserCourses()
+const { useCourseDetail } = useUserCourses()
 
 const courseId = computed(() => Number(route.params.id))
 const { data, isLoading, error } = useCourseDetail(courseId.value)
-const { mutate: enrollCourse, isPending: isEnrolling } = useEnrollCourse()
 
 const course = computed(() => data.value?.course)
 
@@ -30,20 +30,6 @@ const formatDuration = (seconds: number) => {
     return `${hours}h ${minutes}m`
   }
   return `${minutes}m`
-}
-
-const handleEnroll = () => {
-  if (course.value) {
-    enrollCourse(courseId.value, {
-      onSuccess: () => {
-        router.push(`/courses/${courseId.value}/player`)
-      },
-    })
-  }
-}
-
-const goToCoursePlayer = () => {
-  router.push(`/courses/${courseId.value}/player`)
 }
 
 const getLevelColor = (level: string) => {
@@ -227,24 +213,7 @@ const getLevelColor = (level: string) => {
 
             <!-- Action Button -->
             <div class="space-y-3">
-              <Button
-                v-if="!course.is_enrolled"
-                @click="handleEnroll"
-                :disabled="isEnrolling"
-                class="w-full text-base font-semibold py-6 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground"
-              >
-                <PhSpinner v-if="isEnrolling" class="h-5 w-5 mr-2 animate-spin" />
-                <span v-else>Enroll Now</span>
-              </Button>
-
-              <Button
-                v-else
-                @click="goToCoursePlayer"
-                class="w-full text-base font-semibold py-6 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground"
-              >
-                <PhPlay class="h-5 w-5 mr-2" weight="fill" />
-                Go to Course
-              </Button>
+              <EnrollButton :course-id="courseId" :course="course" />
             </div>
 
             <!-- What's Included -->

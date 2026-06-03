@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import EnrollButton from '@/components/enrollment/EnrollButton.vue'
 import {
   PhSpinner,
   PhMagnifyingGlass,
@@ -22,7 +23,7 @@ import {
 
 const router = useRouter()
 const route = useRoute()
-const { useExploreCourses, useEnrollCourse } = useUserCourses()
+const { useExploreCourses } = useUserCourses()
 
 const searchQuery = ref('')
 const selectedLevel = ref<string>('all')
@@ -47,7 +48,6 @@ watch(
 )
 
 const { data, isLoading, error } = useExploreCourses(params)
-const { mutate: enrollCourse, isPending: isEnrolling } = useEnrollCourse()
 
 const courses = computed(() => data.value?.courses || [])
 
@@ -58,10 +58,6 @@ const formatDuration = (seconds: number) => {
     return `${hours}h ${minutes}m`
   }
   return `${minutes}m`
-}
-
-const handleEnroll = (courseId: number) => {
-  enrollCourse(courseId)
 }
 
 const viewCourseDetails = (courseId: number) => {
@@ -269,14 +265,7 @@ const getLevelColor = (level: string) => {
                 </span>
               </div>
 
-              <Button
-                @click="handleEnroll(course.id)"
-                :disabled="isEnrolling"
-                class="w-full text-sm font-semibold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground"
-              >
-                <PhSpinner v-if="isEnrolling" class="h-4 w-4 mr-2 animate-spin" />
-                Enroll Now
-              </Button>
+              <EnrollButton :course-id="course.id" :course="course" />
 
               <Button
                 @click="viewCourseDetails(course.id)"

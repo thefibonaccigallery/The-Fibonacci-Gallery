@@ -12,7 +12,7 @@ const { activeTab, setActiveTab } = useDashboard()
     <AppSidebar :activeTab="activeTab" @update:activeTab="setActiveTab" />
 
     <!-- Main Content Area -->
-    <main class="flex-1 h-screen overflow-y-auto w-full relative">
+    <main class="flex-1 h-screen overflow-y-auto w-full relative pl-4">
       <slot />
     </main>
 
