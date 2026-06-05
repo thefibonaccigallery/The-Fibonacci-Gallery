@@ -50,14 +50,27 @@ const router = createRouter({
       component: () => import('@/views/CourseDetailsPage.vue'),
     },
     {
+      path: '/checkout/:courseId',
+      name: 'checkout',
+      component: () => import('@/views/CheckoutPage.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/payment/success',
+      name: 'payment-success',
+      component: () => import('@/views/PaymentSuccessPage.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/payment/cancel',
+      name: 'payment-cancel',
+      component: () => import('@/views/PaymentCancelPage.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/courses/:courseId/player',
       name: 'course-player',
       component: () => import('@/views/CoursePlayerPage.vue'),
-    },
-    {
-      path: '/checkout/:courseId',
-      name: 'checkout',
-      component: () => import('@/pages/CheckoutPage.vue'),
       meta: { requiresAuth: true },
     },
     {

@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'nowpayments' => [
+        'api_key'    => env('NOWPAYMENTS_API_KEY'),
+        'ipn_secret' => env('NOWPAYMENTS_IPN_SECRET'),
+        'api_url'    => env('NOWPAYMENTS_API_URL', 'https://api.nowpayments.io/v1'),
+    ],
+
 ];

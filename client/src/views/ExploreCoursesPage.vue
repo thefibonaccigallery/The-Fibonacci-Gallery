@@ -12,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import EnrollButton from '@/components/enrollment/EnrollButton.vue'
 import {
   PhSpinner,
   PhMagnifyingGlass,
@@ -265,7 +264,12 @@ const getLevelColor = (level: string) => {
                 </span>
               </div>
 
-              <EnrollButton :course-id="course.id" :course="course" />
+              <Button
+                @click="router.push(`/checkout/${course.id}`)"
+                class="w-full text-sm font-semibold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                Enroll Now
+              </Button>
 
               <Button
                 @click="viewCourseDetails(course.id)"

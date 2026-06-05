@@ -7,6 +7,7 @@ use App\Http\Controllers\TypesController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\ChapterController;
 use App\Http\Controllers\Admin\VideoController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\EnrollmentController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +16,9 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/types', [TypesController::class, 'index']);
+Route::post('/payments/webhook', [PaymentController::class, 'webhook'])
+    ->name('payments.webhook');
+
 
 // Protected routes
 Route::middleware('auth:api')->group(function () {
@@ -37,6 +41,9 @@ Route::middleware('auth:api')->group(function () {
     // Enrollment routes
     Route::post('/enroll/{courseId}', [EnrollmentController::class, 'enroll']);
     Route::get('/enroll/{courseId}/status', [EnrollmentController::class, 'status']);
+
+    Route::post('/payments/initiate/{courseId}', [PaymentController::class, 'initiatePayment']);
+    Route::get('/payments/status/{orderUuid}',   [PaymentController::class, 'checkStatus']);
 });
 
 // Admin routes (protected by auth and admin middleware)
@@ -67,4 +74,3 @@ Route::middleware(['auth:api', 'role:admin|super_admin'])->prefix('admin')->grou
     Route::post('/videos/{id}/upload', [VideoController::class, 'uploadVideo']);
     Route::post('/videos/reorder', [VideoController::class, 'reorder']);
 });
-

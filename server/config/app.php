@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Frontend URL
+    |--------------------------------------------------------------------------
+    | This URL is used to generate links to the frontend application, such as
+    | success and cancellation URLs for payment processing. Set this in your ".env" file.
+    |
+    */
+
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:5174'),
+
 ];

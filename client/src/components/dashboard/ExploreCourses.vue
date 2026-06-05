@@ -14,7 +14,7 @@ const { mutate: enrollCourse, isPending: isEnrolling } = useEnrollCourse()
 const courses = computed(() => data.value?.courses?.slice(0, 3) || [])
 
 const handleEnroll = (courseId: number) => {
-  enrollCourse(courseId)
+  router.push(`/checkout/${courseId}`)
 }
 
 const viewAllCourses = () => {
@@ -127,10 +127,8 @@ const viewAllCourses = () => {
         <div class="mt-6">
           <Button
             @click="handleEnroll(course.id)"
-            :disabled="isEnrolling"
             class="w-full text-xs font-semibold rounded-xl hover:bg-primary/90 text-primary-foreground bg-primary transition-colors"
           >
-            <PhSpinner v-if="isEnrolling" class="h-3 w-3 mr-2 animate-spin" />
             Enroll Now
           </Button>
         </div>

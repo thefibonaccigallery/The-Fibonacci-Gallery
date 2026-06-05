@@ -27,7 +27,7 @@ class UserCourseController extends Controller
 
         $enrolledCourses = $enrollments->map(function ($enrollment) use ($user) {
             $course = $enrollment->course;
-            
+
             // Get all video IDs for this course
             $videoIds = $course->chapters->flatMap(function ($chapter) {
                 return $chapter->videos->pluck('id');
@@ -56,6 +56,7 @@ class UserCourseController extends Controller
 
             return [
                 'id' => $course->id,
+                'uuid' => $course->uuid,
                 'title' => $course->title,
                 'description' => $course->description,
                 'thumbnail_url' => $course->thumbnail_url,
