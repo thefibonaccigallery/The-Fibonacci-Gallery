@@ -1,9 +1,8 @@
 import type { Chapter } from './CourseTypes'
 
 export interface VideoType {
-  id: number
   uuid: string
-  chapter_id: number
+  chapter_uuid?: string
   title: string
   youtube_video_id: string | null
   level: 'beginner' | 'intermediate' | 'advanced' | null
@@ -21,15 +20,15 @@ export interface VideoListParams {
   page?: number
   per_page?: number
   search?: string
-  course_id?: number
-  chapter_id?: number
+  course_uuid?: string
+  chapter_uuid?: string
   is_published?: boolean
   sort_by?: string
   sort_order?: 'asc' | 'desc'
 }
 
 export interface VideoFormData {
-  chapter_id: number
+  chapter_uuid: string
   title: string
   youtube_video_id: string | null
   level: 'beginner' | 'intermediate' | 'advanced' | null

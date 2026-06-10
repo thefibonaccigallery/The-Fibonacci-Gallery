@@ -13,7 +13,7 @@ class CoursePlayerController extends Controller
     /**
      * Get course player data with chapters, videos, and progress
      */
-    public function show($courseId)
+    public function show($uuid)
     {
         $user = Auth::user();
 
@@ -24,9 +24,9 @@ class CoursePlayerController extends Controller
             'chapters.videos' => function ($query) {
                 $query->where('is_published', true)->orderBy('order');
             },
-        ])->findOrFail($courseId);
+        ])->where('uuid', $uuid)->firstOrFail();
 
-        // Get all video IDs for this course
+        // Get all video IDs for this course (internal only)
         $videoIds = $course->chapters->flatMap(function ($chapter) {
             return $chapter->videos->pluck('id');
         });
@@ -46,34 +46,34 @@ class CoursePlayerController extends Controller
 
         return response()->json([
             'course' => [
-                'id' => $course->id,
-                'title' => $course->title,
-                'description' => $course->description,
+                'uuid'          => $course->uuid,
+                'title'         => $course->title,
+                'description'   => $course->description,
                 'thumbnail_url' => $course->thumbnail_url,
             ],
             'chapters' => $course->chapters->map(function ($chapter) {
                 return [
-                    'id' => $chapter->id,
-                    'title' => $chapter->title,
-                    'level' => $chapter->level,
-                    'order' => $chapter->order,
+                    'uuid'           => $chapter->uuid,
+                    'title'          => $chapter->title,
+                    'level'          => $chapter->level,
+                    'order'          => $chapter->order,
                     'length_seconds' => $chapter->length_seconds,
-                    'videos' => $chapter->videos->map(function ($video) {
+                    'videos'         => $chapter->videos->map(function ($video) {
                         return [
-                            'id' => $video->id,
-                            'title' => $video->title,
+                            'uuid'             => $video->uuid,
+                            'title'            => $video->title,
                             'youtube_video_id' => $video->youtube_video_id,
-                            'level' => $video->level,
-                            'order' => $video->order,
+                            'level'            => $video->level,
+                            'order'            => $video->order,
                             'duration_seconds' => $video->duration_seconds,
-                            'cooldown_hours' => $video->cooldown_hours,
-                            'progress' => $video->progress ? [
+                            'cooldown_hours'   => $video->cooldown_hours,
+                            'progress'         => $video->progress ? [
                                 'watch_time_seconds' => $video->progress->watch_time_seconds,
-                                'watch_percentage' => (float) $video->progress->watch_percentage,
-                                'is_completed' => $video->progress->is_completed,
-                                'last_watched_at' => $video->progress->last_watched_at,
-                                'cooldown_until' => $video->progress->cooldown_until,
-                                'is_in_cooldown' => $video->progress->cooldown_until && now()->lt($video->progress->cooldown_until),
+                                'watch_percentage'   => (float) $video->progress->watch_percentage,
+                                'is_completed'       => $video->progress->is_completed,
+                                'last_watched_at'    => $video->progress->last_watched_at,
+                                'cooldown_until'     => $video->progress->cooldown_until,
+                                'is_in_cooldown'     => $video->progress->cooldown_until && now()->lt($video->progress->cooldown_until),
                             ] : null,
                         ];
                     }),
@@ -85,30 +85,30 @@ class CoursePlayerController extends Controller
     /**
      * Update video progress
      */
-    public function updateProgress(Request $request, $videoId)
+    public function updateProgress(Request $request, $uuid)
     {
         $request->validate([
             'watch_time_seconds' => 'required|integer|min:0',
-            'watch_percentage' => 'required|numeric|min:0|max:100',
+            'watch_percentage'   => 'required|numeric|min:0|max:100',
         ]);
 
-        $user = Auth::user();
-        $video = CourseVideo::findOrFail($videoId);
+        $user  = Auth::user();
+        $video = CourseVideo::where('uuid', $uuid)->firstOrFail();
 
         $watchPercentage = $request->watch_percentage;
-        $isCompleted = $watchPercentage >= 70;
+        $isCompleted     = $watchPercentage >= 70;
 
         $progress = VideoProgress::updateOrCreate(
             [
-                'user_id' => $user->id,
+                'user_id'        => $user->id,
                 'course_video_id' => $video->id,
             ],
             [
                 'watch_time_seconds' => $request->watch_time_seconds,
-                'watch_percentage' => $watchPercentage,
-                'is_completed' => $isCompleted,
-                'completed_at' => $isCompleted ? now() : null,
-                'last_watched_at' => now(),
+                'watch_percentage'   => $watchPercentage,
+                'is_completed'       => $isCompleted,
+                'completed_at'       => $isCompleted ? now() : null,
+                'last_watched_at'    => now(),
             ]
         );
 
@@ -125,7 +125,7 @@ class CoursePlayerController extends Controller
                 if (!$nextProgress || !$nextProgress->cooldown_until) {
                     VideoProgress::updateOrCreate(
                         [
-                            'user_id' => $user->id,
+                            'user_id'         => $user->id,
                             'course_video_id' => $nextVideo->id,
                         ],
                         [
@@ -137,14 +137,14 @@ class CoursePlayerController extends Controller
         }
 
         return response()->json([
-            'success' => true,
+            'success'  => true,
             'progress' => [
                 'watch_time_seconds' => $progress->watch_time_seconds,
-                'watch_percentage' => (float) $progress->watch_percentage,
-                'is_completed' => $progress->is_completed,
-                'last_watched_at' => $progress->last_watched_at,
-                'cooldown_until' => $progress->cooldown_until,
-                'is_in_cooldown' => $progress->cooldown_until && now()->lt($progress->cooldown_until),
+                'watch_percentage'   => (float) $progress->watch_percentage,
+                'is_completed'       => $progress->is_completed,
+                'last_watched_at'    => $progress->last_watched_at,
+                'cooldown_until'     => $progress->cooldown_until,
+                'is_in_cooldown'     => $progress->cooldown_until && now()->lt($progress->cooldown_until),
             ],
         ]);
     }

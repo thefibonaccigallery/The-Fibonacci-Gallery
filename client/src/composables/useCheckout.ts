@@ -5,7 +5,7 @@ import axiosInstance from '@/api/axiosInstance'
 import { toast } from 'vue-sonner'
 
 interface Course {
-  id: number
+  uuid: string
   title: string
   level: string
   price: number
@@ -56,24 +56,14 @@ export function useCheckout() {
   const qrDataUrl = ref('')
 
   // Fetch course details
-  const useCourseDetails = (courseId: number) => {
+  const useCourseDetails = (courseUuid: string) => {
     return useQuery<Course>({
-      queryKey: ['course-checkout', courseId],
+      queryKey: ['course-checkout', courseUuid],
       queryFn: async () => {
-        // TODO: Replace with actual API call
-        // const response = await axiosInstance.get(`/courses/${courseId}`)
-        // return response.data
-
-        // Mock data for now
-        return {
-          id: courseId,
-          title: 'The Complete Forex Trading Course',
-          level: 'beginner',
-          price: 99.0,
-          thumbnail_url: null,
-        }
+        const response = await axiosInstance.get(`/courses/${courseUuid}`)
+        return response.data.course
       },
-      enabled: computed(() => !!courseId),
+      enabled: computed(() => !!courseUuid),
     })
   }
 
@@ -82,11 +72,7 @@ export function useCheckout() {
     return useQuery<Currency[]>({
       queryKey: ['payment-currencies'],
       queryFn: async () => {
-        // TODO: Replace with actual API call
-        // const response = await axiosInstance.get('/api/payments/currencies')
-        // return response.data
-
-        // Mock data for now
+        // Mock data for now since backend doesn't have currencies API
         return [
           { id: 'btc', name: 'Bitcoin', symbol: 'BTC' },
           { id: 'eth', name: 'Ethereum', symbol: 'ETH' },
@@ -103,28 +89,16 @@ export function useCheckout() {
   const useInitiatePayment = () => {
     return useMutation({
       mutationFn: async ({
-        courseId,
+        courseUuid,
         payCurrency,
       }: {
-        courseId: number
+        courseUuid: string
         payCurrency: string
       }) => {
-        // TODO: Replace with actual API call
-        // const response = await axiosInstance.post(`/api/payments/initiate/${courseId}`, {
-        //   pay_currency: payCurrency,
-        // })
-        // return response.data
-
-        // Mock data for now
-        await new Promise((resolve) => setTimeout(resolve, 1500))
-        return {
-          payment_id: '123456789',
-          pay_address: '0xABCDEF1234567890ABCDEF1234567890ABCDEF12',
-          pay_amount: 0.03241,
+        const response = await axiosInstance.post(`/payments/initiate/${courseUuid}`, {
           pay_currency: payCurrency,
-          order_uuid: 'abc-def-ghi-jkl-' + Date.now(),
-          expiration_estimate_date: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-        }
+        })
+        return response.data
       },
       onSuccess: (data) => {
         paymentDetails.value = data
@@ -143,17 +117,8 @@ export function useCheckout() {
     const query = useQuery<PaymentStatus>({
       queryKey: ['payment-status', orderUuid],
       queryFn: async () => {
-        // TODO: Replace with actual API call
-        // const response = await axiosInstance.get(`/api/payments/status/${orderUuid.value}`)
-        // return response.data
-
-        // Mock data for now - simulate payment flow
-        await new Promise((resolve) => setTimeout(resolve, 500))
-        const random = Math.random()
-        if (random > 0.9) {
-          return { status: 'finished' as const, payment_amount: 0.03241, actually_paid: 0.03241 }
-        }
-        return { status: 'waiting' as const, payment_amount: 0.03241, actually_paid: 0 }
+        const response = await axiosInstance.get(`/payments/status/${orderUuid.value}`)
+        return response.data
       },
       refetchInterval: (data) => {
         if (data && terminalStatuses.includes(data.status)) return false

@@ -13,8 +13,8 @@ const { mutate: enrollCourse, isPending: isEnrolling } = useEnrollCourse()
 
 const courses = computed(() => data.value?.courses?.slice(0, 3) || [])
 
-const handleEnroll = (courseId: number) => {
-  router.push(`/checkout/${courseId}`)
+const handleEnroll = (courseUuid: string) => {
+  router.push(`/checkout/${courseUuid}`)
 }
 
 const viewAllCourses = () => {
@@ -59,7 +59,7 @@ const viewAllCourses = () => {
     >
       <div
         v-for="course in courses"
-        :key="course.id"
+        :key="course.uuid"
         class="snap-start shrink-0 w-72 md:w-auto liquid-glass rounded-2xl p-5 border border-border/20 flex flex-col justify-between transition-transform duration-300 hover:scale-[1.01]"
       >
         <!-- Card content -->
@@ -126,7 +126,7 @@ const viewAllCourses = () => {
         <!-- Button -->
         <div class="mt-6">
           <Button
-            @click="handleEnroll(course.id)"
+            @click="handleEnroll(course.uuid)"
             class="w-full text-xs font-semibold rounded-xl hover:bg-primary/90 text-primary-foreground bg-primary transition-colors"
           >
             Enroll Now

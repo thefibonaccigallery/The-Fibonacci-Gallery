@@ -19,8 +19,8 @@ export function useCourses() {
   }
 
   // Fetch single course
-  const fetchCourse = async (id: number): Promise<Course> => {
-    const response = await axiosInstance.get(`/admin/courses/${id}`)
+  const fetchCourse = async (uuid: string): Promise<Course> => {
+    const response = await axiosInstance.get(`/admin/courses/${uuid}`)
     return response.data
   }
 
@@ -41,8 +41,8 @@ export function useCourses() {
 
   // Update course
   const { mutate: updateCourse, isPending: isUpdating } = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Partial<CourseFormData> }) => {
-      const response = await axiosInstance.put(`/admin/courses/${id}`, data)
+    mutationFn: async ({ uuid, data }: { uuid: string; data: Partial<CourseFormData> }) => {
+      const response = await axiosInstance.put(`/admin/courses/${uuid}`, data)
       return response.data
     },
     onSuccess: () => {
@@ -56,8 +56,8 @@ export function useCourses() {
 
   // Delete course
   const { mutate: deleteCourse, isPending: isDeleting } = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await axiosInstance.delete(`/admin/courses/${id}`)
+    mutationFn: async (uuid: string) => {
+      const response = await axiosInstance.delete(`/admin/courses/${uuid}`)
       return response.data
     },
     onSuccess: () => {
@@ -71,10 +71,10 @@ export function useCourses() {
 
   // Upload thumbnail
   const { mutate: uploadThumbnail, isPending: isUploadingThumbnail } = useMutation({
-    mutationFn: async ({ id, file }: { id: number; file: File }) => {
+    mutationFn: async ({ uuid, file }: { uuid: string; file: File }) => {
       const formData = new FormData()
       formData.append('thumbnail', file)
-      const response = await axiosInstance.post(`/admin/courses/${id}/thumbnail`, formData, {
+      const response = await axiosInstance.post(`/admin/courses/${uuid}/thumbnail`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       return response.data
@@ -90,8 +90,8 @@ export function useCourses() {
 
   // Delete thumbnail
   const { mutate: deleteThumbnail, isPending: isDeletingThumbnail } = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await axiosInstance.delete(`/admin/courses/${id}/thumbnail`)
+    mutationFn: async (uuid: string) => {
+      const response = await axiosInstance.delete(`/admin/courses/${uuid}/thumbnail`)
       return response.data
     },
     onSuccess: () => {

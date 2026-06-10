@@ -23,12 +23,12 @@ const {
   isDeletingThumbnail,
 } = useCourses()
 
-const courseId = computed(() => {
-  const id = route.params.id
-  return id ? Number(id) : null
+const courseUuid = computed(() => {
+  const uuid = route.params.uuid
+  return uuid ? String(uuid) : null
 })
 
-const isEditMode = computed(() => !!courseId.value)
+const isEditMode = computed(() => !!courseUuid.value)
 
 // Form state
 const form = ref<CourseFormData>({
@@ -46,8 +46,8 @@ const errors = ref<Record<string, string>>({})
 
 // Fetch course data if editing
 const { data: courseData, isLoading } = useQuery({
-  queryKey: ['course', courseId],
-  queryFn: () => fetchCourse(courseId.value!),
+  queryKey: ['course', courseUuid],
+  queryFn: () => fetchCourse(courseUuid.value!),
   enabled: isEditMode,
 })
 
@@ -107,13 +107,13 @@ const handleSubmit = async () => {
   if (isEditMode.value) {
     // Update existing course
     updateCourse(
-      { id: courseId.value!, data: formData },
+      { uuid: courseUuid.value!, data: formData },
       {
         onSuccess: async (response) => {
           // Upload thumbnail if changed
           if (thumbnailFile.value) {
             await uploadThumbnail({
-              id: courseId.value!,
+              uuid: courseUuid.value!,
               file: thumbnailFile.value,
             })
           }
@@ -125,11 +125,11 @@ const handleSubmit = async () => {
     // Create new course
     createCourse(formData, {
       onSuccess: async (response) => {
-        const newCourseId = response.course.id
+        const newCourseUuid = response.course.uuid
         // Upload thumbnail if provided
         if (thumbnailFile.value) {
           await uploadThumbnail({
-            id: newCourseId,
+            uuid: newCourseUuid,
             file: thumbnailFile.value,
           })
         }
@@ -140,8 +140,8 @@ const handleSubmit = async () => {
 }
 
 const handleDeleteThumbnail = () => {
-  if (courseId.value) {
-    deleteThumbnail(courseId.value)
+  if (courseUuid.value) {
+    deleteThumbnail(courseUuid.value)
     currentThumbnailUrl.value = null
   }
 }

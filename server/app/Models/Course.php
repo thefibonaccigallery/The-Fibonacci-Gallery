@@ -11,6 +11,8 @@ class Course extends Model
 {
     use HasFactory, HasUuid;
 
+    protected $hidden = ['id'];
+
     protected $fillable = [
         'title',
         'slug',

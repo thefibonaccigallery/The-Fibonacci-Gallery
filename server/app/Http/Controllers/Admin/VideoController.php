@@ -16,15 +16,17 @@ class VideoController extends Controller
         $query = CourseVideo::with('chapter.course');
 
         // Filter by course
-        if ($request->has('course_id')) {
-            $query->whereHas('chapter', function ($q) use ($request) {
-                $q->where('course_id', $request->course_id);
+        if ($request->has('course_uuid')) {
+            $query->whereHas('chapter.course', function ($q) use ($request) {
+                $q->where('uuid', $request->course_uuid);
             });
         }
 
         // Filter by chapter
-        if ($request->has('chapter_id')) {
-            $query->where('chapter_id', $request->chapter_id);
+        if ($request->has('chapter_uuid')) {
+            $query->whereHas('chapter', function ($q) use ($request) {
+                $q->where('uuid', $request->chapter_uuid);
+            });
         }
 
         // Filter by published status
@@ -49,6 +51,9 @@ class VideoController extends Controller
 
     public function store(Request $request)
     {
+        $chapter = Chapter::findByUuidOrFail($request->chapter_uuid);
+        $request->merge(['chapter_id' => $chapter->id]);
+
         $validated = $request->validate([
             'chapter_id' => 'required|exists:chapters,id',
             'title' => 'required|string|max:255',
@@ -68,15 +73,20 @@ class VideoController extends Controller
         ], 201);
     }
 
-    public function show($id)
+    public function show($uuid)
     {
-        $video = CourseVideo::with('chapter.course')->findOrFail($id);
+        $video = CourseVideo::with('chapter.course')->where('uuid', $uuid)->firstOrFail();
         return response()->json($video);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $uuid)
     {
-        $video = CourseVideo::findOrFail($id);
+        $video = CourseVideo::findByUuidOrFail($uuid);
+
+        if ($request->has('chapter_uuid')) {
+            $chapter = Chapter::findByUuidOrFail($request->chapter_uuid);
+            $request->merge(['chapter_id' => $chapter->id]);
+        }
 
         $validated = $request->validate([
             'chapter_id' => 'sometimes|required|exists:chapters,id',
@@ -97,9 +107,9 @@ class VideoController extends Controller
         ]);
     }
 
-    public function destroy($id)
+    public function destroy($uuid)
     {
-        $video = CourseVideo::findOrFail($id);
+        $video = CourseVideo::findByUuidOrFail($uuid);
 
         // Delete video file if exists (implement based on your storage strategy)
         // Storage::disk('public')->delete('videos/' . $video->uuid . '.mp4');
@@ -111,9 +121,9 @@ class VideoController extends Controller
         ]);
     }
 
-    public function uploadVideo(Request $request, $id)
+    public function uploadVideo(Request $request, $uuid)
     {
-        $video = CourseVideo::findOrFail($id);
+        $video = CourseVideo::findByUuidOrFail($uuid);
 
         $request->validate([
             'video' => 'required|file|mimes:mp4,mov,avi,wmv|max:512000', // 500MB max
@@ -138,12 +148,12 @@ class VideoController extends Controller
     {
         $validated = $request->validate([
             'videos' => 'required|array',
-            'videos.*.id' => 'required|exists:course_videos,id',
+            'videos.*.uuid' => 'required|exists:course_videos,uuid',
             'videos.*.order' => 'required|integer|min:1',
         ]);
 
         foreach ($validated['videos'] as $videoData) {
-            CourseVideo::where('id', $videoData['id'])->update(['order' => $videoData['order']]);
+            CourseVideo::where('uuid', $videoData['uuid'])->update(['order' => $videoData['order']]);
         }
 
         return response()->json([

@@ -10,21 +10,21 @@ export const useEnrollment = () => {
   const languageStore = useLanguageStore()
 
   const { mutate: enrollCourse, isPending: isEnrolling } = useMutation({
-    mutationFn: (courseId: number) =>
-      axios.post(`/enroll/${courseId}`).then(r => r.data),
+    mutationFn: (courseUuid: string) =>
+      axios.post(`/enroll/${courseUuid}`).then(r => r.data),
 
-    onSuccess: (data, courseId) => {
+    onSuccess: (data, courseUuid) => {
       // Invalidate queries to refresh enrollment states in UI
       queryClient.invalidateQueries({ queryKey: ['my-courses'] })
       queryClient.invalidateQueries({ queryKey: ['explore-courses'] })
-      queryClient.invalidateQueries({ queryKey: ['course-detail', courseId] })
-      queryClient.invalidateQueries({ queryKey: ['enrollment-status', courseId] })
+      queryClient.invalidateQueries({ queryKey: ['course-detail', courseUuid] })
+      queryClient.invalidateQueries({ queryKey: ['enrollment-status', courseUuid] })
 
       if (!data.requires_payment) {
         toast.success(languageStore.translations.enrollment.success)
-        router.push(`/courses/${courseId}/player`)
+        router.push(`/courses/${courseUuid}/player`)
       } else {
-        router.push(`/checkout/${courseId}`)
+        router.push(`/checkout/${courseUuid}`)
       }
     },
 

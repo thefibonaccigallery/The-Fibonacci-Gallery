@@ -10,6 +10,8 @@ class CourseVideo extends Model
 {
     use HasFactory, HasUuid;
 
+    protected $hidden = ['id', 'chapter_id'];
+
     protected $fillable = [
         'chapter_id',
         'title',

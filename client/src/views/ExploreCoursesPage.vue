@@ -59,8 +59,8 @@ const formatDuration = (seconds: number) => {
   return `${minutes}m`
 }
 
-const viewCourseDetails = (courseId: number) => {
-  router.push(`/courses/${courseId}/details`)
+const viewCourseDetails = (courseUuid: string) => {
+  router.push(`/courses/${courseUuid}/details`)
 }
 
 const getLevelColor = (level: string) => {
@@ -173,7 +173,7 @@ const getLevelColor = (level: string) => {
         <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div
             v-for="course in courses"
-            :key="course.id"
+            :key="course.uuid"
             class="liquid-glass rounded-2xl p-6 border border-border/20 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/5"
           >
             <!-- Card content -->
@@ -181,7 +181,7 @@ const getLevelColor = (level: string) => {
               <!-- Thumbnail -->
               <div
                 class="relative w-full h-40 rounded-xl overflow-hidden bg-zinc-950 border border-primary/10 flex items-center justify-center group cursor-pointer"
-                @click="viewCourseDetails(course.id)"
+                @click="viewCourseDetails(course.uuid)"
               >
                 <img
                   v-if="course.thumbnail_url"
@@ -234,7 +234,7 @@ const getLevelColor = (level: string) => {
               <div>
                 <h4
                   class="text-lg font-bold text-foreground line-clamp-2 mb-2 cursor-pointer hover:text-primary transition-colors"
-                  @click="viewCourseDetails(course.id)"
+                  @click="viewCourseDetails(course.uuid)"
                 >
                   {{ course.title }}
                 </h4>
@@ -265,14 +265,14 @@ const getLevelColor = (level: string) => {
               </div>
 
               <Button
-                @click="router.push(`/checkout/${course.id}`)"
+                @click="router.push(`/checkout/${course.uuid}`)"
                 class="w-full text-sm font-semibold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 Enroll Now
               </Button>
 
               <Button
-                @click="viewCourseDetails(course.id)"
+                @click="viewCourseDetails(course.uuid)"
                 variant="outline"
                 class="w-full text-sm font-semibold rounded-xl border-border/40 hover:bg-secondary/50"
               >

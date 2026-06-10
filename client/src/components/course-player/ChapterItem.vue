@@ -8,14 +8,14 @@ interface Props {
   chapter: CoursePlayerChapter
   chapterIndex: number
   isUnlocked: boolean
-  activeVideoId: number | null
+  activeVideoId: string | null
   isVideoUnlocked: (chapterIndex: number, videoIndex: number) => boolean
   isVideoInCooldown: (video: CoursePlayerVideo) => boolean
   getCooldownLabel: (video: CoursePlayerVideo) => string
 }
 
 interface Emits {
-  (e: 'selectVideo', payload: { videoId: number; chapterId: number }): void
+  (e: 'selectVideo', payload: { videoUuid: string; chapterUuid: string }): void
 }
 
 const props = defineProps<Props>()
@@ -47,8 +47,8 @@ const toggleExpanded = () => {
   }
 }
 
-const handleSelectVideo = (videoId: number) => {
-  emit('selectVideo', { videoId, chapterId: props.chapter.id })
+const handleSelectVideo = (videoUuid: string) => {
+  emit('selectVideo', { videoUuid, chapterUuid: props.chapter.uuid })
 }
 </script>
 
@@ -100,13 +100,13 @@ const handleSelectVideo = (videoId: number) => {
     <div v-if="isExpanded && isUnlocked" class="p-2 space-y-1 bg-background">
       <VideoItem
         v-for="(video, videoIndex) in chapter.videos"
-        :key="video.id"
+        :key="video.uuid"
         :video="video"
         :is-unlocked="isVideoUnlocked(chapterIndex, videoIndex)"
-        :is-active="video.id === activeVideoId"
+        :is-active="video.uuid === activeVideoId"
         :is-in-cooldown="isVideoInCooldown(video)"
         :cooldown-label="getCooldownLabel(video)"
-        @select="handleSelectVideo(video.id)"
+        @select="handleSelectVideo(video.uuid)"
       />
     </div>
   </div>

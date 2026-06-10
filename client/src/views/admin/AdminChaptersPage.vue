@@ -15,11 +15,11 @@ const { fetchCourses } = useCourses()
 
 const page = ref(1)
 const search = ref('')
-const selectedCourseId = ref<number | undefined>(undefined)
+const selectedCourseUuid = ref<string | undefined>(undefined)
 
 // Delete confirmation dialog state
 const deleteDialogOpen = ref(false)
-const chapterToDelete = ref<{ id: number; title: string } | null>(null)
+const chapterToDelete = ref<{ uuid: string; title: string } | null>(null)
 
 // Fetch courses for filter dropdown
 const { data: coursesData } = useQuery({
@@ -35,13 +35,13 @@ const {
   isLoading,
   refetch,
 } = useQuery({
-  queryKey: ['chapters', page, search, selectedCourseId],
+  queryKey: ['chapters', page, search, selectedCourseUuid],
   queryFn: () =>
     fetchChapters({
       page: page.value,
       per_page: 15,
       search: search.value || undefined,
-      course_id: selectedCourseId.value,
+      course_uuid: selectedCourseUuid.value,
     }),
 })
 
@@ -52,14 +52,14 @@ const pagination = computed(() => ({
   total: chaptersData.value?.total || 0,
 }))
 
-const handleDelete = (id: number, title: string) => {
-  chapterToDelete.value = { id, title }
+const handleDelete = (uuid: string, title: string) => {
+  chapterToDelete.value = { uuid, title }
   deleteDialogOpen.value = true
 }
 
 const confirmDelete = () => {
   if (chapterToDelete.value) {
-    deleteChapter(chapterToDelete.value.id, {
+    deleteChapter(chapterToDelete.value.uuid, {
       onSuccess: () => {
         refetch()
         deleteDialogOpen.value = false
@@ -107,12 +107,12 @@ const getLevelColor = (level: string | null) => {
     <div class="liquid-glass rounded-xl p-4 flex flex-col sm:flex-row gap-4">
       <Input v-model="search" placeholder="Search chapters..." class="flex-1" @input="page = 1" />
       <select
-        v-model="selectedCourseId"
+        v-model="selectedCourseUuid"
         @change="page = 1"
         class="px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary min-w-[200px]"
       >
         <option :value="undefined">All Courses</option>
-        <option v-for="course in courses" :key="course.id" :value="course.id">
+        <option v-for="course in courses" :key="course.uuid" :value="course.uuid">
           {{ course.title }}
         </option>
       </select>
@@ -130,7 +130,7 @@ const getLevelColor = (level: string | null) => {
       <h3 class="text-xl font-semibold text-foreground mb-2">No chapters found</h3>
       <p class="text-muted-foreground mb-6">
         {{
-          selectedCourseId
+          selectedCourseUuid
             ? 'No chapters in this course yet'
             : 'Get started by creating your first chapter'
         }}
@@ -145,7 +145,7 @@ const getLevelColor = (level: string | null) => {
     <div v-else class="space-y-4">
       <div
         v-for="chapter in chapters"
-        :key="chapter.id"
+        :key="chapter.uuid"
         class="liquid-glass rounded-xl p-6 hover:shadow-lg transition-shadow animate-fade-in-up"
       >
         <div class="flex items-start justify-between gap-4">
@@ -187,7 +187,7 @@ const getLevelColor = (level: string | null) => {
           <!-- Actions -->
           <div class="flex gap-2 flex-shrink-0">
             <Button
-              @click="router.push(`/admin/chapters/${chapter.id}/edit`)"
+              @click="router.push(`/admin/chapters/${chapter.uuid}/edit`)"
               variant="outline"
               size="sm"
             >
@@ -195,7 +195,7 @@ const getLevelColor = (level: string | null) => {
               Edit
             </Button>
             <Button
-              @click="handleDelete(chapter.id, chapter.title)"
+              @click="handleDelete(chapter.uuid, chapter.title)"
               variant="outline"
               size="sm"
               :disabled="isDeleting"

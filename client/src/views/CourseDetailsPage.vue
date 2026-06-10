@@ -18,8 +18,8 @@ const route = useRoute()
 const router = useRouter()
 const { useCourseDetail } = useUserCourses()
 
-const courseId = computed(() => Number(route.params.id))
-const { data, isLoading, error } = useCourseDetail(courseId.value)
+const courseUuid = computed(() => route.params.uuid as string)
+const { data, isLoading, error } = useCourseDetail(courseUuid.value)
 
 const course = computed(() => data.value?.course)
 
@@ -33,7 +33,7 @@ const formatDuration = (seconds: number) => {
 }
 
 const goToCoursePlayer = () => {
-  router.push(`/courses/${courseId.value}/player`)
+  router.push(`/courses/${courseUuid.value}/player`)
 }
 
 const getLevelColor = (level: string) => {
@@ -136,8 +136,8 @@ const getLevelColor = (level: string) => {
               <Accordion type="multiple" class="space-y-4">
                 <AccordionItem
                   v-for="(chapter, index) in course.chapters"
-                  :key="chapter.id"
-                  :value="`chapter-${chapter.id}`"
+                  :key="chapter.uuid"
+                  :value="`chapter-${chapter.uuid}`"
                   class="border border-border/20 rounded-xl overflow-hidden bg-background/50"
                 >
                   <AccordionTrigger class="px-6 py-4 hover:bg-secondary/30 transition-colors">
@@ -220,7 +220,7 @@ const getLevelColor = (level: string) => {
               <div class="space-y-3">
                 <Button
                   v-if="!course.is_enrolled"
-                  @click="router.push(`/checkout/${courseId}`)"
+                  @click="router.push(`/checkout/${courseUuid}`)"
                   class="w-full text-base font-semibold py-6 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   Enroll Now

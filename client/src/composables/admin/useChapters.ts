@@ -10,7 +10,7 @@ export function useChapters() {
   const fetchChapters = async (params?: {
     page?: number
     per_page?: number
-    course_id?: number
+    course_uuid?: string
     search?: string
   }): Promise<PaginatedResponse<Chapter>> => {
     const response = await axiosInstance.get('/admin/chapters', { params })
@@ -18,8 +18,8 @@ export function useChapters() {
   }
 
   // Fetch single chapter
-  const fetchChapter = async (id: number): Promise<Chapter> => {
-    const response = await axiosInstance.get(`/admin/chapters/${id}`)
+  const fetchChapter = async (uuid: string): Promise<Chapter> => {
+    const response = await axiosInstance.get(`/admin/chapters/${uuid}`)
     return response.data
   }
 
@@ -41,8 +41,8 @@ export function useChapters() {
 
   // Update chapter
   const { mutate: updateChapter, isPending: isUpdating } = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Partial<ChapterFormData> }) => {
-      const response = await axiosInstance.put(`/admin/chapters/${id}`, data)
+    mutationFn: async ({ uuid, data }: { uuid: string; data: Partial<ChapterFormData> }) => {
+      const response = await axiosInstance.put(`/admin/chapters/${uuid}`, data)
       return response.data
     },
     onSuccess: () => {
@@ -57,8 +57,8 @@ export function useChapters() {
 
   // Delete chapter
   const { mutate: deleteChapter, isPending: isDeleting } = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await axiosInstance.delete(`/admin/chapters/${id}`)
+    mutationFn: async (uuid: string) => {
+      const response = await axiosInstance.delete(`/admin/chapters/${uuid}`)
       return response.data
     },
     onSuccess: () => {

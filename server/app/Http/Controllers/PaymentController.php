@@ -15,14 +15,14 @@ class PaymentController extends Controller
     public function __construct(private NowPaymentsService $nowPayments) {}
 
     // Step 1 — Student selects crypto and initiates payment
-    public function initiatePayment(Request $request, $courseId)
+    public function initiatePayment(Request $request, $uuid)
     {
         $request->validate([
             'pay_currency' => ['required', 'string'],
         ]);
 
         $user   = auth()->user();
-        $course = Course::findOrFail($courseId);
+        $course = Course::where('uuid', $uuid)->firstOrFail();
 
         // Check already enrolled
         $alreadyEnrolled = Enrollment::where('user_id', $user->id)
@@ -48,20 +48,20 @@ class PaymentController extends Controller
 
         // Create order in database first
         $order = Order::create([
-            'user_id'     => $user->id,
-            'course_id'   => $course->id,
-            'amount'      => $course->price,
-            'currency'    => 'USD',
-            'status'      => 'waiting',
+            'user_id'      => $user->id,
+            'course_id'    => $course->id,
+            'amount'       => $course->price,
+            'currency'     => 'USD',
+            'status'       => 'waiting',
             'pay_currency' => $request->pay_currency,
         ]);
 
         // Call NOWPayments API
         $payment = $this->nowPayments->createPayment([
-            'amount'      => $course->price,
+            'amount'       => $course->price,
             'pay_currency' => $request->pay_currency,
-            'order_id'    => $order->uuid,
-            'description' => "Enrollment: {$course->title}",
+            'order_id'     => $order->uuid,
+            'description'  => "Enrollment: {$course->title}",
         ]);
 
         if (!isset($payment['payment_id'])) {
@@ -77,11 +77,11 @@ class PaymentController extends Controller
         ]);
 
         return response()->json([
-            'payment_id'      => $payment['payment_id'],
-            'pay_address'     => $payment['pay_address'],
-            'pay_amount'      => $payment['pay_amount'],
-            'pay_currency'    => $payment['pay_currency'],
-            'order_uuid'      => $order->uuid,
+            'payment_id'               => $payment['payment_id'],
+            'pay_address'              => $payment['pay_address'],
+            'pay_amount'               => $payment['pay_amount'],
+            'pay_currency'             => $payment['pay_currency'],
+            'order_uuid'               => $order->uuid,
             'expiration_estimate_date' => $payment['expiration_estimate_date'] ?? null,
         ]);
     }
@@ -93,10 +93,12 @@ class PaymentController extends Controller
             ->where('user_id', auth()->id())
             ->firstOrFail();
 
+        $course = \App\Models\Course::find($order->course_id);
+
         return response()->json([
-            'status'       => $order->status,
-            'is_enrolled'  => $order->status === 'finished',
-            'course_id'    => $order->course_id,
+            'status'      => $order->status,
+            'is_enrolled' => $order->status === 'finished',
+            'course_uuid' => $course?->uuid,
         ]);
     }
 

@@ -17,8 +17,8 @@ const getProgress = (completed: number, total: number) => {
   return Math.round((completed / total) * 100)
 }
 
-const goToCoursePlayer = (courseId: number) => {
-  router.push(`/courses/${courseId}/player`)
+const goToCoursePlayer = (courseUuid: string) => {
+  router.push(`/courses/${courseUuid}/player`)
 }
 
 const formatDate = (dateString: string) => {
@@ -83,7 +83,7 @@ const formatDate = (dateString: string) => {
         <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div
             v-for="course in courses"
-            :key="course.id"
+            :key="course.uuid"
             class="liquid-glass rounded-2xl p-6 border border-border/20 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/5"
           >
             <!-- Card content -->
@@ -203,7 +203,7 @@ const formatDate = (dateString: string) => {
               </div>
 
               <Button
-                @click="goToCoursePlayer(course.id)"
+                @click="goToCoursePlayer(course.uuid)"
                 class="w-full text-sm font-semibold rounded-xl flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 <PhPlay class="h-4 w-4" weight="fill" />

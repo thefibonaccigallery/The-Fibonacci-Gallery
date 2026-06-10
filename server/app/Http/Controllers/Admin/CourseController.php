@@ -64,15 +64,15 @@ class CourseController extends Controller
         ], 201);
     }
 
-    public function show($id)
+    public function show($uuid)
     {
-        $course = Course::with('chapters.videos')->findOrFail($id);
+        $course = Course::with('chapters.videos')->where('uuid', $uuid)->firstOrFail();
         return response()->json($course);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $uuid)
     {
-        $course = Course::findOrFail($id);
+        $course = Course::findByUuidOrFail($uuid);
 
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
@@ -96,9 +96,9 @@ class CourseController extends Controller
         ]);
     }
 
-    public function destroy($id)
+    public function destroy($uuid)
     {
-        $course = Course::findOrFail($id);
+        $course = Course::findByUuidOrFail($uuid);
 
         // Delete thumbnail if exists
         if ($course->thumbnail) {
@@ -112,9 +112,9 @@ class CourseController extends Controller
         ]);
     }
 
-    public function uploadThumbnail(Request $request, $id)
+    public function uploadThumbnail(Request $request, $uuid)
     {
-        $course = Course::findOrFail($id);
+        $course = Course::findByUuidOrFail($uuid);
 
         $request->validate([
             'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
@@ -136,9 +136,9 @@ class CourseController extends Controller
         ]);
     }
 
-    public function deleteThumbnail($id)
+    public function deleteThumbnail($uuid)
     {
-        $course = Course::findOrFail($id);
+        $course = Course::findByUuidOrFail($uuid);
 
         if ($course->thumbnail) {
             Storage::disk('public')->delete($course->thumbnail);

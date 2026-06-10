@@ -10,6 +10,8 @@ class Chapter extends Model
 {
     use HasFactory, HasUuid;
 
+    protected $hidden = ['id', 'course_id'];
+
     protected $fillable = [
         'course_id',
         'title',

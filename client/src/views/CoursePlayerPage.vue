@@ -11,7 +11,7 @@ import CourseCurriculum from '@/components/course-player/CourseCurriculum.vue'
 const route = useRoute()
 const router = useRouter()
 
-const courseId = computed(() => Number(route.params.courseId))
+const courseUuid = computed(() => route.params.courseUuid as string)
 const isCurriculumOpen = ref(false)
 
 const {
@@ -30,7 +30,7 @@ const {
   initializePlayer,
   isVideoInCooldown,
   getCooldownLabel,
-} = useCoursePlayer(courseId.value)
+} = useCoursePlayer(courseUuid.value)
 
 // Navigation
 const nextVideo = computed(() => getNextVideo())
@@ -54,20 +54,20 @@ const nextDisabledReason = computed(() => {
 
 const handleNext = () => {
   if (nextVideo.value && canGoNext.value) {
-    setActiveVideo(nextVideo.value.video.id, nextVideo.value.chapter.id)
+    setActiveVideo(nextVideo.value.video.uuid, nextVideo.value.chapter.uuid)
     isCurriculumOpen.value = false
   }
 }
 
 const handlePrevious = () => {
   if (previousVideo.value) {
-    setActiveVideo(previousVideo.value.video.id, previousVideo.value.chapter.id)
+    setActiveVideo(previousVideo.value.video.uuid, previousVideo.value.chapter.uuid)
     isCurriculumOpen.value = false
   }
 }
 
-const handleSelectVideo = (payload: { videoId: number; chapterId: number }) => {
-  setActiveVideo(payload.videoId, payload.chapterId)
+const handleSelectVideo = (payload: { videoUuid: string; chapterUuid: string }) => {
+  setActiveVideo(payload.videoUuid, payload.chapterUuid)
   isCurriculumOpen.value = false
 }
 
@@ -75,7 +75,7 @@ const handleProgress = (payload: { watchTime: number; watchPercentage: number })
   if (!activeVideoId.value) return
 
   updateProgress({
-    videoId: activeVideoId.value,
+    videoUuid: activeVideoId.value,
     payload: {
       watch_time_seconds: payload.watchTime,
       watch_percentage: payload.watchPercentage,

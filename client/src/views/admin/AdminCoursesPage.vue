@@ -17,7 +17,7 @@ const filterPublished = ref<boolean | undefined>(undefined)
 
 // Delete confirmation dialog state
 const deleteDialogOpen = ref(false)
-const courseToDelete = ref<{ id: number; title: string } | null>(null)
+const courseToDelete = ref<{ uuid: string; title: string } | null>(null)
 
 const {
   data: coursesData,
@@ -41,14 +41,14 @@ const pagination = computed(() => ({
   total: coursesData.value?.total || 0,
 }))
 
-const handleDelete = (id: number, title: string) => {
-  courseToDelete.value = { id, title }
+const handleDelete = (uuid: string, title: string) => {
+  courseToDelete.value = { uuid, title }
   deleteDialogOpen.value = true
 }
 
 const confirmDelete = () => {
   if (courseToDelete.value) {
-    deleteCourse(courseToDelete.value.id, {
+    deleteCourse(courseToDelete.value.uuid, {
       onSuccess: () => {
         refetch()
         deleteDialogOpen.value = false
@@ -138,7 +138,7 @@ const formatDuration = (seconds: number) => {
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div
         v-for="course in courses"
-        :key="course.id"
+        :key="course.uuid"
         class="liquid-glass rounded-xl overflow-hidden hover:shadow-lg transition-shadow animate-fade-in-up"
       >
         <!-- Thumbnail -->
@@ -196,7 +196,7 @@ const formatDuration = (seconds: number) => {
           <!-- Actions -->
           <div class="flex gap-2">
             <Button
-              @click="router.push(`/admin/courses/${course.id}/edit`)"
+              @click="router.push(`/admin/courses/${course.uuid}/edit`)"
               variant="outline"
               size="sm"
               class="flex-1"
@@ -205,7 +205,7 @@ const formatDuration = (seconds: number) => {
               Edit
             </Button>
             <Button
-              @click="handleDelete(course.id, course.title)"
+              @click="handleDelete(course.uuid, course.title)"
               variant="outline"
               size="sm"
               :disabled="isDeleting"

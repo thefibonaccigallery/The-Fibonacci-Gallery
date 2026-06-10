@@ -8,10 +8,10 @@ import type {
   UpdateProgressPayload,
 } from '@/types/CoursePlayerTypes'
 
-export function useCoursePlayer(courseId: number) {
+export function useCoursePlayer(courseUuid: string) {
   const queryClient = useQueryClient()
-  const activeVideoId = ref<number | null>(null)
-  const activeChapterId = ref<number | null>(null)
+  const activeVideoId = ref<string | null>(null)
+  const activeChapterId = ref<string | null>(null)
 
   // Fetch course player data
   const {
@@ -20,9 +20,9 @@ export function useCoursePlayer(courseId: number) {
     error,
     refetch,
   } = useQuery<CoursePlayerData>({
-    queryKey: ['course-player', courseId],
+    queryKey: ['course-player', courseUuid],
     queryFn: async () => {
-      const response = await axiosInstance.get(`/courses/${courseId}/player`)
+      const response = await axiosInstance.get(`/courses/${courseUuid}/player`)
       return response.data
     },
   })
@@ -38,13 +38,13 @@ export function useCoursePlayer(courseId: number) {
   // Get active video
   const activeVideo = computed(() => {
     if (!activeVideoId.value) return null
-    return allVideos.value.find((v) => v.id === activeVideoId.value) || null
+    return allVideos.value.find((v) => v.uuid === activeVideoId.value) || null
   })
 
   // Get active chapter
   const activeChapter = computed(() => {
     if (!activeChapterId.value) return null
-    return chapters.value.find((c) => c.id === activeChapterId.value) || null
+    return chapters.value.find((c) => c.uuid === activeChapterId.value) || null
   })
 
   // Reactive ref for current time, updating every minute
@@ -122,18 +122,18 @@ export function useCoursePlayer(courseId: number) {
   }
 
   // Set active video
-  const setActiveVideo = (videoId: number, chapterId: number) => {
-    activeVideoId.value = videoId
-    activeChapterId.value = chapterId
+  const setActiveVideo = (videoUuid: string, chapterUuid: string) => {
+    activeVideoId.value = videoUuid
+    activeChapterId.value = chapterUuid
   }
 
   // Get next video
   const getNextVideo = (): { video: CoursePlayerVideo; chapter: CoursePlayerChapter } | null => {
     if (!activeVideo.value || !activeChapter.value) return null
 
-    const currentChapterIndex = chapters.value.findIndex((c) => c.id === activeChapter.value!.id)
+    const currentChapterIndex = chapters.value.findIndex((c) => c.uuid === activeChapter.value!.uuid)
     const currentVideoIndex = activeChapter.value.videos.findIndex(
-      (v) => v.id === activeVideo.value!.id,
+      (v) => v.uuid === activeVideo.value!.uuid,
     )
 
     // Check if there's a next video in the current chapter
@@ -151,6 +151,7 @@ export function useCoursePlayer(courseId: number) {
       }
     }
 
+    // Return first video of next chapter if previous is completed (wait, getNextVideo just seq matches)
     return null
   }
 
@@ -161,9 +162,9 @@ export function useCoursePlayer(courseId: number) {
   } | null => {
     if (!activeVideo.value || !activeChapter.value) return null
 
-    const currentChapterIndex = chapters.value.findIndex((c) => c.id === activeChapter.value!.id)
+    const currentChapterIndex = chapters.value.findIndex((c) => c.uuid === activeChapter.value!.uuid)
     const currentVideoIndex = activeChapter.value.videos.findIndex(
-      (v) => v.id === activeVideo.value!.id,
+      (v) => v.uuid === activeVideo.value!.uuid,
     )
 
     // Check if there's a previous video in the current chapter
@@ -187,18 +188,18 @@ export function useCoursePlayer(courseId: number) {
   // Update progress mutation
   const { mutate: updateProgress, isPending: isUpdatingProgress } = useMutation({
     mutationFn: async ({
-      videoId,
+      videoUuid,
       payload,
     }: {
-      videoId: number
+      videoUuid: string
       payload: UpdateProgressPayload
     }) => {
-      const response = await axiosInstance.post(`/progress/${videoId}`, payload)
+      const response = await axiosInstance.post(`/progress/${videoUuid}`, payload)
       return response.data
     },
     onSuccess: () => {
       // Invalidate and refetch course player data to update unlock states
-      queryClient.invalidateQueries({ queryKey: ['course-player', courseId] })
+      queryClient.invalidateQueries({ queryKey: ['course-player', courseUuid] })
     },
   })
 
@@ -219,7 +220,7 @@ export function useCoursePlayer(courseId: number) {
 
         // Set to first incomplete unlocked video
         if (!video.progress?.is_completed && isVideoUnlocked(chapterIndex, videoIndex)) {
-          setActiveVideo(video.id, chapter.id)
+          setActiveVideo(video.uuid, chapter.uuid)
           foundVideo = true
           break
         }
@@ -232,7 +233,7 @@ export function useCoursePlayer(courseId: number) {
     if (!foundVideo && chapters.value[0]?.videos && chapters.value[0].videos.length > 0) {
       const firstVideo = chapters.value[0].videos[0]
       if (firstVideo) {
-        setActiveVideo(firstVideo.id, chapters.value[0].id)
+        setActiveVideo(firstVideo.uuid, chapters.value[0].uuid)
       }
     }
   }

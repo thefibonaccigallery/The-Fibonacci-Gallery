@@ -15,8 +15,9 @@ class ChapterController extends Controller
         $query = Chapter::with('course', 'videos');
 
         // Filter by course
-        if ($request->has('course_id')) {
-            $query->where('course_id', $request->course_id);
+        if ($request->has('course_uuid')) {
+            $course = Course::findByUuidOrFail($request->course_uuid);
+            $query->where('course_id', $course->id);
         }
 
         // Search by title
@@ -36,6 +37,9 @@ class ChapterController extends Controller
 
     public function store(Request $request)
     {
+        $course = Course::findByUuidOrFail($request->course_uuid);
+        $request->merge(['course_id' => $course->id]);
+
         $validated = $request->validate([
             'course_id' => 'required|exists:courses,id',
             'title' => 'required|string|max:255',
@@ -44,8 +48,8 @@ class ChapterController extends Controller
                 'nullable',
                 'integer',
                 'min:1',
-                Rule::unique('chapters')->where(function ($query) use ($request) {
-                    return $query->where('course_id', $request->course_id);
+                Rule::unique('chapters')->where(function ($query) use ($course) {
+                    return $query->where('course_id', $course->id);
                 }),
             ],
         ], [
@@ -60,15 +64,20 @@ class ChapterController extends Controller
         ], 201);
     }
 
-    public function show($id)
+    public function show($uuid)
     {
-        $chapter = Chapter::with('course', 'videos')->findOrFail($id);
+        $chapter = Chapter::with('course', 'videos')->where('uuid', $uuid)->firstOrFail();
         return response()->json($chapter);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $uuid)
     {
-        $chapter = Chapter::findOrFail($id);
+        $chapter = Chapter::findByUuidOrFail($uuid);
+
+        if ($request->has('course_uuid')) {
+            $course = Course::findByUuidOrFail($request->course_uuid);
+            $request->merge(['course_id' => $course->id]);
+        }
 
         $validated = $request->validate([
             'course_id' => 'sometimes|required|exists:courses,id',
@@ -96,9 +105,9 @@ class ChapterController extends Controller
         ]);
     }
 
-    public function destroy($id)
+    public function destroy($uuid)
     {
-        $chapter = Chapter::findOrFail($id);
+        $chapter = Chapter::findByUuidOrFail($uuid);
         $chapter->delete();
 
         return response()->json([
@@ -110,12 +119,12 @@ class ChapterController extends Controller
     {
         $validated = $request->validate([
             'chapters' => 'required|array',
-            'chapters.*.id' => 'required|exists:chapters,id',
+            'chapters.*.uuid' => 'required|exists:chapters,uuid',
             'chapters.*.order' => 'required|integer|min:1',
         ]);
 
         foreach ($validated['chapters'] as $chapterData) {
-            Chapter::where('id', $chapterData['id'])->update(['order' => $chapterData['order']]);
+            Chapter::where('uuid', $chapterData['uuid'])->update(['order' => $chapterData['order']]);
         }
 
         return response()->json([

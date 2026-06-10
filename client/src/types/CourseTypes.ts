@@ -1,7 +1,6 @@
 export type CourseLevel = 'beginner' | 'intermediate' | 'advanced'
 
 export interface Course {
-  id: number
   uuid: string
   title: string
   slug: string
@@ -19,9 +18,8 @@ export interface Course {
 }
 
 export interface Chapter {
-  id: number
   uuid: string
-  course_id: number
+  course_uuid?: string
   title: string
   level: CourseLevel | null
   length_seconds: number
@@ -33,9 +31,8 @@ export interface Chapter {
 }
 
 export interface Video {
-  id: number
   uuid: string
-  chapter_id: number
+  chapter_uuid?: string
   title: string
   level: CourseLevel | null
   order: number
@@ -57,14 +54,14 @@ export interface CourseFormData {
 }
 
 export interface ChapterFormData {
-  course_id: number
+  course_uuid: string
   title: string
   level?: CourseLevel
   order?: number
 }
 
 export interface VideoFormData {
-  chapter_id: number
+  chapter_uuid: string
   title: string
   level?: CourseLevel
   order?: number
@@ -84,6 +81,6 @@ export interface PaginatedResponse<T> {
 }
 
 export interface ReorderItem {
-  id: number
+  uuid: string
   order: number
 }

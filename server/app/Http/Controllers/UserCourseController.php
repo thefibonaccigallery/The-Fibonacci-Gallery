@@ -28,7 +28,7 @@ class UserCourseController extends Controller
         $enrolledCourses = $enrollments->map(function ($enrollment) use ($user) {
             $course = $enrollment->course;
 
-            // Get all video IDs for this course
+            // Get all video IDs for this course (internal only)
             $videoIds = $course->chapters->flatMap(function ($chapter) {
                 return $chapter->videos->pluck('id');
             });
@@ -55,18 +55,17 @@ class UserCourseController extends Controller
             }
 
             return [
-                'id' => $course->id,
-                'uuid' => $course->uuid,
-                'title' => $course->title,
+                'uuid'        => $course->uuid,
+                'title'       => $course->title,
                 'description' => $course->description,
                 'thumbnail_url' => $course->thumbnail_url,
-                'level' => $course->level,
+                'level'       => $course->level,
                 'totalLessons' => $totalVideos,
                 'completedLessons' => $completedVideos,
                 'progress_percentage' => $totalVideos > 0 ? round(($completedVideos / $totalVideos) * 100, 2) : 0,
                 'enrolled_at' => $enrollment->enrolled_at,
                 'last_watched_video' => $lastWatchedVideo ? [
-                    'id' => $lastWatchedVideo->id,
+                    'uuid'  => $lastWatchedVideo->uuid,
                     'title' => $lastWatchedVideo->title,
                 ] : null,
             ];
@@ -123,15 +122,15 @@ class UserCourseController extends Controller
             });
 
             return [
-                'id' => $course->id,
-                'title' => $course->title,
-                'description' => $course->description,
+                'uuid'          => $course->uuid,
+                'title'         => $course->title,
+                'description'   => $course->description,
                 'thumbnail_url' => $course->thumbnail_url,
-                'level' => $course->level,
-                'price' => $course->price,
-                'totalLessons' => $totalVideos,
+                'level'         => $course->level,
+                'price'         => $course->price,
+                'totalLessons'  => $totalVideos,
                 'length_seconds' => $course->length_seconds,
-                'published_at' => $course->published_at,
+                'published_at'  => $course->published_at,
             ];
         });
 
@@ -144,7 +143,7 @@ class UserCourseController extends Controller
     /**
      * Get a single course detail for exploration
      */
-    public function showCourse($id)
+    public function showCourse($uuid)
     {
         $user = Auth::user();
 
@@ -154,7 +153,8 @@ class UserCourseController extends Controller
             }, 'chapters.videos' => function ($query) {
                 $query->where('is_published', true)->orderBy('order');
             }])
-            ->findOrFail($id);
+            ->where('uuid', $uuid)
+            ->firstOrFail();
 
         // Check if user is enrolled
         $enrollment = Enrollment::where('user_id', $user->id)
@@ -166,22 +166,22 @@ class UserCourseController extends Controller
         });
 
         $courseData = [
-            'id' => $course->id,
-            'title' => $course->title,
-            'description' => $course->description,
+            'uuid'          => $course->uuid,
+            'title'         => $course->title,
+            'description'   => $course->description,
             'thumbnail_url' => $course->thumbnail_url,
-            'level' => $course->level,
-            'price' => $course->price,
-            'totalLessons' => $totalVideos,
+            'level'         => $course->level,
+            'price'         => $course->price,
+            'totalLessons'  => $totalVideos,
             'length_seconds' => $course->length_seconds,
-            'published_at' => $course->published_at,
-            'is_enrolled' => $enrollment !== null,
-            'chapters' => $course->chapters->map(function ($chapter) {
+            'published_at'  => $course->published_at,
+            'is_enrolled'   => $enrollment !== null,
+            'chapters'      => $course->chapters->map(function ($chapter) {
                 return [
-                    'id' => $chapter->id,
-                    'title' => $chapter->title,
-                    'level' => $chapter->level,
-                    'order' => $chapter->order,
+                    'uuid'        => $chapter->uuid,
+                    'title'       => $chapter->title,
+                    'level'       => $chapter->level,
+                    'order'       => $chapter->order,
                     'video_count' => $chapter->videos->count(),
                 ];
             }),
@@ -189,18 +189,20 @@ class UserCourseController extends Controller
 
         return response()->json([
             'success' => true,
-            'course' => $courseData,
+            'course'  => $courseData,
         ]);
     }
 
     /**
      * Enroll in a course
      */
-    public function enrollCourse(Request $request, $courseId)
+    public function enrollCourse(Request $request, $uuid)
     {
         $user = Auth::user();
 
-        $course = Course::where('is_published', true)->findOrFail($courseId);
+        $course = Course::where('is_published', true)
+            ->where('uuid', $uuid)
+            ->firstOrFail();
 
         // Check if already enrolled
         $existingEnrollment = Enrollment::where('user_id', $user->id)
@@ -216,14 +218,14 @@ class UserCourseController extends Controller
 
         // Create enrollment
         $enrollment = Enrollment::create([
-            'user_id' => $user->id,
-            'course_id' => $course->id,
+            'user_id'     => $user->id,
+            'course_id'   => $course->id,
             'enrolled_at' => now(),
         ]);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Successfully enrolled in the course',
+            'success'    => true,
+            'message'    => 'Successfully enrolled in the course',
             'enrollment' => $enrollment,
         ], 201);
     }
@@ -253,22 +255,22 @@ class UserCourseController extends Controller
             if (!$enrollment) {
                 return response()->json([
                     'success' => true,
-                    'course' => null,
+                    'course'  => null,
                 ]);
             }
 
-            $course = $enrollment->course;
-            $videoIds = $course->chapters->flatMap(fn($chapter) => $chapter->videos->pluck('id'));
+            $course     = $enrollment->course;
+            $videoIds   = $course->chapters->flatMap(fn($chapter) => $chapter->videos->pluck('id'));
             $totalVideos = $videoIds->count();
 
             return response()->json([
                 'success' => true,
-                'course' => [
-                    'id' => $course->id,
-                    'title' => $course->title,
-                    'description' => $course->description,
-                    'thumbnail_url' => $course->thumbnail_url,
-                    'totalLessons' => $totalVideos,
+                'course'  => [
+                    'uuid'           => $course->uuid,
+                    'title'          => $course->title,
+                    'description'    => $course->description,
+                    'thumbnail_url'  => $course->thumbnail_url,
+                    'totalLessons'   => $totalVideos,
                     'completedLessons' => 0,
                     'next_video_title' => $course->chapters->first()?->videos->first()?->title ?? 'Start Learning',
                 ],
@@ -307,12 +309,12 @@ class UserCourseController extends Controller
 
         return response()->json([
             'success' => true,
-            'course' => [
-                'id' => $course->id,
-                'title' => $course->title,
-                'description' => $course->description,
-                'thumbnail_url' => $course->thumbnail_url,
-                'totalLessons' => $totalVideos,
+            'course'  => [
+                'uuid'            => $course->uuid,
+                'title'           => $course->title,
+                'description'     => $course->description,
+                'thumbnail_url'   => $course->thumbnail_url,
+                'totalLessons'    => $totalVideos,
                 'completedLessons' => $completedVideos,
                 'next_video_title' => $nextVideo ? $nextVideo->title : 'Course Completed',
             ],

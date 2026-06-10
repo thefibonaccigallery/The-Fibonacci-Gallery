@@ -45,12 +45,12 @@ const router = createRouter({
       component: () => import('@/views/ExploreCoursesPage.vue'),
     },
     {
-      path: '/courses/:id/details',
+      path: '/courses/:uuid/details',
       name: 'course-details',
       component: () => import('@/views/CourseDetailsPage.vue'),
     },
     {
-      path: '/checkout/:courseId',
+      path: '/checkout/:courseUuid',
       name: 'checkout',
       component: () => import('@/views/CheckoutPage.vue'),
       meta: { requiresAuth: true },
@@ -68,7 +68,7 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      path: '/courses/:courseId/player',
+      path: '/courses/:courseUuid/player',
       name: 'course-player',
       component: () => import('@/views/CoursePlayerPage.vue'),
       meta: { requiresAuth: true },
@@ -106,7 +106,7 @@ const router = createRouter({
           component: () => import('@/views/admin/AdminCourseFormPage.vue'),
         },
         {
-          path: 'courses/:id/edit',
+          path: 'courses/:uuid/edit',
           name: 'admin-courses-edit',
           component: () => import('@/views/admin/AdminCourseFormPage.vue'),
         },
@@ -121,7 +121,7 @@ const router = createRouter({
           component: () => import('@/views/admin/AdminChapterFormPage.vue'),
         },
         {
-          path: 'chapters/:id/edit',
+          path: 'chapters/:uuid/edit',
           name: 'admin-chapters-edit',
           component: () => import('@/views/admin/AdminChapterFormPage.vue'),
         },
@@ -136,7 +136,7 @@ const router = createRouter({
           component: () => import('@/views/admin/AdminVideoFormPage.vue'),
         },
         {
-          path: 'videos/:id/edit',
+          path: 'videos/:uuid/edit',
           name: 'admin-videos-edit',
           component: () => import('@/views/admin/AdminVideoFormPage.vue'),
         },

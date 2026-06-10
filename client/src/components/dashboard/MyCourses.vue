@@ -16,8 +16,8 @@ const getProgress = (completed: number, total: number) => {
   return Math.round((completed / total) * 100)
 }
 
-const goToCoursePlayer = (courseId: number) => {
-  router.push(`/courses/${courseId}/player`)
+const goToCoursePlayer = (courseUuid: string) => {
+  router.push(`/courses/${courseUuid}/player`)
 }
 
 const viewAllCourses = () => {
@@ -65,7 +65,7 @@ const viewAllCourses = () => {
     >
       <div
         v-for="course in courses"
-        :key="course.id"
+        :key="course.uuid"
         class="snap-start shrink-0 w-72 md:w-auto liquid-glass rounded-2xl p-5 border border-border/20 flex flex-col justify-between transition-transform duration-300 hover:scale-[1.01]"
       >
         <!-- Card content -->
@@ -161,7 +161,7 @@ const viewAllCourses = () => {
           </div>
 
           <Button
-            @click="goToCoursePlayer(course.id)"
+            @click="goToCoursePlayer(course.uuid)"
             variant="outline"
             class="w-full text-xs font-semibold rounded-xl flex items-center justify-center gap-2 hover:bg-primary hover:text-primary-foreground border-primary/30 text-primary"
           >

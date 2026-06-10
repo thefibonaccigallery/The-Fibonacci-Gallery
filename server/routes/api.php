@@ -28,21 +28,21 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/user/password', [AuthController::class, 'updatePassword']);
 
     // Course player routes
-    Route::get('/courses/{courseId}/player', [CoursePlayerController::class, 'show']);
-    Route::post('/progress/{videoId}', [CoursePlayerController::class, 'updateProgress']);
+    Route::get('/courses/{uuid}/player', [CoursePlayerController::class, 'show']);
+    Route::post('/progress/{uuid}', [CoursePlayerController::class, 'updateProgress']);
 
     // User course routes
     Route::get('/my-courses', [UserCourseController::class, 'myEnrolledCourses']);
     Route::get('/explore-courses', [UserCourseController::class, 'exploreCourses']);
-    Route::get('/courses/{id}', [UserCourseController::class, 'showCourse']);
-    Route::post('/courses/{courseId}/enroll', [UserCourseController::class, 'enrollCourse']);
+    Route::get('/courses/{uuid}', [UserCourseController::class, 'showCourse']);
+    Route::post('/courses/{uuid}/enroll', [UserCourseController::class, 'enrollCourse']);
     Route::get('/continue-learning', [UserCourseController::class, 'continueLearningSuggestion']);
 
     // Enrollment routes
-    Route::post('/enroll/{courseId}', [EnrollmentController::class, 'enroll']);
-    Route::get('/enroll/{courseId}/status', [EnrollmentController::class, 'status']);
+    Route::post('/enroll/{uuid}', [EnrollmentController::class, 'enroll']);
+    Route::get('/enroll/{uuid}/status', [EnrollmentController::class, 'status']);
 
-    Route::post('/payments/initiate/{courseId}', [PaymentController::class, 'initiatePayment']);
+    Route::post('/payments/initiate/{uuid}', [PaymentController::class, 'initiatePayment']);
     Route::get('/payments/status/{orderUuid}',   [PaymentController::class, 'checkStatus']);
 });
 
@@ -51,26 +51,26 @@ Route::middleware(['auth:api', 'role:admin|super_admin'])->prefix('admin')->grou
     // Course routes
     Route::get('/courses', [CourseController::class, 'index']);
     Route::post('/courses', [CourseController::class, 'store']);
-    Route::get('/courses/{id}', [CourseController::class, 'show']);
-    Route::put('/courses/{id}', [CourseController::class, 'update']);
-    Route::delete('/courses/{id}', [CourseController::class, 'destroy']);
-    Route::post('/courses/{id}/thumbnail', [CourseController::class, 'uploadThumbnail']);
-    Route::delete('/courses/{id}/thumbnail', [CourseController::class, 'deleteThumbnail']);
+    Route::get('/courses/{uuid}', [CourseController::class, 'show']);
+    Route::put('/courses/{uuid}', [CourseController::class, 'update']);
+    Route::delete('/courses/{uuid}', [CourseController::class, 'destroy']);
+    Route::post('/courses/{uuid}/thumbnail', [CourseController::class, 'uploadThumbnail']);
+    Route::delete('/courses/{uuid}/thumbnail', [CourseController::class, 'deleteThumbnail']);
 
     // Chapter routes
     Route::get('/chapters', [ChapterController::class, 'index']);
     Route::post('/chapters', [ChapterController::class, 'store']);
-    Route::get('/chapters/{id}', [ChapterController::class, 'show']);
-    Route::put('/chapters/{id}', [ChapterController::class, 'update']);
-    Route::delete('/chapters/{id}', [ChapterController::class, 'destroy']);
+    Route::get('/chapters/{uuid}', [ChapterController::class, 'show']);
+    Route::put('/chapters/{uuid}', [ChapterController::class, 'update']);
+    Route::delete('/chapters/{uuid}', [ChapterController::class, 'destroy']);
     Route::post('/chapters/reorder', [ChapterController::class, 'reorder']);
 
     // Video routes
     Route::get('/videos', [VideoController::class, 'index']);
     Route::post('/videos', [VideoController::class, 'store']);
-    Route::get('/videos/{id}', [VideoController::class, 'show']);
-    Route::put('/videos/{id}', [VideoController::class, 'update']);
-    Route::delete('/videos/{id}', [VideoController::class, 'destroy']);
-    Route::post('/videos/{id}/upload', [VideoController::class, 'uploadVideo']);
+    Route::get('/videos/{uuid}', [VideoController::class, 'show']);
+    Route::put('/videos/{uuid}', [VideoController::class, 'update']);
+    Route::delete('/videos/{uuid}', [VideoController::class, 'destroy']);
+    Route::post('/videos/{uuid}/upload', [VideoController::class, 'uploadVideo']);
     Route::post('/videos/reorder', [VideoController::class, 'reorder']);
 });

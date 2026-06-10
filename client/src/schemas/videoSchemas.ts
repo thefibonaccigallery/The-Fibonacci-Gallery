@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const videoSchema = z.object({
-  chapter_id: z.number().min(1, 'Please select a chapter'),
+  chapter_uuid: z.string().min(1, 'Please select a chapter'),
   title: z.string().min(1, 'Title is required').max(255, 'Title must be less than 255 characters'),
   youtube_video_id: z
     .string()

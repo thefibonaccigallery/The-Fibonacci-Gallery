@@ -32,4 +32,10 @@ class Order extends Model
         'actually_paid' => 'decimal:8',
         'paid_at' => 'datetime',
     ];
+
+    protected $hidden = [
+        'id',
+        'user_id',
+        'course_id',
+    ];
 }

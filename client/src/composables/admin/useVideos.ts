@@ -22,9 +22,9 @@ export function useVideos() {
   }
 
   // Fetch single video
-  const fetchVideo = async (id: number): Promise<VideoType> => {
+  const fetchVideo = async (uuid: string): Promise<VideoType> => {
     try {
-      const response = await axiosInstance.get(`/admin/videos/${id}`)
+      const response = await axiosInstance.get(`/admin/videos/${uuid}`)
       return response.data
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to fetch video')
@@ -54,8 +54,8 @@ export function useVideos() {
 
   // Update video mutation
   const { mutate: updateVideo, isPending: isUpdating } = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Partial<VideoFormState> }) => {
-      const response = await axiosInstance.put(`/admin/videos/${id}`, data)
+    mutationFn: async ({ uuid, data }: { uuid: string; data: Partial<VideoFormState> }) => {
+      const response = await axiosInstance.put(`/admin/videos/${uuid}`, data)
       return response.data
     },
     onSuccess: () => {
@@ -74,8 +74,8 @@ export function useVideos() {
 
   // Delete video mutation
   const { mutate: deleteVideo, isPending: isDeleting } = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await axiosInstance.delete(`/admin/videos/${id}`)
+    mutationFn: async (uuid: string) => {
+      const response = await axiosInstance.delete(`/admin/videos/${uuid}`)
       return response.data
     },
     onSuccess: () => {

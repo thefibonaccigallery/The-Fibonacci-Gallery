@@ -10,13 +10,13 @@ class EnrollmentController extends Controller
 {
     /**
      * Enroll in a course or check if payment is required.
-     * 
-     * POST /api/enroll/{courseId}
+     *
+     * POST /api/enroll/{uuid}
      */
-    public function enroll(Request $request, $courseId)
+    public function enroll(Request $request, $uuid)
     {
         $user   = auth()->user();
-        $course = Course::findOrFail($courseId);
+        $course = Course::where('uuid', $uuid)->firstOrFail();
 
         // Check already enrolled
         $alreadyEnrolled = Enrollment::where('user_id', $user->id)
@@ -40,14 +40,14 @@ class EnrollmentController extends Controller
             return response()->json([
                 'requires_payment' => false,
                 'message'          => 'Successfully enrolled.',
-                'course_id'        => $course->id,
+                'course_uuid'      => $course->uuid,
             ]);
         }
 
         // Paid course — return payment required response
         return response()->json([
             'requires_payment' => true,
-            'course_id'        => $course->id,
+            'course_uuid'      => $course->uuid,
             'course_title'     => $course->title,
             'amount'           => $course->price,
             'currency'         => 'USD',
@@ -56,13 +56,14 @@ class EnrollmentController extends Controller
 
     /**
      * Check the enrollment status for a course.
-     * 
-     * GET /api/enroll/{courseId}/status
+     *
+     * GET /api/enroll/{uuid}/status
      */
-    public function status($courseId)
+    public function status($uuid)
     {
+        $course     = Course::where('uuid', $uuid)->firstOrFail();
         $isEnrolled = Enrollment::where('user_id', auth()->id())
-            ->where('course_id', $courseId)
+            ->where('course_id', $course->id)
             ->exists();
 
         return response()->json([

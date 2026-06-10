@@ -17,12 +17,12 @@ import type { VideoType } from '@/types/VideoTypes'
 const route = useRoute()
 const router = useRouter()
 
-const videoId = computed(() => {
-  const id = route.params.id
-  return id ? Number(id) : null
+const videoUuid = computed(() => {
+  const uuid = route.params.uuid
+  return uuid ? String(uuid) : null
 })
 
-const isEditMode = computed(() => videoId.value !== null)
+const isEditMode = computed(() => videoUuid.value !== null)
 
 const {
   errors,
@@ -38,10 +38,10 @@ const {
 const { fetchChapters } = useChapters()
 const { fetchCourses } = useCourses()
 
-const selectedCourseId = ref<number | undefined>(undefined)
+const selectedCourseUuid = ref<string | undefined>(undefined)
 
 const form = ref<VideoFormState>({
-  chapter_id: 0,
+  chapter_uuid: '',
   title: '',
   youtube_video_id: null,
   level: null,
@@ -62,24 +62,24 @@ const courses = computed(() => coursesData.value?.data || [])
 
 // Fetch chapters for selected course
 const { data: chaptersData, isLoading: isLoadingChapters } = useQuery({
-  queryKey: ['chapters-by-course', selectedCourseId],
-  queryFn: () => fetchChapters({ per_page: 100, course_id: selectedCourseId.value }),
-  enabled: computed(() => selectedCourseId.value !== undefined),
+  queryKey: ['chapters-by-course', selectedCourseUuid],
+  queryFn: () => fetchChapters({ per_page: 100, course_uuid: selectedCourseUuid.value }),
+  enabled: computed(() => selectedCourseUuid.value !== undefined),
 })
 
 const chapters = computed(() => chaptersData.value?.data || [])
 
 // Reset chapter selection when course changes
-watch(selectedCourseId, () => {
+watch(selectedCourseUuid, () => {
   if (!isEditMode.value) {
-    form.value.chapter_id = 0
+    form.value.chapter_uuid = ''
   }
 })
 
 // Fetch video data if editing
 const { data: videoData, isLoading: isLoadingVideo } = useQuery({
-  queryKey: ['video', videoId],
-  queryFn: () => fetchVideo(videoId.value!),
+  queryKey: ['video', videoUuid],
+  queryFn: () => fetchVideo(videoUuid.value!),
   enabled: isEditMode.value,
 })
 
@@ -89,7 +89,7 @@ watch(
   (data) => {
     if (data) {
       form.value = {
-        chapter_id: data.chapter_id,
+        chapter_uuid: data.chapter?.uuid || '',
         title: data.title,
         youtube_video_id: data.youtube_video_id,
         level: data.level,
@@ -99,9 +99,9 @@ watch(
         is_preview: data.is_preview,
         cooldown_hours: data.cooldown_hours || 0,
       }
-      // Set the course ID based on the chapter's course
-      if (data.chapter?.course_id) {
-        selectedCourseId.value = data.chapter.course_id
+      // Set the course UUID based on the chapter's course
+      if (data.chapter?.course?.uuid) {
+        selectedCourseUuid.value = data.chapter.course.uuid
       }
     }
   },
@@ -120,7 +120,7 @@ const handleSubmit = () => {
 
   if (isEditMode.value) {
     updateVideo(
-      { id: videoId.value!, data: form.value },
+      { uuid: videoUuid.value!, data: form.value },
       {
         onSuccess: () => {
           router.push('/admin/videos')
@@ -147,9 +147,8 @@ const previewOpen = ref(false)
 const previewVideoData = computed<VideoType | null>(() => {
   if (!form.value.youtube_video_id) return null
   return {
-    id: videoId.value ?? 0,
-    uuid: '',
-    chapter_id: form.value.chapter_id,
+    uuid: videoUuid.value || '',
+    chapter_uuid: form.value.chapter_uuid,
     title: form.value.title || 'Untitled Video',
     youtube_video_id: form.value.youtube_video_id,
     level: form.value.level ?? null,
@@ -210,14 +209,14 @@ const durationDisplay = computed({
     <div v-else class="liquid-glass rounded-xl p-6 space-y-6 animate-fade-in-up">
       <!-- Course Selection -->
       <div class="space-y-2">
-        <Label for="course_id">Course *</Label>
+        <Label for="course_uuid">Course *</Label>
         <select
-          id="course_id"
-          v-model="selectedCourseId"
+          id="course_uuid"
+          v-model="selectedCourseUuid"
           class="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
         >
           <option :value="undefined" disabled>Select a course first</option>
-          <option v-for="course in courses" :key="course.id" :value="course.id">
+          <option v-for="course in courses" :key="course.uuid" :value="course.uuid">
             {{ course.title }}
           </option>
         </select>
@@ -226,34 +225,34 @@ const durationDisplay = computed({
 
       <!-- Chapter Selection -->
       <div class="space-y-2">
-        <Label for="chapter_id">Chapter *</Label>
+        <Label for="chapter_uuid">Chapter *</Label>
         <select
-          id="chapter_id"
-          v-model="form.chapter_id"
-          @change="clearError('chapter_id')"
-          :disabled="!selectedCourseId"
+          id="chapter_uuid"
+          v-model="form.chapter_uuid"
+          @change="clearError('chapter_uuid')"
+          :disabled="!selectedCourseUuid"
           :class="[
             'w-full px-3 py-2 rounded-lg border bg-background text-foreground',
             'focus:outline-none focus:ring-2 focus:ring-primary',
             'disabled:opacity-50 disabled:cursor-not-allowed',
-            errors.chapter_id ? 'border-destructive' : 'border-border',
+            errors.chapter_uuid ? 'border-destructive' : 'border-border',
           ]"
         >
-          <option :value="0" disabled>
-            {{ selectedCourseId ? 'Select a chapter' : 'Select a course first' }}
+          <option value="" disabled>
+            {{ selectedCourseUuid ? 'Select a chapter' : 'Select a course first' }}
           </option>
-          <option v-for="chapter in chapters" :key="chapter.id" :value="chapter.id">
+          <option v-for="chapter in chapters" :key="chapter.uuid" :value="chapter.uuid">
             {{ chapter.title }}
           </option>
         </select>
         <p
-          v-if="selectedCourseId && chapters.length === 0 && !isLoadingChapters"
+          v-if="selectedCourseUuid && chapters.length === 0 && !isLoadingChapters"
           class="text-xs text-muted-foreground"
         >
           No chapters found in this course. Create a chapter first.
         </p>
-        <p v-if="errors.chapter_id" class="text-sm text-destructive">
-          {{ errors.chapter_id }}
+        <p v-if="errors.chapter_uuid" class="text-sm text-destructive">
+          {{ errors.chapter_uuid }}
         </p>
       </div>
 

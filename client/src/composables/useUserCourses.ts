@@ -4,7 +4,7 @@ import axiosInstance from '@/api/axiosInstance'
 import { toast } from 'vue-sonner'
 
 export interface EnrolledCourse {
-  id: number
+  uuid: string
   title: string
   description: string | null
   thumbnail_url: string | null
@@ -14,13 +14,13 @@ export interface EnrolledCourse {
   progress_percentage: number
   enrolled_at: string
   last_watched_video: {
-    id: number
+    uuid: string
     title: string
   } | null
 }
 
 export interface ExploreCourse {
-  id: number
+  uuid: string
   title: string
   description: string | null
   thumbnail_url: string | null
@@ -32,7 +32,7 @@ export interface ExploreCourse {
 }
 
 export interface CourseDetail {
-  id: number
+  uuid: string
   title: string
   description: string | null
   thumbnail_url: string | null
@@ -43,7 +43,7 @@ export interface CourseDetail {
   published_at: string
   is_enrolled: boolean
   chapters: Array<{
-    id: number
+    uuid: string
     title: string
     level: string | null
     order: number
@@ -52,7 +52,7 @@ export interface CourseDetail {
 }
 
 export interface ContinueLearningCourse {
-  id: number
+  uuid: string
   title: string
   description: string | null
   thumbnail_url: string | null
@@ -98,14 +98,14 @@ export function useUserCourses() {
   }
 
   // Fetch single course detail
-  const useCourseDetail = (courseId: number) => {
+  const useCourseDetail = (courseUuid: string) => {
     return useQuery<{ success: boolean; course: CourseDetail }>({
-      queryKey: ['course-detail', courseId],
+      queryKey: ['course-detail', courseUuid],
       queryFn: async () => {
-        const response = await axiosInstance.get(`/courses/${courseId}`)
+        const response = await axiosInstance.get(`/courses/${courseUuid}`)
         return response.data
       },
-      enabled: !!courseId,
+      enabled: !!courseUuid,
     })
   }
 
@@ -123,8 +123,8 @@ export function useUserCourses() {
   // Enroll in a course
   const useEnrollCourse = () => {
     return useMutation({
-      mutationFn: async (courseId: number) => {
-        const response = await axiosInstance.post(`/courses/${courseId}/enroll`)
+      mutationFn: async (courseUuid: string) => {
+        const response = await axiosInstance.post(`/courses/${courseUuid}/enroll`)
         return response.data
       },
       onSuccess: (data) => {

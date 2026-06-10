@@ -6,7 +6,7 @@ import type { CoursePlayerChapter, CoursePlayerVideo } from '@/types/CoursePlaye
 
 interface Props {
   chapters: CoursePlayerChapter[]
-  activeVideoId: number | null
+  activeVideoId: string | null
   isChapterUnlocked: (chapterIndex: number) => boolean
   isVideoUnlocked: (chapterIndex: number, videoIndex: number) => boolean
   isVideoInCooldown: (video: CoursePlayerVideo) => boolean
@@ -14,7 +14,7 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'selectVideo', payload: { videoId: number; chapterId: number }): void
+  (e: 'selectVideo', payload: { videoUuid: string; chapterUuid: string }): void
 }
 
 const props = defineProps<Props>()
@@ -30,7 +30,7 @@ const completedVideos = computed(() => {
   }, 0)
 })
 
-const handleSelectVideo = (payload: { videoId: number; chapterId: number }) => {
+const handleSelectVideo = (payload: { videoUuid: string; chapterUuid: string }) => {
   emit('selectVideo', payload)
 }
 </script>
@@ -52,7 +52,7 @@ const handleSelectVideo = (payload: { videoId: number; chapterId: number }) => {
     <div class="flex-1 overflow-y-auto p-4 space-y-3">
       <ChapterItem
         v-for="(chapter, index) in chapters"
-        :key="chapter.id"
+        :key="chapter.uuid"
         :chapter="chapter"
         :chapter-index="index"
         :is-unlocked="isChapterUnlocked(index)"

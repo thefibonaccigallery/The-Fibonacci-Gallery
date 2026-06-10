@@ -8,15 +8,15 @@ import { computed } from 'vue'
 const router = useRouter()
 const route = useRoute()
 
-// Get course ID from query params or fallback
-const courseId = computed(() => route.query.courseId || 1)
+// Get course UUID from query params or fallback
+const courseUuid = computed(() => (route.query.courseUuid as string) || '')
 
 const handleTryAgain = () => {
-  router.push(`/checkout/${courseId.value}`)
+  router.push(`/checkout/${courseUuid.value}`)
 }
 
 const handleBackToCourse = () => {
-  router.push(`/courses/${courseId.value}/details`)
+  router.push(`/courses/${courseUuid.value}/details`)
 }
 
 const handleBackToDashboard = () => {

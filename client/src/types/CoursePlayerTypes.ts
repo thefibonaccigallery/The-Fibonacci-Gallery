@@ -8,7 +8,7 @@ export interface VideoProgress {
 }
 
 export interface CoursePlayerVideo {
-  id: number
+  uuid: string
   title: string
   youtube_video_id: string | null
   level: 'beginner' | 'intermediate' | 'advanced' | null
@@ -19,7 +19,7 @@ export interface CoursePlayerVideo {
 }
 
 export interface CoursePlayerChapter {
-  id: number
+  uuid: string
   title: string
   level: 'beginner' | 'intermediate' | 'advanced' | null
   order: number
@@ -29,7 +29,7 @@ export interface CoursePlayerChapter {
 
 export interface CoursePlayerData {
   course: {
-    id: number
+    uuid: string
     title: string
     description: string | null
     thumbnail_url: string | null

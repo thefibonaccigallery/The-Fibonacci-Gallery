@@ -11,7 +11,7 @@ import { PhSpinner } from '@phosphor-icons/vue'
 
 const route = useRoute()
 const router = useRouter()
-const courseId = computed(() => Number(route.params.courseId))
+const courseUuid = computed(() => route.params.courseUuid as string)
 
 const {
   currentStep,
@@ -26,7 +26,7 @@ const {
   copyAddress,
 } = useCheckout()
 
-const { data: course, isLoading: courseLoading } = useCourseDetails(courseId.value)
+const { data: course, isLoading: courseLoading } = useCourseDetails(courseUuid.value)
 const { data: currencies, isLoading: currenciesLoading } = useCurrencies()
 const { mutate: initiatePayment, isPending: paymentInitiating } = useInitiatePayment()
 
@@ -45,7 +45,7 @@ const handleBack = () => {
 const handleSelectCurrency = (currency: any) => {
   selectedCurrency.value = currency
   initiatePayment({
-    courseId: courseId.value,
+    courseUuid: courseUuid.value,
     payCurrency: currency.id,
   })
 }

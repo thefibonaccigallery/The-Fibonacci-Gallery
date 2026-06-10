@@ -14,16 +14,16 @@ const router = useRouter()
 const { fetchChapter, createChapter, updateChapter, isCreating, isUpdating } = useChapters()
 const { fetchCourses } = useCourses()
 
-const chapterId = computed(() => {
-  const id = route.params.id
-  return id ? Number(id) : null
+const chapterUuid = computed(() => {
+  const uuid = route.params.uuid
+  return uuid ? String(uuid) : null
 })
 
-const isEditMode = computed(() => !!chapterId.value)
+const isEditMode = computed(() => !!chapterUuid.value)
 
 // Form state
 const form = ref<ChapterFormData>({
-  course_id: 0,
+  course_uuid: '',
   title: '',
   level: undefined,
   order: undefined,
@@ -41,8 +41,8 @@ const courses = computed(() => coursesData.value?.data || [])
 
 // Fetch chapter data if editing
 const { data: chapterData, isLoading } = useQuery({
-  queryKey: ['chapter', chapterId],
-  queryFn: () => fetchChapter(chapterId.value!),
+  queryKey: ['chapter', chapterUuid],
+  queryFn: () => fetchChapter(chapterUuid.value!),
   enabled: isEditMode,
 })
 
@@ -50,7 +50,7 @@ const { data: chapterData, isLoading } = useQuery({
 onMounted(() => {
   if (chapterData.value) {
     form.value = {
-      course_id: chapterData.value.course_id,
+      course_uuid: chapterData.value.course?.uuid || '',
       title: chapterData.value.title,
       level: chapterData.value.level || undefined,
       order: chapterData.value.order,
@@ -62,8 +62,8 @@ onMounted(() => {
 const validateForm = (): boolean => {
   errors.value = {}
 
-  if (!form.value.course_id) {
-    errors.value.course_id = 'Please select a course'
+  if (!form.value.course_uuid) {
+    errors.value.course_uuid = 'Please select a course'
   }
 
   if (!form.value.title.trim()) {
@@ -90,7 +90,7 @@ const handleSubmit = async () => {
   if (isEditMode.value) {
     // Update existing chapter
     updateChapter(
-      { id: chapterId.value!, data: formData },
+      { uuid: chapterUuid.value!, data: formData },
       {
         onSuccess: () => {
           router.push('/admin/chapters')
@@ -154,24 +154,24 @@ const isSaving = computed(() => isCreating.value || isUpdating.value)
 
         <!-- Course Selection -->
         <div class="space-y-2">
-          <label for="course_id" class="text-sm font-medium text-foreground">
+          <label for="course_uuid" class="text-sm font-medium text-foreground">
             Course <span class="text-destructive">*</span>
           </label>
           <select
-            id="course_id"
-            v-model.number="form.course_id"
+            id="course_uuid"
+            v-model="form.course_uuid"
             :class="[
               'w-full px-3 py-2 rounded-lg border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary',
-              errors.course_id ? 'border-destructive' : 'border-border',
+              errors.course_uuid ? 'border-destructive' : 'border-border',
             ]"
             :disabled="isEditMode"
           >
-            <option :value="0" disabled>Select a course</option>
-            <option v-for="course in courses" :key="course.id" :value="course.id">
+            <option value="" disabled>Select a course</option>
+            <option v-for="course in courses" :key="course.uuid" :value="course.uuid">
               {{ course.title }}
             </option>
           </select>
-          <p v-if="errors.course_id" class="text-sm text-destructive">{{ errors.course_id }}</p>
+          <p v-if="errors.course_uuid" class="text-sm text-destructive">{{ errors.course_uuid }}</p>
           <p v-if="isEditMode" class="text-xs text-muted-foreground">
             Course cannot be changed after creation
           </p>
