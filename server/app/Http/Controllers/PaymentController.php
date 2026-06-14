@@ -1,21 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Order;
 use App\Services\NowPaymentsService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class PaymentController extends Controller
 {
     public function __construct(private NowPaymentsService $nowPayments) {}
 
-    // Step 1 — Student selects crypto and initiates payment
-    public function initiatePayment(Request $request, $uuid)
+    public function initiatePayment(Request $request, string $uuid)
     {
         $request->validate([
             'pay_currency' => ['required', 'string'],
@@ -24,7 +21,6 @@ class PaymentController extends Controller
         $user   = auth()->user();
         $course = Course::where('uuid', $uuid)->firstOrFail();
 
-        // Check already enrolled
         $alreadyEnrolled = Enrollment::where('user_id', $user->id)
             ->where('course_id', $course->id)
             ->exists();
@@ -33,7 +29,6 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Already enrolled.'], 409);
         }
 
-        // Check for existing pending order
         $existingOrder = Order::where('user_id', $user->id)
             ->where('course_id', $course->id)
             ->whereIn('status', ['waiting', 'confirming'])
@@ -46,7 +41,6 @@ class PaymentController extends Controller
             ], 409);
         }
 
-        // Create order in database first
         $order = Order::create([
             'user_id'      => $user->id,
             'course_id'    => $course->id,
@@ -56,7 +50,6 @@ class PaymentController extends Controller
             'pay_currency' => $request->pay_currency,
         ]);
 
-        // Call NOWPayments API
         $payment = $this->nowPayments->createPayment([
             'amount'       => $course->price,
             'pay_currency' => $request->pay_currency,
@@ -66,10 +59,12 @@ class PaymentController extends Controller
 
         if (!isset($payment['payment_id'])) {
             $order->update(['status' => 'failed']);
-            return response()->json(['message' => 'Failed to create payment. Please try again.'], 500);
+            $apiMessage = $payment['message'] ?? ($payment['error'] ?? null);
+            return response()->json([
+                'message' => $apiMessage ?? 'Failed to create payment. Please try again.',
+            ], 500);
         }
 
-        // Update order with NOWPayments details
         $order->update([
             'nowpayments_payment_id' => $payment['payment_id'],
             'nowpayments_order_id'   => $payment['order_id'] ?? null,
@@ -86,14 +81,13 @@ class PaymentController extends Controller
         ]);
     }
 
-    // Step 2 — Poll payment status from frontend
-    public function checkStatus(Request $request, $orderUuid)
+    public function checkStatus(string $orderUuid)
     {
         $order = Order::where('uuid', $orderUuid)
             ->where('user_id', auth()->id())
             ->firstOrFail();
 
-        $course = \App\Models\Course::find($order->course_id);
+        $course = Course::find($order->course_id);
 
         return response()->json([
             'status'      => $order->status,
@@ -102,10 +96,8 @@ class PaymentController extends Controller
         ]);
     }
 
-    // Step 3 — NOWPayments sends webhook
     public function webhook(Request $request)
     {
-        // Verify signature
         $signature = $request->header('x-nowpayments-sig');
         $payload   = $request->getContent();
 
@@ -120,14 +112,12 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Order not found.'], 404);
         }
 
-        // Update order status and actually paid amount
         $order->update([
             'status'        => $data['payment_status'],
             'actually_paid' => $data['actually_paid'] ?? $order->actually_paid,
             'paid_at'       => $data['payment_status'] === 'finished' ? now() : null,
         ]);
 
-        // If finished — enroll the student
         if ($data['payment_status'] === 'finished') {
             Enrollment::firstOrCreate([
                 'user_id'   => $order->user_id,
