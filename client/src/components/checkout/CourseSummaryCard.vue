@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
-import { PhArrowRight } from '@phosphor-icons/vue'
+import { PhSpinner } from '@phosphor-icons/vue'
 
 interface Course {
-  id: number
+  uuid: string
   title: string
   level: string
-  price: number
+  price: number | string
   thumbnail_url: string | null
 }
 
 defineProps<{
   course: Course
+  loading?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -87,18 +88,19 @@ const getLevelColor = (level: string) => {
         <div class="pt-4 border-t border-border/20">
           <div class="flex items-center justify-between">
             <span class="text-sm text-muted-foreground">Course Price</span>
-            <span class="text-2xl font-bold text-primary">${{ course.price.toFixed(2) }}</span>
+            <span class="text-2xl font-bold text-primary">${{ Number(course.price).toFixed(2) }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Next Button -->
+      <!-- Pay Button -->
       <Button
         @click="emit('next')"
+        :disabled="loading"
         class="w-full text-sm font-semibold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center gap-2"
       >
-        Select Payment Method
-        <PhArrowRight class="h-4 w-4" weight="bold" />
+        <PhSpinner v-if="loading" class="h-4 w-4 animate-spin" />
+        Pay with USDT (TRC20)
       </Button>
     </div>
   </div>

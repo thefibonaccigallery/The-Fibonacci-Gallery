@@ -9,9 +9,9 @@ import { useLanguageStore } from '@/stores/languageStore'
 import axios from '@/api/axiosInstance'
 
 const props = defineProps<{
-  courseId: number
+  courseUuid: string
   course: {
-    id: number
+    uuid: string
     price: number | string
     is_enrolled?: boolean
   }
@@ -25,9 +25,9 @@ const { enrollCourse, isEnrolling } = useEnrollment()
 
 // Fetch enrollment status using the status check endpoint
 const { data: statusData } = useQuery({
-  queryKey: ['enrollment-status', props.courseId],
+  queryKey: ['enrollment-status', props.courseUuid],
   queryFn: async () => {
-    const res = await axios.get(`/enroll/${props.courseId}/status`)
+    const res = await axios.get(`/enroll/${props.courseUuid}/status`)
     return res.data
   },
   initialData: props.course.is_enrolled !== undefined ? { is_enrolled: props.course.is_enrolled } : undefined
@@ -41,7 +41,7 @@ const isEnrolled = computed(() => statusData.value?.is_enrolled)
     v-if="isEnrolled"
     variant="outline"
     class="w-full text-base font-semibold py-6 rounded-xl border border-primary/30 text-foreground hover:bg-secondary/50"
-    @click="router.push(`/courses/${courseId}/player`)"
+    @click="router.push(`/courses/${courseUuid}/player`)"
   >
     {{ lang.enrollment.go_to_course }}
   </Button>
@@ -50,7 +50,7 @@ const isEnrolled = computed(() => statusData.value?.is_enrolled)
     v-else
     :disabled="isEnrolling"
     class="w-full text-base font-semibold py-6 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground"
-    @click="enrollCourse(courseId)"
+    @click="enrollCourse(courseUuid)"
   >
     <PhSpinner v-if="isEnrolling" class="w-4 h-4 animate-spin mr-2" />
     <span v-if="Number(course.price) === 0">{{ lang.enrollment.enroll_free }}</span>

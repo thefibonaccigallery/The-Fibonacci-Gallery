@@ -26,7 +26,10 @@ const {
   isChapterUnlocked,
   getNextVideo,
   getPreviousVideo,
-  updateProgress,
+  canGoNext,
+  canGoPrevious,
+  currentWatchPercentage,
+  reportProgress,
   initializePlayer,
   isVideoInCooldown,
   getCooldownLabel,
@@ -35,16 +38,6 @@ const {
 // Navigation
 const nextVideo = computed(() => getNextVideo())
 const previousVideo = computed(() => getPreviousVideo())
-
-const canGoNext = computed(() => {
-  if (!nextVideo.value) return false
-  // Check if current video has at least 70% watched
-  return (activeVideo.value?.progress?.watch_percentage || 0) >= 70
-})
-
-const canGoPrevious = computed(() => {
-  return previousVideo.value !== null
-})
 
 const nextDisabledReason = computed(() => {
   if (!nextVideo.value) return 'No more videos'
@@ -73,14 +66,7 @@ const handleSelectVideo = (payload: { videoUuid: string; chapterUuid: string }) 
 
 const handleProgress = (payload: { watchTime: number; watchPercentage: number }) => {
   if (!activeVideoId.value) return
-
-  updateProgress({
-    videoUuid: activeVideoId.value,
-    payload: {
-      watch_time_seconds: payload.watchTime,
-      watch_percentage: payload.watchPercentage,
-    },
-  })
+  reportProgress(activeVideoId.value, payload.watchTime, payload.watchPercentage)
 }
 
 const handleVideoEnded = () => {
@@ -188,6 +174,7 @@ onMounted(() => {
                 :can-go-next="canGoNext"
                 :can-go-previous="canGoPrevious"
                 :next-disabled-reason="nextDisabledReason"
+                :current-watch-percentage="currentWatchPercentage"
                 @next="handleNext"
                 @previous="handlePrevious"
               />

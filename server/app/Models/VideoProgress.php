@@ -12,6 +12,8 @@ class VideoProgress extends Model
 
     protected $table = 'video_progress';
 
+    public $timestamps = false;
+
     protected $fillable = [
         'user_id',
         'course_video_id',

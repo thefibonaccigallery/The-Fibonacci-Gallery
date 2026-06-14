@@ -89,31 +89,44 @@ class CoursePlayerController extends Controller
     {
         $request->validate([
             'watch_time_seconds' => 'required|integer|min:0',
-            'watch_percentage'   => 'required|numeric|min:0|max:100',
         ]);
 
         $user  = Auth::user();
         $video = CourseVideo::where('uuid', $uuid)->firstOrFail();
 
-        $watchPercentage = $request->watch_percentage;
-        $isCompleted     = $watchPercentage >= 70;
+        // Load existing progress so we can preserve completion state and never reduce time
+        $existing = VideoProgress::where('user_id', $user->id)
+            ->where('course_video_id', $video->id)
+            ->first();
+
+        // Never allow watch time to decrease (guards against client bugs or replays)
+        $watchTimeSeconds = max($request->watch_time_seconds, $existing?->watch_time_seconds ?? 0);
+
+        // Compute percentage authoritatively on the server so clients cannot fake it
+        $watchPercentage = $video->duration_seconds > 0
+            ? min(round(($watchTimeSeconds / $video->duration_seconds) * 100, 2), 100.0)
+            : 0;
+
+        $alreadyCompleted = $existing?->is_completed ?? false;
+        $isNowCompleted   = $alreadyCompleted || ($watchPercentage >= 70);
+        $isNewlyCompleted = !$alreadyCompleted && $isNowCompleted;
 
         $progress = VideoProgress::updateOrCreate(
             [
-                'user_id'        => $user->id,
+                'user_id'         => $user->id,
                 'course_video_id' => $video->id,
             ],
             [
-                'watch_time_seconds' => $request->watch_time_seconds,
+                'watch_time_seconds' => $watchTimeSeconds,
                 'watch_percentage'   => $watchPercentage,
-                'is_completed'       => $isCompleted,
-                'completed_at'       => $isCompleted ? now() : null,
+                'is_completed'       => $isNowCompleted,
+                'completed_at'       => $isNowCompleted ? ($existing?->completed_at ?? now()) : null,
                 'last_watched_at'    => now(),
             ]
         );
 
         // If just completed, set cooldown on next video
-        if ($isCompleted) {
+        if ($isNewlyCompleted) {
             $nextVideo = $this->getNextVideo($video);
 
             if ($nextVideo && $nextVideo->cooldown_hours > 0) {

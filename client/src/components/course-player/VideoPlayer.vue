@@ -19,17 +19,20 @@ const emit = defineEmits<Emits>()
 const playerContainer = ref<HTMLDivElement | null>(null)
 let player: Plyr | null = null
 let progressInterval: number | null = null
-let lastProgressUpdate = 0
+
+// Accumulated play time tracking — measures actual seconds the user spent watching,
+// not the current playback position, so fast-forwarding doesn't inflate progress.
+let accumulatedSeconds = 0          // total seconds genuinely watched
+let sessionStartTime: number | null = null  // wall-clock ms when current play segment began
+let lastSentWatchTime = -1          // dedup guard: avoid sending identical values
 
 const initializePlayer = () => {
   if (!playerContainer.value || !props.video?.youtube_video_id) return
 
-  // Clean up existing player
   if (player) {
     player.destroy()
   }
 
-  // Create new player
   player = new Plyr(playerContainer.value, {
     controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
     youtube: {
@@ -41,54 +44,72 @@ const initializePlayer = () => {
     },
   })
 
-  // Set up event listeners
-  player.on('timeupdate', handleTimeUpdate)
-  player.on('pause', handlePause)
-  player.on('ended', handleEnded)
+  // Seed accumulated time from server so returning users keep their prior progress
+  accumulatedSeconds = Math.floor(props.video?.progress?.watch_time_seconds || 0)
+  sessionStartTime = null
+  lastSentWatchTime = -1
 
-  // Start progress tracking interval (every 10 seconds)
-  if (progressInterval) {
-    clearInterval(progressInterval)
-  }
+  player.on('playing', handlePlaying)
+  player.on('seeked',  handleSeeked)
+  player.on('pause',   handlePause)
+  player.on('ended',   handleEnded)
 
+  if (progressInterval) clearInterval(progressInterval)
+
+  // Checkpoint every 10 s while playing: commit the current segment and send progress
   progressInterval = window.setInterval(() => {
     if (player && player.playing) {
+      accumulateSession()
+      sessionStartTime = Date.now()
       sendProgress()
     }
   }, 10000)
 }
 
-const handleTimeUpdate = () => {
-  // This fires frequently, we'll use the interval for actual updates
+// Called when the video starts or resumes playing — begin timing this segment
+const handlePlaying = () => {
+  sessionStartTime = Date.now()
+}
+
+// Add the current segment's elapsed time to the accumulator (idempotent: safe to call twice)
+const accumulateSession = () => {
+  if (sessionStartTime !== null) {
+    accumulatedSeconds += Math.floor((Date.now() - sessionStartTime) / 1000)
+    sessionStartTime = null
+  }
+}
+
+// Seek/scrub: close the current segment; if still playing, start a new one immediately
+const handleSeeked = () => {
+  accumulateSession()
+  if (player?.playing) sessionStartTime = Date.now()
 }
 
 const handlePause = () => {
+  accumulateSession()
   sendProgress()
 }
 
 const handleEnded = () => {
+  accumulateSession()
   sendProgress()
   emit('ended')
 }
 
+// Emits actual accumulated watch time and a locally-computed percentage for immediate UI feedback.
+// The backend will recompute the authoritative percentage from watch_time_seconds.
 const sendProgress = () => {
   if (!player || !props.video) return
-
-  const currentTime = Math.floor(player.currentTime)
   const duration = player.duration
+  if (duration <= 0) return
+  if (accumulatedSeconds === lastSentWatchTime) return
+  lastSentWatchTime = accumulatedSeconds
 
-  // Avoid sending duplicate updates
-  if (currentTime === lastProgressUpdate) return
-  lastProgressUpdate = currentTime
-
-  if (duration > 0) {
-    const watchPercentage = Math.min((currentTime / duration) * 100, 100)
-
-    emit('progress', {
-      watchTime: currentTime,
-      watchPercentage: Math.round(watchPercentage * 100) / 100, // Round to 2 decimals
-    })
-  }
+  const watchPercentage = Math.min((accumulatedSeconds / duration) * 100, 100)
+  emit('progress', {
+    watchTime: accumulatedSeconds,
+    watchPercentage: Math.round(watchPercentage * 100) / 100,
+  })
 }
 
 const cleanup = () => {
@@ -105,7 +126,7 @@ const cleanup = () => {
 
 // Watch for video changes
 watch(
-  () => props.video?.id,
+  () => props.video?.uuid,
   () => {
     cleanup()
     if (props.video?.youtube_video_id) {

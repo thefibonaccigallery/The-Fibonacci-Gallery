@@ -7,7 +7,7 @@ use App\Http\Controllers\TypesController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\ChapterController;
 use App\Http\Controllers\Admin\VideoController;
-use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\EnrollmentController;
 use Illuminate\Support\Facades\Route;
 

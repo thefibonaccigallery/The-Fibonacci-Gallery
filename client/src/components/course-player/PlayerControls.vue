@@ -10,6 +10,7 @@ interface Props {
   canGoNext: boolean
   canGoPrevious: boolean
   nextDisabledReason?: string
+  currentWatchPercentage?: number
 }
 
 interface Emits {
@@ -20,8 +21,11 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
+// Use the highest of local (live) and server-side percentage so the bar
+// updates immediately as the video plays, not only after a server refetch.
 const watchPercentage = computed(() => {
-  return props.video?.progress?.watch_percentage || 0
+  const serverPct = props.video?.progress?.watch_percentage || 0
+  return Math.max(props.currentWatchPercentage ?? 0, serverPct)
 })
 
 const getLevelColor = (level: string | null) => {

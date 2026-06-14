@@ -165,24 +165,18 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from) => {
   const token = Cookies.get('access_token')
   const userStr = localStorage.getItem('auth')
 
   if (to.path === '/' && token && userStr) {
     try {
       const user = JSON.parse(userStr)
-      if (user.role === 'admin') {
-        next('/admin/dashboard')
-      } else {
-        next('/dashboard')
-      }
-      return
+      return user.role === 'admin' ? '/admin/dashboard' : '/dashboard'
     } catch (e) {
       // Ignore parse error and proceed
     }
   }
-  next()
 })
 
 export default router

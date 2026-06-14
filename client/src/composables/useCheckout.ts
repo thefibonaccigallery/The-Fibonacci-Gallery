@@ -12,13 +12,6 @@ interface Course {
   thumbnail_url: string | null
 }
 
-interface Currency {
-  id: string
-  name: string
-  symbol: string
-  icon?: string
-}
-
 interface PaymentDetails {
   payment_id: string
   pay_address: string
@@ -50,7 +43,6 @@ export function useCheckout() {
   const queryClient = useQueryClient()
 
   const currentStep = ref(1)
-  const selectedCurrency = ref<Currency | null>(null)
   const paymentDetails = ref<PaymentDetails | null>(null)
   const timeLeft = ref('')
   const qrDataUrl = ref('')
@@ -64,24 +56,6 @@ export function useCheckout() {
         return response.data.course
       },
       enabled: computed(() => !!courseUuid),
-    })
-  }
-
-  // Fetch available currencies
-  const useCurrencies = () => {
-    return useQuery<Currency[]>({
-      queryKey: ['payment-currencies'],
-      queryFn: async () => {
-        // Mock data for now since backend doesn't have currencies API
-        return [
-          { id: 'btc', name: 'Bitcoin', symbol: 'BTC' },
-          { id: 'eth', name: 'Ethereum', symbol: 'ETH' },
-          { id: 'usdttrc20', name: 'Tether TRC20', symbol: 'USDT' },
-          { id: 'usdterc20', name: 'Tether ERC20', symbol: 'USDT' },
-          { id: 'bnb', name: 'BNB', symbol: 'BNB' },
-          { id: 'ltc', name: 'Litecoin', symbol: 'LTC' },
-        ]
-      },
     })
   }
 
@@ -102,7 +76,7 @@ export function useCheckout() {
       },
       onSuccess: (data) => {
         paymentDetails.value = data
-        currentStep.value = 3
+        currentStep.value = 2
         startCountdown(data.expiration_estimate_date)
         generateQr(data.pay_address)
       },
@@ -183,7 +157,6 @@ export function useCheckout() {
   // Reset checkout state
   const resetCheckout = () => {
     currentStep.value = 1
-    selectedCurrency.value = null
     paymentDetails.value = null
     timeLeft.value = ''
     qrDataUrl.value = ''
@@ -192,14 +165,12 @@ export function useCheckout() {
   return {
     // State
     currentStep,
-    selectedCurrency,
     paymentDetails,
     timeLeft,
     qrDataUrl,
 
     // Queries and Mutations
     useCourseDetails,
-    useCurrencies,
     useInitiatePayment,
     usePaymentStatus,
 

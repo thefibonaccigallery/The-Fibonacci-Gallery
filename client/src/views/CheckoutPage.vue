@@ -5,7 +5,6 @@ import { useCheckout } from '@/composables/useCheckout'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import CheckoutStepper from '@/components/checkout/CheckoutStepper.vue'
 import CourseSummaryCard from '@/components/checkout/CourseSummaryCard.vue'
-import CurrencySelector from '@/components/checkout/CurrencySelector.vue'
 import PaymentDetails from '@/components/checkout/PaymentDetails.vue'
 import { PhSpinner } from '@phosphor-icons/vue'
 
@@ -15,39 +14,23 @@ const courseUuid = computed(() => route.params.courseUuid as string)
 
 const {
   currentStep,
-  selectedCurrency,
   paymentDetails,
   timeLeft,
   qrDataUrl,
   useCourseDetails,
-  useCurrencies,
   useInitiatePayment,
   usePaymentStatus,
   copyAddress,
 } = useCheckout()
 
 const { data: course, isLoading: courseLoading } = useCourseDetails(courseUuid.value)
-const { data: currencies, isLoading: currenciesLoading } = useCurrencies()
 const { mutate: initiatePayment, isPending: paymentInitiating } = useInitiatePayment()
 
 const orderUuid = computed(() => paymentDetails.value?.order_uuid || null)
 const { data: paymentStatus } = usePaymentStatus(orderUuid)
 
-const handleSelectPaymentMethod = () => {
-  currentStep.value = 2
-}
-
-const handleBack = () => {
-  currentStep.value = 1
-  selectedCurrency.value = null
-}
-
-const handleSelectCurrency = (currency: any) => {
-  selectedCurrency.value = currency
-  initiatePayment({
-    courseUuid: courseUuid.value,
-    payCurrency: currency.id,
-  })
+const handlePay = () => {
+  initiatePayment({ courseUuid: courseUuid.value, payCurrency: 'usdttrc20' })
 }
 
 const handleCancel = () => {
@@ -82,21 +65,13 @@ const handleCancel = () => {
           <CourseSummaryCard
             v-if="currentStep === 1"
             :course="course"
-            @next="handleSelectPaymentMethod"
+            :loading="paymentInitiating"
+            @next="handlePay"
           />
 
-          <!-- Step 2: Currency Selection -->
-          <CurrencySelector
-            v-else-if="currentStep === 2"
-            :currencies="currencies || []"
-            :is-loading="paymentInitiating"
-            @back="handleBack"
-            @next="handleSelectCurrency"
-          />
-
-          <!-- Step 3: Payment Details -->
+          <!-- Step 2: Payment Details -->
           <PaymentDetails
-            v-else-if="currentStep === 3 && paymentDetails"
+            v-else-if="currentStep === 2 && paymentDetails"
             :payment-details="paymentDetails"
             :payment-status="paymentStatus"
             :qr-data-url="qrDataUrl"

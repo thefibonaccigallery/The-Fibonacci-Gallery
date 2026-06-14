@@ -1,4 +1,4 @@
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import axiosInstance from '@/api/axiosInstance'
 import type {
@@ -45,6 +45,15 @@ export function useCoursePlayer(courseUuid: string) {
   const activeChapter = computed(() => {
     if (!activeChapterId.value) return null
     return chapters.value.find((c) => c.uuid === activeChapterId.value) || null
+  })
+
+  // Local watch percentage — updated immediately on every progress event so
+  // canGoNext and the progress bar react without waiting for a server round-trip
+  const currentWatchPercentage = ref(0)
+
+  // Reset to the server value whenever the active video changes
+  watch(activeVideoId, () => {
+    currentWatchPercentage.value = activeVideo.value?.progress?.watch_percentage || 0
   })
 
   // Reactive ref for current time, updating every minute
@@ -198,10 +207,28 @@ export function useCoursePlayer(courseUuid: string) {
       return response.data
     },
     onSuccess: () => {
-      // Invalidate and refetch course player data to update unlock states
+      // Refetch course data so lock/unlock states stay in sync with the server
       queryClient.invalidateQueries({ queryKey: ['course-player', courseUuid] })
     },
   })
+
+  // Whether the user has watched enough of the current video to advance.
+  // Uses the local percentage so it reacts instantly (no server round-trip needed).
+  const canGoNext = computed(() => {
+    const next = getNextVideo()
+    if (!next) return false
+    const serverPct = activeVideo.value?.progress?.watch_percentage || 0
+    return Math.max(currentWatchPercentage.value, serverPct) >= 70
+  })
+
+  const canGoPrevious = computed(() => getPreviousVideo() !== null)
+
+  // Report progress: update local percentage immediately for UI feedback,
+  // then send only watch_time_seconds to the server (percentage is computed there).
+  const reportProgress = (videoUuid: string, watchTimeSeconds: number, localPercentage: number) => {
+    currentWatchPercentage.value = localPercentage
+    updateProgress({ videoUuid, payload: { watch_time_seconds: watchTimeSeconds } })
+  }
 
   // Initialize with first unlocked video
   const initializePlayer = () => {
@@ -247,11 +274,16 @@ export function useCoursePlayer(courseUuid: string) {
     activeChapter,
     activeVideoId,
     activeChapterId,
+    currentWatchPercentage,
 
     // Loading states
     isLoading,
     isUpdatingProgress,
     error,
+
+    // Navigation state
+    canGoNext,
+    canGoPrevious,
 
     // Methods
     setActiveVideo,
@@ -260,7 +292,7 @@ export function useCoursePlayer(courseUuid: string) {
     getChapterStats,
     getNextVideo,
     getPreviousVideo,
-    updateProgress,
+    reportProgress,
     initializePlayer,
     refetch,
     isVideoInCooldown,

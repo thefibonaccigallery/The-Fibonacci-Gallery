@@ -39,5 +39,4 @@ export interface CoursePlayerData {
 
 export interface UpdateProgressPayload {
   watch_time_seconds: number
-  watch_percentage: number
 }
