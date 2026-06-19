@@ -18,14 +18,17 @@ class Enrollment extends Model
         'enrolled_at',
         'completed_at',
         'progress_percentage',
+        'type',
+        'coupon_id',
     ];
 
     protected $casts = [
-        'user_id' => 'integer',
-        'course_id' => 'integer',
-        'enrolled_at' => 'datetime',
-        'completed_at' => 'datetime',
+        'user_id'             => 'integer',
+        'course_id'           => 'integer',
+        'enrolled_at'         => 'datetime',
+        'completed_at'        => 'datetime',
         'progress_percentage' => 'decimal:2',
+        'coupon_id'           => 'integer',
     ];
 
     public function user()
@@ -36,5 +39,10 @@ class Enrollment extends Model
     public function course()
     {
         return $this->belongsTo(Course::class);
+    }
+
+    public function coupon()
+    {
+        return $this->belongsTo(Coupon::class);
     }
 }

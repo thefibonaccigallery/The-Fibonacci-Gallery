@@ -156,6 +156,26 @@ const router = createRouter({
           component: () => import('@/views/admin/AdminOrdersPage.vue'),
         },
         {
+          path: 'coupons',
+          name: 'admin-coupons',
+          component: () => import('@/views/admin/AdminCouponsPage.vue'),
+        },
+        {
+          path: 'coupons/create',
+          name: 'admin-coupons-create',
+          component: () => import('@/views/admin/AdminCouponFormPage.vue'),
+        },
+        {
+          path: 'coupons/:uuid/edit',
+          name: 'admin-coupons-edit',
+          component: () => import('@/views/admin/AdminCouponFormPage.vue'),
+        },
+        {
+          path: 'coupons/:uuid/usage',
+          name: 'admin-coupons-usage',
+          component: () => import('@/views/admin/AdminCouponUsagePage.vue'),
+        },
+        {
           path: 'settings',
           name: 'admin-settings',
           component: () => import('@/views/admin/AdminSettingsPage.vue'),

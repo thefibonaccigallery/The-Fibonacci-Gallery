@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Coupon;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Order;
@@ -16,6 +17,7 @@ class PaymentController extends Controller
     {
         $request->validate([
             'pay_currency' => ['required', 'string'],
+            'coupon_code'  => ['nullable', 'string'],
         ]);
 
         $user   = auth()->user();
@@ -29,22 +31,64 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Already enrolled.'], 409);
         }
 
+        // Resolve coupon
+        $coupon   = null;
+        $couponId = null;
+        $amount   = (float) $course->price;
+
+        if ($request->filled('coupon_code')) {
+            $coupon = Coupon::where('code', strtoupper(trim($request->coupon_code)))
+                ->where('course_id', $course->id)
+                ->first();
+
+            if ($coupon && $coupon->isValid()) {
+                $discount = $amount * $coupon->discount_percentage / 100;
+                $amount   = max(0, $amount - $discount);
+                $couponId = $coupon->id;
+            }
+        }
+
+        // 100% coupon — enroll directly without payment
+        if ($amount == 0 && $couponId) {
+            $enrollment = Enrollment::firstOrCreate(
+                ['user_id' => $user->id, 'course_id' => $course->id],
+                ['enrolled_at' => now(), 'type' => 'coupon', 'coupon_id' => $couponId]
+            );
+
+            return response()->json([
+                'enrolled'   => true,
+                'message'    => 'Enrolled successfully with coupon.',
+                'course_uuid' => $course->uuid,
+            ]);
+        }
+
         $existingOrder = Order::where('user_id', $user->id)
             ->where('course_id', $course->id)
             ->whereIn('status', ['waiting', 'confirming'])
             ->first();
 
         if ($existingOrder) {
-            return response()->json([
-                'message' => 'You already have a pending payment for this course.',
-                'order'   => $existingOrder,
-            ], 409);
+            // Previous attempt failed before NowPayments responded — delete and retry
+            if (!$existingOrder->nowpayments_payment_id) {
+                $existingOrder->delete();
+            } else {
+                // Valid pending payment — return stored details so frontend can restore step 2
+                return response()->json([
+                    'payment_id'               => $existingOrder->nowpayments_payment_id,
+                    'pay_address'              => $existingOrder->pay_address,
+                    'pay_amount'               => $existingOrder->pay_amount,
+                    'pay_currency'             => $existingOrder->pay_currency,
+                    'order_uuid'               => $existingOrder->uuid,
+                    'expiration_estimate_date' => null,
+                ]);
+            }
         }
 
         $order = Order::create([
             'user_id'      => $user->id,
             'course_id'    => $course->id,
-            'amount'       => $course->price,
+            'coupon_id'    => $couponId,
+            'amount'       => $amount,
             'currency'     => 'USD',
             'status'       => 'waiting',
             'pay_currency' => $request->pay_currency,
@@ -68,6 +112,7 @@ class PaymentController extends Controller
         $order->update([
             'nowpayments_payment_id' => $payment['payment_id'],
             'nowpayments_order_id'   => $payment['order_id'] ?? null,
+            'pay_address'            => $payment['pay_address'] ?? null,
             'pay_amount'             => $payment['pay_amount'] ?? null,
         ]);
 
@@ -87,12 +132,45 @@ class PaymentController extends Controller
             ->where('user_id', auth()->id())
             ->firstOrFail();
 
+        $terminalStatuses = ['finished', 'failed', 'expired', 'refunded'];
+
+        // Sync live status from NowPayments while the payment is still active.
+        // This is a fallback for when the webhook is delayed or missed.
+        if ($order->nowpayments_payment_id && !in_array($order->status, $terminalStatuses)) {
+            $live = $this->nowPayments->getPaymentStatus($order->nowpayments_payment_id);
+
+            if (isset($live['payment_status']) && $live['payment_status'] !== $order->status) {
+                $newStatus = $live['payment_status'];
+
+                $order->update([
+                    'status'        => $newStatus,
+                    'actually_paid' => $live['actually_paid'] ?? $order->actually_paid,
+                    'paid_at'       => $newStatus === 'finished' ? now() : $order->paid_at,
+                ]);
+
+                $order->refresh();
+
+                if ($newStatus === 'finished') {
+                    Enrollment::firstOrCreate(
+                        ['user_id' => $order->user_id, 'course_id' => $order->course_id],
+                        [
+                            'enrolled_at' => now(),
+                            'type'        => $order->coupon_id ? 'coupon' : 'paid',
+                            'coupon_id'   => $order->coupon_id,
+                        ]
+                    );
+                }
+            }
+        }
+
         $course = Course::find($order->course_id);
 
         return response()->json([
-            'status'      => $order->status,
-            'is_enrolled' => $order->status === 'finished',
-            'course_uuid' => $course?->uuid,
+            'status'         => $order->status,
+            'payment_amount' => (float) $order->amount,
+            'actually_paid'  => (float) $order->actually_paid,
+            'is_enrolled'    => $order->status === 'finished',
+            'course_uuid'    => $course?->uuid,
         ]);
     }
 
@@ -119,12 +197,14 @@ class PaymentController extends Controller
         ]);
 
         if ($data['payment_status'] === 'finished') {
-            Enrollment::firstOrCreate([
-                'user_id'   => $order->user_id,
-                'course_id' => $order->course_id,
-            ], [
-                'enrolled_at' => now(),
-            ]);
+            Enrollment::firstOrCreate(
+                ['user_id' => $order->user_id, 'course_id' => $order->course_id],
+                [
+                    'enrolled_at' => now(),
+                    'type'        => $order->coupon_id ? 'coupon' : 'paid',
+                    'coupon_id'   => $order->coupon_id,
+                ]
+            );
         }
 
         return response()->json(['message' => 'Webhook received.']);

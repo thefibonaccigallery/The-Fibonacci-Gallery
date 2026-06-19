@@ -16,6 +16,8 @@ return new class extends Migration
             $table->uuid()->unique();
             $table->bigInteger('user_id')->constrained('users')->onDelete('cascade');
             $table->bigInteger('course_id')->constrained('courses')->onDelete('cascade');
+            $table->enum('type', ['free', 'paid', 'coupon'])->default('free');
+            $table->unsignedBigInteger('coupon_id')->nullable();
             $table->timestamp('enrolled_at')->useCurrent();
             $table->timestamp('completed_at')->nullable();
             $table->decimal('progress_percentage', 5, 2)->default(0.00);

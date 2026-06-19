@@ -41,7 +41,7 @@ class CourseController extends Controller
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|unique:courses,slug',
             'description' => 'nullable|string',
-            'level' => ['required', Rule::in(config('types_course.levels'))],
+            'level' => ['required', Rule::in(config('types.course.levels'))],
             'price' => 'required|numeric|min:0',
             'is_published' => 'boolean',
         ]);
@@ -78,7 +78,7 @@ class CourseController extends Controller
             'title' => 'sometimes|required|string|max:255',
             'slug' => ['sometimes', 'required', 'string', Rule::unique('courses', 'slug')->ignore($course->id)],
             'description' => 'nullable|string',
-            'level' => ['sometimes', 'required', Rule::in(config('types/course.levels'))],
+            'level' => ['sometimes', 'required', Rule::in(config('types.course.levels'))],
             'price' => 'sometimes|required|numeric|min:0',
             'is_published' => 'boolean',
         ]);
@@ -117,7 +117,7 @@ class CourseController extends Controller
         $course = Course::findByUuidOrFail($uuid);
 
         $request->validate([
-            'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'thumbnail' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
         ]);
 
         // Delete old thumbnail if exists
@@ -126,7 +126,10 @@ class CourseController extends Controller
         }
 
         // Store new thumbnail
-        $path = $request->file('thumbnail')->store('thumbnails', 'public');
+        $file = $request->file('thumbnail');
+        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $path = 'thumbnails/' . $filename;
+        Storage::disk('public')->putFileAs('thumbnails', $file, $filename);
 
         $course->update(['thumbnail' => $path]);
 

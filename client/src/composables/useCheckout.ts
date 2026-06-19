@@ -1,5 +1,5 @@
 import { ref, computed, watch, onUnmounted } from 'vue'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
+import { useQuery, useMutation } from '@tanstack/vue-query'
 import { useRouter } from 'vue-router'
 import axiosInstance from '@/api/axiosInstance'
 import { toast } from 'vue-sonner'
@@ -34,18 +34,30 @@ interface PaymentStatus {
     | 'refunded'
   payment_amount: number
   actually_paid: number
+  is_enrolled: boolean
+  course_uuid: string | null
 }
 
 const terminalStatuses = ['finished', 'failed', 'expired', 'refunded']
 
 export function useCheckout() {
   const router = useRouter()
-  const queryClient = useQueryClient()
 
   const currentStep = ref(1)
   const paymentDetails = ref<PaymentDetails | null>(null)
   const timeLeft = ref('')
   const qrDataUrl = ref('')
+
+  // Module-level interval ref so it can be safely cleared from onUnmounted
+  // (can't use onUnmounted inside the async onSuccess callback of a mutation)
+  let countdownInterval: number | null = null
+
+  onUnmounted(() => {
+    if (countdownInterval !== null) {
+      clearInterval(countdownInterval)
+      countdownInterval = null
+    }
+  })
 
   // Fetch course details
   const useCourseDetails = (courseUuid: string) => {
@@ -65,16 +77,24 @@ export function useCheckout() {
       mutationFn: async ({
         courseUuid,
         payCurrency,
+        couponCode,
       }: {
         courseUuid: string
         payCurrency: string
+        couponCode?: string
       }) => {
         const response = await axiosInstance.post(`/payments/initiate/${courseUuid}`, {
           pay_currency: payCurrency,
+          ...(couponCode ? { coupon_code: couponCode } : {}),
         })
         return response.data
       },
       onSuccess: (data) => {
+        // 100% coupon — enrolled directly, no payment step needed
+        if (data.enrolled) {
+          router.push(`/courses/${data.course_uuid}/player`)
+          return
+        }
         paymentDetails.value = data
         currentStep.value = 2
         startCountdown(data.expiration_estimate_date)
@@ -87,7 +107,7 @@ export function useCheckout() {
   }
 
   // Poll payment status
-  const usePaymentStatus = (orderUuid: ReturnType<typeof ref<string | null>>) => {
+  const usePaymentStatus = (orderUuid: ReturnType<typeof ref<string | null>>, courseUuid: string) => {
     const query = useQuery<PaymentStatus>({
       queryKey: ['payment-status', orderUuid],
       queryFn: async () => {
@@ -101,7 +121,7 @@ export function useCheckout() {
       enabled: computed(() => !!orderUuid.value),
     })
 
-    // Watch for status changes
+    // Watch for status changes and navigate accordingly
     watch(
       () => query.data.value?.status,
       (status) => {
@@ -109,7 +129,7 @@ export function useCheckout() {
           router.push('/payment/success')
         }
         if (status === 'failed' || status === 'expired') {
-          router.push('/payment/cancel')
+          router.push(`/payment/cancel?courseUuid=${courseUuid}`)
         }
       },
     )
@@ -119,19 +139,20 @@ export function useCheckout() {
 
   // Countdown timer
   const startCountdown = (expiryDate: string) => {
-    const interval = setInterval(() => {
+    if (countdownInterval !== null) clearInterval(countdownInterval)
+
+    countdownInterval = window.setInterval(() => {
       const diff = new Date(expiryDate).getTime() - Date.now()
       if (diff <= 0) {
         timeLeft.value = 'Expired'
-        clearInterval(interval)
+        clearInterval(countdownInterval!)
+        countdownInterval = null
         return
       }
       const minutes = Math.floor(diff / 1000 / 60)
       const seconds = Math.floor((diff / 1000) % 60)
       timeLeft.value = `${minutes}m ${seconds}s`
     }, 1000)
-
-    onUnmounted(() => clearInterval(interval))
   }
 
   // Generate QR code

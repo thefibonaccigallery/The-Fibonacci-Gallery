@@ -82,7 +82,7 @@ class ChapterController extends Controller
         $validated = $request->validate([
             'course_id' => 'sometimes|required|exists:courses,id',
             'title' => 'sometimes|required|string|max:255',
-            'level' => ['nullable', Rule::in(config('types/course.levels'))],
+            'level' => ['nullable', Rule::in(config('types_course.levels'))],
             'order' => [
                 'sometimes',
                 'required',

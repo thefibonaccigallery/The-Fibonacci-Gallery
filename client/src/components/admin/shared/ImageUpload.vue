@@ -11,7 +11,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  maxSize: 2,
+  maxSize: 10,
   accept: 'image/jpeg,image/png,image/jpg,image/gif,image/webp',
 })
 

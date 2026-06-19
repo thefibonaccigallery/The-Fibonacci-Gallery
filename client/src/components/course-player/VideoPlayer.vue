@@ -49,6 +49,17 @@ const initializePlayer = () => {
   sessionStartTime = null
   lastSentWatchTime = -1
 
+  // Resume from last saved position (skip if the video was already completed — restart from beginning)
+  const resumeAt = accumulatedSeconds
+  const isCompleted = props.video?.progress?.is_completed === true
+  if (resumeAt > 0 && !isCompleted) {
+    const seekOnReady = () => {
+      if (player) player.currentTime = resumeAt
+      player?.off('ready', seekOnReady)
+    }
+    player.on('ready', seekOnReady)
+  }
+
   player.on('playing', handlePlaying)
   player.on('seeked',  handleSeeked)
   player.on('pause',   handlePause)
@@ -97,10 +108,11 @@ const handleEnded = () => {
 }
 
 // Emits actual accumulated watch time and a locally-computed percentage for immediate UI feedback.
-// The backend will recompute the authoritative percentage from watch_time_seconds.
+// Uses the stored duration_seconds (same value the server uses) so the local percentage always
+// matches the server-computed watch_percentage — prevents the controls and sidebar from diverging.
 const sendProgress = () => {
   if (!player || !props.video) return
-  const duration = player.duration
+  const duration = props.video.duration_seconds
   if (duration <= 0) return
   if (accumulatedSeconds === lastSentWatchTime) return
   lastSentWatchTime = accumulatedSeconds

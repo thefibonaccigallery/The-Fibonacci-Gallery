@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Coupon;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\VideoProgress;
@@ -194,7 +195,7 @@ class UserCourseController extends Controller
     }
 
     /**
-     * Enroll in a course
+     * Enroll in a course (free courses or 100% coupon codes)
      */
     public function enrollCourse(Request $request, $uuid)
     {
@@ -204,7 +205,6 @@ class UserCourseController extends Controller
             ->where('uuid', $uuid)
             ->firstOrFail();
 
-        // Check if already enrolled
         $existingEnrollment = Enrollment::where('user_id', $user->id)
             ->where('course_id', $course->id)
             ->first();
@@ -216,12 +216,41 @@ class UserCourseController extends Controller
             ], 400);
         }
 
-        // Create enrollment
-        $enrollment = Enrollment::create([
+        $enrollmentData = [
             'user_id'     => $user->id,
             'course_id'   => $course->id,
             'enrolled_at' => now(),
-        ]);
+            'type'        => 'free',
+        ];
+
+        if ($request->filled('coupon_code')) {
+            $coupon = Coupon::where('code', strtoupper(trim($request->coupon_code)))
+                ->where('course_id', $course->id)
+                ->first();
+
+            if (!$coupon || !$coupon->isValid()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid or expired coupon code.',
+                ], 422);
+            }
+
+            $finalPrice = max(0, $course->price - ($course->price * $coupon->discount_percentage / 100));
+
+            if ($finalPrice > 0) {
+                return response()->json([
+                    'success'          => false,
+                    'message'          => 'This coupon reduces the price but does not cover it fully. Please proceed to checkout.',
+                    'requires_payment' => true,
+                    'final_price'      => $finalPrice,
+                ], 422);
+            }
+
+            $enrollmentData['type']      = 'coupon';
+            $enrollmentData['coupon_id'] = $coupon->id;
+        }
+
+        $enrollment = Enrollment::create($enrollmentData);
 
         return response()->json([
             'success'    => true,

@@ -27,14 +27,18 @@ const { data: course, isLoading: courseLoading } = useCourseDetails(courseUuid.v
 const { mutate: initiatePayment, isPending: paymentInitiating } = useInitiatePayment()
 
 const orderUuid = computed(() => paymentDetails.value?.order_uuid || null)
-const { data: paymentStatus } = usePaymentStatus(orderUuid)
+const { data: paymentStatus } = usePaymentStatus(orderUuid, courseUuid.value)
 
-const handlePay = () => {
-  initiatePayment({ courseUuid: courseUuid.value, payCurrency: 'usdttrc20' })
+const handlePay = (couponCode: string | null) => {
+  initiatePayment({
+    courseUuid: courseUuid.value,
+    payCurrency: 'usdttrc20',
+    couponCode: couponCode ?? undefined,
+  })
 }
 
 const handleCancel = () => {
-  router.push('/payment/cancel')
+  router.push(`/payment/cancel?courseUuid=${courseUuid.value}`)
 }
 </script>
 

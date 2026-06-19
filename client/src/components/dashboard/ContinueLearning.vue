@@ -19,7 +19,7 @@ const progressPercentage = computed(() => {
 
 const goToCoursePlayer = () => {
   if (course.value) {
-    router.push(`/courses/${course.value.id}/player`)
+    router.push(`/courses/${course.value.uuid}/player`)
   }
 }
 </script>

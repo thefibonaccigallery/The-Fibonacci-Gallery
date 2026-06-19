@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuery } from '@tanstack/vue-query'
 import { useCourses } from '@/composables/admin/useCourses'
@@ -51,18 +51,18 @@ const { data: courseData, isLoading } = useQuery({
   enabled: isEditMode,
 })
 
-// Populate form when course data is loaded
-onMounted(() => {
-  if (courseData.value) {
+// Populate form when course data arrives (query is async — onMounted fires before data resolves)
+watch(courseData, (data) => {
+  if (data) {
     form.value = {
-      title: courseData.value.title,
-      slug: courseData.value.slug,
-      description: courseData.value.description || '',
-      level: courseData.value.level,
-      price: courseData.value.price,
-      is_published: courseData.value.is_published,
+      title: data.title,
+      slug: data.slug,
+      description: data.description || '',
+      level: data.level,
+      price: data.price,
+      is_published: data.is_published,
     }
-    currentThumbnailUrl.value = courseData.value.thumbnail_url
+    currentThumbnailUrl.value = data.thumbnail_url
   }
 })
 

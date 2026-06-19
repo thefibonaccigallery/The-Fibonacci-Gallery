@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import { Button } from '@/components/ui/button'
-import { PhSpinner } from '@phosphor-icons/vue'
+import { Input } from '@/components/ui/input'
+import { PhSpinner, PhTag, PhCheckCircle, PhXCircle, PhX } from '@phosphor-icons/vue'
+import axiosInstance from '@/api/axiosInstance'
 
 interface Course {
   uuid: string
@@ -10,14 +13,34 @@ interface Course {
   thumbnail_url: string | null
 }
 
-defineProps<{
+interface CouponResult {
+  valid: boolean
+  message?: string
+  code?: string
+  discount_percentage?: number
+  discount_amount?: number
+  final_price?: number
+  is_free?: boolean
+}
+
+const props = defineProps<{
   course: Course
   loading?: boolean
 }>()
 
 const emit = defineEmits<{
-  next: []
+  next: [couponCode: string | null]
 }>()
+
+const couponInput = ref('')
+const isValidating = ref(false)
+const couponResult = ref<CouponResult | null>(null)
+
+const originalPrice = computed(() => Number(props.course.price))
+const finalPrice = computed(() =>
+  couponResult.value?.valid ? (couponResult.value.final_price ?? originalPrice.value) : originalPrice.value,
+)
+const isFree = computed(() => couponResult.value?.valid === true && couponResult.value.is_free === true)
 
 const getLevelColor = (level: string) => {
   switch (level.toLowerCase()) {
@@ -30,6 +53,39 @@ const getLevelColor = (level: string) => {
     default:
       return 'text-muted-foreground border-border/30 bg-secondary/50'
   }
+}
+
+const handleApply = async () => {
+  const code = couponInput.value.trim()
+  if (!code) return
+
+  isValidating.value = true
+  couponResult.value = null
+
+  try {
+    const response = await axiosInstance.post('/coupons/validate', {
+      code,
+      course_uuid: props.course.uuid,
+    })
+    couponResult.value = response.data
+  } catch (error: any) {
+    couponResult.value = {
+      valid: false,
+      message: error.response?.data?.message || 'Invalid coupon code',
+    }
+  } finally {
+    isValidating.value = false
+  }
+}
+
+const handleClear = () => {
+  couponInput.value = ''
+  couponResult.value = null
+}
+
+const handlePay = () => {
+  const appliedCode = couponResult.value?.valid ? (couponResult.value.code ?? couponInput.value.trim()) : null
+  emit('next', appliedCode)
 }
 </script>
 
@@ -84,23 +140,118 @@ const getLevelColor = (level: string) => {
           </div>
         </div>
 
-        <!-- Price -->
-        <div class="pt-4 border-t border-border/20">
+        <!-- Price block -->
+        <div class="pt-4 border-t border-border/20 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-sm text-muted-foreground">Course Price</span>
-            <span class="text-2xl font-bold text-primary">${{ Number(course.price).toFixed(2) }}</span>
+            <span
+              :class="[
+                'text-lg font-semibold',
+                couponResult?.valid ? 'line-through text-muted-foreground' : 'text-foreground',
+              ]"
+            >
+              ${{ originalPrice.toFixed(2) }}
+            </span>
+          </div>
+
+          <!-- Discount row — shown only when coupon is valid -->
+          <div v-if="couponResult?.valid" class="flex items-center justify-between">
+            <span class="text-sm text-green-500 flex items-center gap-1">
+              <PhTag :size="14" />
+              {{ couponResult.discount_percentage }}% discount
+            </span>
+            <span class="text-sm text-green-500 font-medium">
+              &minus;${{ couponResult.discount_amount?.toFixed(2) }}
+            </span>
+          </div>
+
+          <!-- Final price -->
+          <div v-if="couponResult?.valid" class="flex items-center justify-between pt-2 border-t border-border/20">
+            <span class="text-sm font-semibold text-foreground">Total</span>
+            <span class="text-2xl font-bold text-primary">
+              {{ isFree ? 'Free' : `$${finalPrice.toFixed(2)}` }}
+            </span>
+          </div>
+          <div v-else class="flex items-center justify-between">
+            <span class="text-sm font-semibold text-foreground">Total</span>
+            <span class="text-2xl font-bold text-primary">
+              ${{ originalPrice.toFixed(2) }}
+            </span>
           </div>
         </div>
       </div>
 
-      <!-- Pay Button -->
+      <!-- Coupon Section -->
+      <div class="space-y-2">
+        <p class="text-sm font-medium text-foreground flex items-center gap-2">
+          <PhTag :size="16" class="text-muted-foreground" />
+          Coupon Code
+        </p>
+
+        <!-- Applied coupon badge -->
+        <div
+          v-if="couponResult?.valid"
+          class="flex items-center justify-between px-3 py-2.5 rounded-xl bg-green-500/10 border border-green-500/30"
+        >
+          <div class="flex items-center gap-2">
+            <PhCheckCircle :size="16" class="text-green-500" weight="fill" />
+            <span class="font-mono text-sm font-semibold text-green-600 tracking-wider">
+              {{ couponResult.code }}
+            </span>
+            <span class="text-xs text-green-500">applied</span>
+          </div>
+          <button
+            type="button"
+            @click="handleClear"
+            class="text-muted-foreground hover:text-foreground transition-colors"
+            title="Remove coupon"
+          >
+            <PhX :size="16" />
+          </button>
+        </div>
+
+        <!-- Coupon input -->
+        <div v-else class="flex gap-2">
+          <Input
+            v-model="couponInput"
+            placeholder="Enter coupon code"
+            class="uppercase tracking-wider flex-1"
+            @keyup.enter="handleApply"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            class="shrink-0 px-4"
+            :disabled="isValidating || !couponInput.trim()"
+            @click="handleApply"
+          >
+            <PhSpinner v-if="isValidating" :size="14" class="animate-spin" />
+            <span v-else>Apply</span>
+          </Button>
+        </div>
+
+        <!-- Error message -->
+        <div
+          v-if="couponResult && !couponResult.valid"
+          class="flex items-center gap-2 text-xs text-destructive"
+        >
+          <PhXCircle :size="14" weight="fill" />
+          {{ couponResult.message }}
+        </div>
+      </div>
+
+      <!-- Pay / Enroll Button -->
       <Button
-        @click="emit('next')"
+        @click="handlePay"
         :disabled="loading"
         class="w-full text-sm font-semibold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center gap-2"
       >
         <PhSpinner v-if="loading" class="h-4 w-4 animate-spin" />
-        Pay with USDT (TRC20)
+        <span v-if="isFree">Enroll for Free</span>
+        <span v-else-if="couponResult?.valid">
+          Pay ${{ finalPrice.toFixed(2) }} with USDT (TRC20)
+        </span>
+        <span v-else>Pay with USDT (TRC20)</span>
       </Button>
     </div>
   </div>

@@ -2,11 +2,16 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CoursePlayerController;
+use App\Http\Controllers\CouponController;
 use App\Http\Controllers\UserCourseController;
 use App\Http\Controllers\TypesController;
+use App\Http\Controllers\Admin\CouponController as AdminCouponController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\ChapterController;
 use App\Http\Controllers\Admin\VideoController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Admin\EnrollmentController as AdminEnrollmentController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\EnrollmentController;
 use Illuminate\Support\Facades\Route;
@@ -44,6 +49,9 @@ Route::middleware('auth:api')->group(function () {
 
     Route::post('/payments/initiate/{uuid}', [PaymentController::class, 'initiatePayment']);
     Route::get('/payments/status/{orderUuid}',   [PaymentController::class, 'checkStatus']);
+
+    // Coupon validation (user-facing)
+    Route::post('/coupons/validate', [CouponController::class, 'validate']);
 });
 
 // Admin routes (protected by auth and admin middleware)
@@ -73,4 +81,25 @@ Route::middleware(['auth:api', 'role:admin|super_admin'])->prefix('admin')->grou
     Route::delete('/videos/{uuid}', [VideoController::class, 'destroy']);
     Route::post('/videos/{uuid}/upload', [VideoController::class, 'uploadVideo']);
     Route::post('/videos/reorder', [VideoController::class, 'reorder']);
+
+    // Order routes
+    Route::get('/orders', [AdminOrderController::class, 'index']);
+    Route::put('/orders/{uuid}', [AdminOrderController::class, 'update']);
+
+    // Student routes
+    Route::get('/students', [StudentController::class, 'index']);
+
+    // Enrollment routes
+    Route::get('/enrollments', [AdminEnrollmentController::class, 'index']);
+    Route::post('/enrollments', [AdminEnrollmentController::class, 'store']);
+    Route::delete('/enrollments/{uuid}', [AdminEnrollmentController::class, 'destroy']);
+
+    // Coupon routes
+    Route::get('/coupons', [AdminCouponController::class, 'index']);
+    Route::post('/coupons', [AdminCouponController::class, 'store']);
+    Route::get('/coupons/{uuid}', [AdminCouponController::class, 'show']);
+    Route::put('/coupons/{uuid}', [AdminCouponController::class, 'update']);
+    Route::delete('/coupons/{uuid}', [AdminCouponController::class, 'destroy']);
+    Route::patch('/coupons/{uuid}/toggle', [AdminCouponController::class, 'toggle']);
+    Route::get('/coupons/{uuid}/usage', [AdminCouponController::class, 'usage']);
 });

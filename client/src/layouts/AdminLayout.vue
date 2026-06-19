@@ -13,6 +13,7 @@ import {
   PhUserList,
   PhShoppingCart,
   PhGear,
+  PhTicket,
 } from '@phosphor-icons/vue'
 
 const route = useRoute()
@@ -36,6 +37,7 @@ const navSections = [
     items: [
       { name: 'Students', path: '/admin/students', icon: PhUsers },
       { name: 'Enrollments', path: '/admin/enrollments', icon: PhUserList },
+      { name: 'Coupons', path: '/admin/coupons', icon: PhTicket },
     ],
   },
   {
