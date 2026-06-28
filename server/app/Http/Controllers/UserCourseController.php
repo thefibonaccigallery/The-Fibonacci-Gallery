@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\EnrollCourseRequest;
 use App\Models\Coupon;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\VideoProgress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class UserCourseController extends Controller
 {
@@ -176,6 +176,7 @@ class UserCourseController extends Controller
             'totalLessons'  => $totalVideos,
             'length_seconds' => $course->length_seconds,
             'published_at'  => $course->published_at,
+            'what_is_included' => $course->what_is_included ?? [],
             'is_enrolled'   => $enrollment !== null,
             'chapters'      => $course->chapters->map(function ($chapter) {
                 return [
@@ -197,7 +198,7 @@ class UserCourseController extends Controller
     /**
      * Enroll in a course (free courses or 100% coupon codes)
      */
-    public function enrollCourse(Request $request, $uuid)
+    public function enrollCourse(EnrollCourseRequest $request, $uuid)
     {
         $user = Auth::user();
 
@@ -308,28 +309,26 @@ class UserCourseController extends Controller
 
         $course = $lastProgress->video->chapter->course;
 
-        // Get all video IDs for this course
-        $videoIds = $course->chapters->flatMap(function ($chapter) {
-            return $chapter->videos->pluck('id');
-        });
+        $course->loadMissing([
+            'chapters'        => fn($q) => $q->orderBy('order'),
+            'chapters.videos' => fn($q) => $q->where('is_published', true)->orderBy('order'),
+        ]);
 
-        // Get progress for all videos
-        $completedVideos = VideoProgress::where('user_id', $user->id)
+        $videoIds = $course->chapters->flatMap(fn($chapter) => $chapter->videos->pluck('id'));
+
+        $allProgress = VideoProgress::where('user_id', $user->id)
             ->whereIn('course_video_id', $videoIds)
-            ->where('is_completed', true)
-            ->count();
+            ->get()
+            ->keyBy('course_video_id');
 
-        $totalVideos = $videoIds->count();
+        $completedVideos = $allProgress->where('is_completed', true)->count();
+        $totalVideos     = $videoIds->count();
 
-        // Find next incomplete video
         $nextVideo = null;
         foreach ($course->chapters as $chapter) {
             foreach ($chapter->videos as $video) {
-                $videoProgress = VideoProgress::where('user_id', $user->id)
-                    ->where('course_video_id', $video->id)
-                    ->first();
-
-                if (!$videoProgress || !$videoProgress->is_completed) {
+                $prog = $allProgress->get($video->id);
+                if (!$prog || !$prog->is_completed) {
                     $nextVideo = $video;
                     break 2;
                 }

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreCouponRequest;
+use App\Http\Requests\Admin\UpdateCouponRequest;
+use App\Http\Resources\CouponResource;
 use App\Models\Coupon;
 use App\Models\Course;
 use Illuminate\Http\Request;
@@ -26,17 +29,8 @@ class CouponController extends Controller
         return response()->json($query);
     }
 
-    public function store(Request $request)
+    public function store(StoreCouponRequest $request)
     {
-        $request->validate([
-            'course_uuid'         => 'required|string|exists:courses,uuid',
-            'code'                => 'required|string|max:50|unique:coupons,code',
-            'discount_percentage' => 'required|numeric|min:1|max:100',
-            'max_uses'            => 'nullable|integer|min:1',
-            'expires_at'          => 'nullable|date|after:today',
-            'is_active'           => 'boolean',
-        ]);
-
         $course = Course::where('uuid', $request->course_uuid)->firstOrFail();
 
         $coupon = Coupon::create([
@@ -50,7 +44,7 @@ class CouponController extends Controller
 
         return response()->json([
             'message' => 'Coupon created successfully',
-            'coupon'  => $coupon->load('course'),
+            'coupon'  => new CouponResource($coupon->load('course')),
         ], 201);
     }
 
@@ -61,21 +55,12 @@ class CouponController extends Controller
             ->withCount('enrollments')
             ->firstOrFail();
 
-        return response()->json(['coupon' => $coupon]);
+        return response()->json(['coupon' => new CouponResource($coupon)]);
     }
 
-    public function update(Request $request, string $uuid)
+    public function update(UpdateCouponRequest $request, string $uuid)
     {
         $coupon = Coupon::where('uuid', $uuid)->firstOrFail();
-
-        $request->validate([
-            'course_uuid'         => 'sometimes|string|exists:courses,uuid',
-            'code'                => "sometimes|string|max:50|unique:coupons,code,{$coupon->id}",
-            'discount_percentage' => 'sometimes|numeric|min:1|max:100',
-            'max_uses'            => 'nullable|integer|min:1',
-            'expires_at'          => 'nullable|date',
-            'is_active'           => 'sometimes|boolean',
-        ]);
 
         if ($request->filled('course_uuid')) {
             $course            = Course::where('uuid', $request->course_uuid)->firstOrFail();
@@ -94,7 +79,7 @@ class CouponController extends Controller
 
         return response()->json([
             'message' => 'Coupon updated successfully',
-            'coupon'  => $coupon->fresh(['course']),
+            'coupon'  => new CouponResource($coupon->fresh(['course'])),
         ]);
     }
 
@@ -130,7 +115,7 @@ class CouponController extends Controller
             ->paginate($request->get('per_page', 15));
 
         return response()->json([
-            'coupon'      => $coupon,
+            'coupon'      => new CouponResource($coupon),
             'enrollments' => $enrollments,
         ]);
     }

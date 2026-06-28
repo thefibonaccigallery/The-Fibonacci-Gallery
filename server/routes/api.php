@@ -88,6 +88,8 @@ Route::middleware(['auth:api', 'role:admin|super_admin'])->prefix('admin')->grou
 
     // Student routes
     Route::get('/students', [StudentController::class, 'index']);
+    Route::post('/students/{uuid}/ban', [StudentController::class, 'ban']);
+    Route::post('/students/{uuid}/unban', [StudentController::class, 'unban']);
 
     // Enrollment routes
     Route::get('/enrollments', [AdminEnrollmentController::class, 'index']);

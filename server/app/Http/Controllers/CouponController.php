@@ -2,19 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ValidateCouponRequest;
 use App\Models\Coupon;
 use App\Models\Course;
-use Illuminate\Http\Request;
 
 class CouponController extends Controller
 {
-    public function validate(Request $request)
+    public function validate(ValidateCouponRequest $request)
     {
-        $request->validate([
-            'code'        => 'required|string',
-            'course_uuid' => 'required|string',
-        ]);
-
         $course = Course::where('uuid', $request->course_uuid)
             ->where('is_published', true)
             ->firstOrFail();

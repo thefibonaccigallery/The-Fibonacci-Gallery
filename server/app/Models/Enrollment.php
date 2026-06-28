@@ -22,14 +22,17 @@ class Enrollment extends Model
         'coupon_id',
     ];
 
-    protected $casts = [
-        'user_id'             => 'integer',
-        'course_id'           => 'integer',
-        'enrolled_at'         => 'datetime',
-        'completed_at'        => 'datetime',
-        'progress_percentage' => 'decimal:2',
-        'coupon_id'           => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'user_id'             => 'integer',
+            'course_id'           => 'integer',
+            'enrolled_at'         => 'datetime',
+            'completed_at'        => 'datetime',
+            'progress_percentage' => 'decimal:2',
+            'coupon_id'           => 'integer',
+        ];
+    }
 
     public function user()
     {

@@ -4,7 +4,12 @@ import { useRoute, useRouter } from 'vue-router'
 import { useUserCourses } from '@/composables/useUserCourses'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import { Button } from '@/components/ui/button'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import {
   PhSpinner,
   PhArrowLeft,
@@ -56,11 +61,7 @@ const getLevelColor = (level: string) => {
       <!-- Header -->
       <div class="border-b border-border/40 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div class="container mx-auto px-4 py-6">
-          <Button
-            @click="router.back()"
-            variant="ghost"
-            class="hover:bg-secondary/50"
-          >
+          <Button @click="router.back()" variant="ghost" class="hover:bg-secondary/50">
             <PhArrowLeft class="h-4 w-4 mr-2" />
             Back
           </Button>
@@ -173,7 +174,7 @@ const getLevelColor = (level: string) => {
 
           <!-- Sidebar -->
           <div class="lg:col-span-1">
-            <div class="liquid-glass rounded-2xl p-6 border border-border/20 sticky top-24">
+            <div class="liquid-glass rounded-2xl p-6 border border-border/20 sticky top-0">
               <!-- Thumbnail -->
               <div
                 class="relative w-full h-48 rounded-xl overflow-hidden bg-zinc-950 border border-primary/10 flex items-center justify-center mb-6"
@@ -237,24 +238,23 @@ const getLevelColor = (level: string) => {
               </div>
 
               <!-- What's Included -->
-              <div class="mt-8 pt-6 border-t border-border/20">
+              <div
+                v-if="course.what_is_included && course.what_is_included.length > 0"
+                class="mt-8 pt-6 border-t border-border/20"
+              >
                 <h3 class="font-semibold text-foreground mb-4">What's included:</h3>
                 <ul class="space-y-3 text-sm text-muted-foreground">
                   <li class="flex items-start gap-2">
                     <PhCheckCircle class="h-5 w-5 text-primary shrink-0 mt-0.5" weight="fill" />
                     <span>{{ course.totalLessons }} video lessons</span>
                   </li>
-                  <li class="flex items-start gap-2">
+                  <li
+                    v-for="(item, index) in course.what_is_included"
+                    :key="index"
+                    class="flex items-start gap-2"
+                  >
                     <PhCheckCircle class="h-5 w-5 text-primary shrink-0 mt-0.5" weight="fill" />
-                    <span>Lifetime access</span>
-                  </li>
-                  <li class="flex items-start gap-2">
-                    <PhCheckCircle class="h-5 w-5 text-primary shrink-0 mt-0.5" weight="fill" />
-                    <span>Progress tracking</span>
-                  </li>
-                  <li class="flex items-start gap-2">
-                    <PhCheckCircle class="h-5 w-5 text-primary shrink-0 mt-0.5" weight="fill" />
-                    <span>Certificate of completion</span>
+                    <span>{{ item }}</span>
                   </li>
                 </ul>
               </div>
@@ -268,11 +268,7 @@ const getLevelColor = (level: string) => {
 
 <style scoped>
 .liquid-glass {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.05) 0%,
-    rgba(255, 255, 255, 0.02) 100%
-  );
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
   backdrop-filter: blur(10px);
 }
 </style>

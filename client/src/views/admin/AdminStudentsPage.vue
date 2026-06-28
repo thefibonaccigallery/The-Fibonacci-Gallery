@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { useStudents } from '@/composables/admin/useStudents'
 import { useEnrollments } from '@/composables/admin/useEnrollments'
 import type { Student } from '@/types/StudentTypes'
@@ -15,8 +15,19 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
 
-const { fetchStudents } = useStudents()
+const queryClient = useQueryClient()
+const { fetchStudents, banStudent, unbanStudent } = useStudents()
 const { fetchEnrollments } = useEnrollments()
 
 const page = ref(1)
@@ -63,6 +74,45 @@ const openEnrollmentsDialog = (student: Student) => {
   selectedStudent.value = student
   enrollmentsDialogOpen.value = true
 }
+
+// Ban dialog
+const banDialogOpen = ref(false)
+const studentToBan = ref<Student | null>(null)
+const banReason = ref('')
+
+const openBanDialog = (student: Student) => {
+  studentToBan.value = student
+  banReason.value = ''
+  banDialogOpen.value = true
+}
+
+const banMutation = useMutation({
+  mutationFn: ({ uuid, reason }: { uuid: string; reason?: string }) =>
+    banStudent(uuid, reason),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['admin-students'] })
+    banDialogOpen.value = false
+    studentToBan.value = null
+  },
+})
+
+// Unban dialog
+const unbanDialogOpen = ref(false)
+const studentToUnban = ref<Student | null>(null)
+
+const openUnbanDialog = (student: Student) => {
+  studentToUnban.value = student
+  unbanDialogOpen.value = true
+}
+
+const unbanMutation = useMutation({
+  mutationFn: (uuid: string) => unbanStudent(uuid),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['admin-students'] })
+    unbanDialogOpen.value = false
+    studentToUnban.value = null
+  },
+})
 
 const formatDate = (date: string) =>
   new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
@@ -117,8 +167,19 @@ const progressBarColor = (pct: number) => {
               v-for="student in students"
               :key="student.uuid"
               class="hover:bg-muted/30 transition-colors"
+              :class="{ 'opacity-60': student.is_banned }"
             >
-              <td class="px-4 py-3 font-medium text-foreground">{{ student.name }}</td>
+              <td class="px-4 py-3 font-medium text-foreground">
+                <div class="flex items-center gap-2">
+                  {{ student.name }}
+                  <span
+                    v-if="student.is_banned"
+                    class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-destructive/10 text-destructive"
+                  >
+                    Banned
+                  </span>
+                </div>
+              </td>
               <td class="px-4 py-3 text-muted-foreground">{{ student.email }}</td>
               <td class="px-4 py-3 text-muted-foreground">{{ student.country ?? 'N/A' }}</td>
               <td class="px-4 py-3">
@@ -130,13 +191,33 @@ const progressBarColor = (pct: number) => {
                 {{ formatDate(student.created_at) }}
               </td>
               <td class="px-4 py-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  @click="openEnrollmentsDialog(student)"
-                >
-                  View Enrollments
-                </Button>
+                <div class="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    @click="openEnrollmentsDialog(student)"
+                  >
+                    View Enrollments
+                  </Button>
+                  <Button
+                    v-if="student.is_banned"
+                    variant="outline"
+                    size="sm"
+                    @click="openUnbanDialog(student)"
+                    :disabled="unbanMutation.isPending.value"
+                  >
+                    Unban
+                  </Button>
+                  <Button
+                    v-else
+                    variant="destructive"
+                    size="sm"
+                    @click="openBanDialog(student)"
+                    :disabled="banMutation.isPending.value"
+                  >
+                    Ban
+                  </Button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -226,5 +307,54 @@ const progressBarColor = (pct: number) => {
         </div>
       </DialogContent>
     </Dialog>
+
+    <!-- Ban Confirmation Dialog -->
+    <AlertDialog v-model:open="banDialogOpen">
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Ban {{ studentToBan?.name }}?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will immediately revoke all active sessions. The student will not be able to log in.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <div class="py-2">
+          <Input
+            v-model="banReason"
+            placeholder="Reason (optional)"
+          />
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            :disabled="banMutation.isPending.value"
+            @click="banMutation.mutate({ uuid: studentToBan!.uuid, reason: banReason || undefined })"
+          >
+            {{ banMutation.isPending.value ? 'Banning...' : 'Ban Student' }}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
+    <!-- Unban Confirmation Dialog -->
+    <AlertDialog v-model:open="unbanDialogOpen">
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Unban {{ studentToUnban?.name }}?</AlertDialogTitle>
+          <AlertDialogDescription>
+            The student will be able to log in and access the platform again.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            :disabled="unbanMutation.isPending.value"
+            @click="unbanMutation.mutate(studentToUnban!.uuid)"
+          >
+            {{ unbanMutation.isPending.value ? 'Unbanning...' : 'Unban Student' }}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 </template>

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreEnrollmentRequest;
+use App\Http\Resources\EnrollmentResource;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\User;
@@ -27,13 +29,8 @@ class EnrollmentController extends Controller
         return response()->json($query);
     }
 
-    public function store(Request $request)
+    public function store(StoreEnrollmentRequest $request)
     {
-        $request->validate([
-            'user_uuid'   => 'required|string',
-            'course_uuid' => 'required|string',
-        ]);
-
         $user   = User::where('uuid', $request->user_uuid)->firstOrFail();
         $course = Course::where('uuid', $request->course_uuid)->firstOrFail();
 
@@ -44,7 +41,7 @@ class EnrollmentController extends Controller
 
         return response()->json([
             'message'    => 'Student enrolled successfully',
-            'enrollment' => $enrollment->load(['user', 'course']),
+            'enrollment' => new EnrollmentResource($enrollment->load(['user', 'course'])),
         ], 201);
     }
 

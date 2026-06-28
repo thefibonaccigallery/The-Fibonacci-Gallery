@@ -10,6 +10,7 @@ export interface Course {
   level: CourseLevel
   length_seconds: number
   price: number
+  what_is_included: string[] | null
   is_published: boolean
   published_at: string | null
   created_at: string
@@ -50,6 +51,7 @@ export interface CourseFormData {
   description?: string
   level: CourseLevel
   price: number
+  what_is_included?: string[]
   is_published: boolean
 }
 

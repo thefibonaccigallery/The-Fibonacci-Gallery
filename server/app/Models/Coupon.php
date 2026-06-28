@@ -19,13 +19,16 @@ class Coupon extends Model
         'is_active',
     ];
 
-    protected $casts = [
-        'course_id'           => 'integer',
-        'discount_percentage' => 'decimal:2',
-        'max_uses'            => 'integer',
-        'expires_at'          => 'datetime',
-        'is_active'           => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'course_id'           => 'integer',
+            'discount_percentage' => 'decimal:2',
+            'max_uses'            => 'integer',
+            'expires_at'          => 'datetime',
+            'is_active'           => 'boolean',
+        ];
+    }
 
     public function course()
     {

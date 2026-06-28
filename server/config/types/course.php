@@ -5,4 +5,5 @@ return [
         'intermediate',
         'advanced',
     ],
+    'completion_threshold' => 70,
 ];

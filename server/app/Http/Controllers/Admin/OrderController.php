@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Enrollment;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
@@ -53,17 +54,19 @@ class OrderController extends Controller
             ? ($order->paid_at ?? now())
             : $order->paid_at;
 
-        $order->update([
-            'status'  => $request->status,
-            'paid_at' => $paidAt,
-        ]);
+        DB::transaction(function () use ($order, $request, $paidAt) {
+            $order->update([
+                'status'  => $request->status,
+                'paid_at' => $paidAt,
+            ]);
 
-        if ($request->status === 'finished') {
-            Enrollment::firstOrCreate(
-                ['user_id' => $order->user_id, 'course_id' => $order->course_id],
-                ['enrolled_at' => now()]
-            );
-        }
+            if ($request->status === 'finished') {
+                Enrollment::firstOrCreate(
+                    ['user_id' => $order->user_id, 'course_id' => $order->course_id],
+                    ['enrolled_at' => now()]
+                );
+            }
+        });
 
         return response()->json([
             'message' => 'Order updated successfully',

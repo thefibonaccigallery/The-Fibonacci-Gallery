@@ -25,16 +25,19 @@ class VideoProgress extends Model
         'cooldown_until',
     ];
 
-    protected $casts = [
-        'user_id' => 'integer',
-        'course_video_id' => 'integer',
-        'is_completed' => 'boolean',
-        'completed_at' => 'datetime',
-        'watch_time_seconds' => 'integer',
-        'watch_percentage' => 'decimal:2',
-        'last_watched_at' => 'datetime',
-        'cooldown_until' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'user_id'            => 'integer',
+            'course_video_id'    => 'integer',
+            'is_completed'       => 'boolean',
+            'completed_at'       => 'datetime',
+            'watch_time_seconds' => 'integer',
+            'watch_percentage'   => 'decimal:2',
+            'last_watched_at'    => 'datetime',
+            'cooldown_until'     => 'datetime',
+        ];
+    }
 
     public function user()
     {

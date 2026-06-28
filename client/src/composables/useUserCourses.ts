@@ -41,6 +41,7 @@ export interface CourseDetail {
   totalLessons: number
   length_seconds: number
   published_at: string
+  what_is_included: string[] | null
   is_enrolled: boolean
   chapters: Array<{
     uuid: string

@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/vue-query'
 import axiosInstance from '@/api/axiosInstance'
 import type { StudentsResponse } from '@/types/StudentTypes'
 
@@ -13,7 +12,17 @@ export function useStudents() {
     return response.data
   }
 
+  const banStudent = async (uuid: string, reason?: string): Promise<void> => {
+    await axiosInstance.post(`/admin/students/${uuid}/ban`, { reason: reason || null })
+  }
+
+  const unbanStudent = async (uuid: string): Promise<void> => {
+    await axiosInstance.post(`/admin/students/${uuid}/unban`)
+  }
+
   return {
     fetchStudents,
+    banStudent,
+    unbanStudent,
   }
 }

@@ -21,4 +21,40 @@ class StudentController extends Controller
 
         return response()->json($query);
     }
+
+    public function ban(Request $request, string $uuid)
+    {
+        $user = User::where('uuid', $uuid)
+            ->whereDoesntHave('roles', fn($q) => $q->whereIn('name', ['admin', 'super_admin']))
+            ->firstOrFail();
+
+        $user->tokens()->each(fn($token) => $token->revoke());
+
+        $user->update([
+            'is_banned' => true,
+            'banned_at' => now(),
+            'ban_reason' => $request->input('reason'),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Student banned successfully.',
+        ]);
+    }
+
+    public function unban(string $uuid)
+    {
+        $user = User::where('uuid', $uuid)->firstOrFail();
+
+        $user->update([
+            'is_banned' => false,
+            'banned_at' => null,
+            'ban_reason' => null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Student unbanned successfully.',
+        ]);
+    }
 }

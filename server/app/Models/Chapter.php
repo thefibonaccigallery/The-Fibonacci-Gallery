@@ -20,11 +20,14 @@ class Chapter extends Model
         'order',
     ];
 
-    protected $casts = [
-        'course_id' => 'integer',
-        'length_seconds' => 'integer',
-        'order' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'course_id'      => 'integer',
+            'length_seconds' => 'integer',
+            'order'          => 'integer',
+        ];
+    }
 
     protected static function boot()
     {

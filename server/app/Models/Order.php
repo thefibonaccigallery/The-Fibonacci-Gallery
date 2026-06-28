@@ -27,15 +27,18 @@ class Order extends Model
         'paid_at',
     ];
 
-    protected $casts = [
-        'user_id'       => 'integer',
-        'course_id'     => 'integer',
-        'coupon_id'     => 'integer',
-        'amount'        => 'decimal:2',
-        'pay_amount'    => 'decimal:8',
-        'actually_paid' => 'decimal:8',
-        'paid_at'       => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'user_id'       => 'integer',
+            'course_id'     => 'integer',
+            'coupon_id'     => 'integer',
+            'amount'        => 'decimal:2',
+            'pay_amount'    => 'decimal:8',
+            'actually_paid' => 'decimal:8',
+            'paid_at'       => 'datetime',
+        ];
+    }
 
     protected $hidden = [
         'id',

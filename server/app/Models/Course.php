@@ -21,16 +21,21 @@ class Course extends Model
         'level',
         'length_seconds',
         'price',
+        'what_is_included',
         'is_published',
         'published_at',
     ];
 
-    protected $casts = [
-        'price' => 'decimal:2',
-        'is_published' => 'boolean',
-        'published_at' => 'datetime',
-        'length_seconds' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'price'            => 'decimal:2',
+            'is_published'     => 'boolean',
+            'published_at'     => 'datetime',
+            'length_seconds'   => 'integer',
+            'what_is_included' => 'array',
+        ];
+    }
 
     protected $appends = ['thumbnail_url'];
 

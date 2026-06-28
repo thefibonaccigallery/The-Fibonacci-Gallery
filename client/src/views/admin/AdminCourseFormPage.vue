@@ -6,7 +6,7 @@ import { useCourses } from '@/composables/admin/useCourses'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import ImageUpload from '@/components/admin/shared/ImageUpload.vue'
-import { PhArrowLeft, PhFloppyDisk } from '@phosphor-icons/vue'
+import { PhArrowLeft, PhFloppyDisk, PhPlus, PhTrash } from '@phosphor-icons/vue'
 import type { CourseFormData, CourseLevel } from '@/types/CourseTypes'
 
 const route = useRoute()
@@ -37,6 +37,7 @@ const form = ref<CourseFormData>({
   description: '',
   level: 'beginner',
   price: 0,
+  what_is_included: [],
   is_published: false,
 })
 
@@ -51,7 +52,6 @@ const { data: courseData, isLoading } = useQuery({
   enabled: isEditMode,
 })
 
-// Populate form when course data arrives (query is async — onMounted fires before data resolves)
 watch(courseData, (data) => {
   if (data) {
     form.value = {
@@ -60,11 +60,12 @@ watch(courseData, (data) => {
       description: data.description || '',
       level: data.level,
       price: data.price,
+      what_is_included: data.what_is_included ? [...data.what_is_included] : [],
       is_published: data.is_published,
     }
     currentThumbnailUrl.value = data.thumbnail_url
   }
-})
+}, { immediate: true })
 
 // Auto-generate slug from title
 const handleTitleChange = () => {
@@ -144,6 +145,14 @@ const handleDeleteThumbnail = () => {
     deleteThumbnail(courseUuid.value)
     currentThumbnailUrl.value = null
   }
+}
+
+const addIncludedItem = () => {
+  form.value.what_is_included = [...(form.value.what_is_included ?? []), '']
+}
+
+const removeIncludedItem = (index: number) => {
+  form.value.what_is_included = (form.value.what_is_included ?? []).filter((_, i) => i !== index)
 }
 
 const isSaving = computed(() => isCreating.value || isUpdating.value || isUploadingThumbnail.value)
@@ -281,6 +290,44 @@ const isSaving = computed(() => isCreating.value || isUpdating.value || isUpload
         <p class="text-xs text-muted-foreground">
           Published courses are visible to students. Unpublished courses are only visible to admins.
         </p>
+      </div>
+
+      <!-- What's Included -->
+      <div class="liquid-glass rounded-xl p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-foreground">What's Included</h3>
+          <Button type="button" variant="outline" size="sm" class="gap-2" @click="addIncludedItem">
+            <PhPlus :size="16" />
+            Add Item
+          </Button>
+        </div>
+        <p class="text-xs text-muted-foreground">
+          List the benefits students get from this course (e.g. "Lifetime access", "Certificate of completion").
+        </p>
+        <div v-if="(form.what_is_included ?? []).length === 0" class="text-sm text-muted-foreground py-2">
+          No items yet. Click "Add Item" to get started.
+        </div>
+        <div
+          v-for="(item, index) in form.what_is_included"
+          :key="index"
+          class="flex items-center gap-2"
+        >
+          <Input
+            :value="item"
+            @input="(e: Event) => { const arr = [...(form.what_is_included ?? [])]; arr[index] = (e.target as HTMLInputElement).value; form.what_is_included = arr }"
+            placeholder="e.g. Lifetime access"
+            class="flex-1"
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            class="text-destructive hover:text-destructive shrink-0"
+            @click="removeIncludedItem(index)"
+          >
+            <PhTrash :size="16" />
+          </Button>
+        </div>
       </div>
 
       <!-- Actions -->

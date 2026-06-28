@@ -23,13 +23,16 @@ class CourseVideo extends Model
         'is_preview',
     ];
 
-    protected $casts = [
-        'chapter_id' => 'integer',
-        'order' => 'integer',
-        'duration_seconds' => 'integer',
-        'is_published' => 'boolean',
-        'is_preview' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'chapter_id'       => 'integer',
+            'order'            => 'integer',
+            'duration_seconds' => 'integer',
+            'is_published'     => 'boolean',
+            'is_preview'       => 'boolean',
+        ];
+    }
 
     protected static function boot()
     {
@@ -58,7 +61,7 @@ class CourseVideo extends Model
 
     public function videoProgress()
     {
-        return $this->hasMany(VideoProgress::class, 'video_id');
+        return $this->hasMany(VideoProgress::class, 'course_video_id');
     }
 
     public function scopePublished($query)
