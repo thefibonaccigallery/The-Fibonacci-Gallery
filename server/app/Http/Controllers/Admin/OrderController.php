@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Enrollment;
 use App\Models\Order;
+use App\Services\NowPaymentsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
@@ -22,6 +24,8 @@ class OrderController extends Controller
         'expired',
         'refunded',
     ];
+
+    public function __construct(private NowPaymentsService $nowPayments) {}
 
     public function index(Request $request)
     {
@@ -53,6 +57,26 @@ class OrderController extends Controller
         $paidAt = $request->status === 'finished'
             ? ($order->paid_at ?? now())
             : $order->paid_at;
+
+        // When canceling/expiring an order, sync current status from NowPayments first
+        // to ensure we have the latest information before overriding
+        $terminalStatuses = ['failed', 'expired', 'refunded'];
+        if ($order->nowpayments_payment_id && in_array($request->status, $terminalStatuses) && $order->status !== $request->status) {
+            try {
+                // Get the actual current status from NowPayments
+                $liveStatus = $this->nowPayments->getPaymentStatus($order->nowpayments_payment_id);
+                
+                Log::info("Admin updating order {$uuid} to {$request->status}. NowPayments status: " . ($liveStatus['payment_status'] ?? 'unknown'));
+                
+                // If NowPayments already marked it as a terminal status, use that
+                if (isset($liveStatus['payment_status']) && in_array($liveStatus['payment_status'], $terminalStatuses)) {
+                    $request->merge(['status' => $liveStatus['payment_status']]);
+                }
+            } catch (\Exception $e) {
+                // Log the error but continue with admin's requested status
+                Log::warning("Could not fetch NowPayments status for order {$uuid} before cancellation: " . $e->getMessage());
+            }
+        }
 
         DB::transaction(function () use ($order, $request, $paidAt) {
             $order->update([

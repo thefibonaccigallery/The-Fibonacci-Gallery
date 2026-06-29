@@ -23,6 +23,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/types', [TypesController::class, 'index']);
 Route::post('/payments/webhook', [PaymentController::class, 'webhook'])
     ->name('payments.webhook');
+Route::get('/public-courses', [UserCourseController::class, 'publicCourses']);
 
 
 // Protected routes
@@ -47,6 +48,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/enroll/{uuid}', [EnrollmentController::class, 'enroll']);
     Route::get('/enroll/{uuid}/status', [EnrollmentController::class, 'status']);
 
+    Route::get('/payments/currencies', [PaymentController::class, 'currencies']);
     Route::post('/payments/initiate/{uuid}', [PaymentController::class, 'initiatePayment']);
     Route::get('/payments/status/{orderUuid}',   [PaymentController::class, 'checkStatus']);
 

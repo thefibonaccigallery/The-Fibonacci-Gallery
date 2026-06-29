@@ -6,7 +6,7 @@ import { PhCopy, PhWarning, PhX } from '@phosphor-icons/vue'
 interface PaymentDetails {
   payment_id: string
   pay_address: string
-  pay_amount: number
+  pay_amount: number | string
   pay_currency: string
   order_uuid: string
   expiration_estimate_date: string
@@ -75,7 +75,7 @@ defineProps<{
         <label class="text-sm font-medium text-muted-foreground">Amount to Send</label>
         <div class="p-4 bg-secondary/50 rounded-xl border border-border/40">
           <div class="text-2xl font-bold text-foreground font-primary">
-            {{ paymentDetails.pay_amount.toFixed(8) }} {{ paymentDetails.pay_currency }}
+            {{ Number(paymentDetails.pay_amount).toFixed(8) }} {{ paymentDetails.pay_currency }}
           </div>
         </div>
       </div>

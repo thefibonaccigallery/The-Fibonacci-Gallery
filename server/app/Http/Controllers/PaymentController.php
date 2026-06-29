@@ -15,6 +15,11 @@ class PaymentController extends Controller
 {
     public function __construct(private NowPaymentsService $nowPayments) {}
 
+    public function currencies()
+    {
+        return response()->json(config('types.order.accepted_currencies'));
+    }
+
     public function initiatePayment(InitiatePaymentRequest $request, string $uuid)
     {
 
@@ -70,15 +75,47 @@ class PaymentController extends Controller
             if (!$existingOrder->nowpayments_payment_id) {
                 $existingOrder->delete();
             } else {
-                // Valid pending payment — return stored details so frontend can restore step 2
-                return response()->json([
-                    'payment_id'               => $existingOrder->nowpayments_payment_id,
-                    'pay_address'              => $existingOrder->pay_address,
-                    'pay_amount'               => $existingOrder->pay_amount,
-                    'pay_currency'             => $existingOrder->pay_currency,
-                    'order_uuid'               => $existingOrder->uuid,
-                    'expiration_estimate_date' => null,
-                ]);
+                // Check if course price has changed since the order was created
+                $priceChanged = abs((float)$existingOrder->amount - $amount) > 0.01;
+                
+                // Check if payment currency has changed
+                $currencyChanged = $existingOrder->pay_currency !== $request->pay_currency;
+                
+                if ($priceChanged || $currencyChanged) {
+                    // Price or currency changed - mark old order as expired and create new one
+                    $existingOrder->update(['status' => 'expired']);
+                } else {
+                    // Check if the payment is still active on NowPayments
+                    try {
+                        $liveStatus = $this->nowPayments->getPaymentStatus($existingOrder->nowpayments_payment_id);
+                        
+                        // If payment has expired/failed on NowPayments, update our status and allow new payment
+                        if (isset($liveStatus['payment_status']) && in_array($liveStatus['payment_status'], ['expired', 'failed', 'refunded'])) {
+                            $existingOrder->update(['status' => $liveStatus['payment_status']]);
+                            // Payment is no longer active, allow creating a new one
+                        } else {
+                            // Valid pending payment — return stored details so frontend can restore step 2
+                            return response()->json([
+                                'payment_id'               => $existingOrder->nowpayments_payment_id,
+                                'pay_address'              => $existingOrder->pay_address,
+                                'pay_amount'               => $existingOrder->pay_amount,
+                                'pay_currency'             => $existingOrder->pay_currency,
+                                'order_uuid'               => $existingOrder->uuid,
+                                'expiration_estimate_date' => $existingOrder->expires_at?->toIso8601String(),
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        // If we can't check NowPayments, assume the payment is still active
+                        return response()->json([
+                            'payment_id'               => $existingOrder->nowpayments_payment_id,
+                            'pay_address'              => $existingOrder->pay_address,
+                            'pay_amount'               => $existingOrder->pay_amount,
+                            'pay_currency'             => $existingOrder->pay_currency,
+                            'order_uuid'               => $existingOrder->uuid,
+                            'expiration_estimate_date' => $existingOrder->expires_at?->toIso8601String(),
+                        ]);
+                    }
+                }
             }
         }
 
@@ -112,6 +149,9 @@ class PaymentController extends Controller
             'nowpayments_order_id'   => $payment['order_id'] ?? null,
             'pay_address'            => $payment['pay_address'] ?? null,
             'pay_amount'             => $payment['pay_amount'] ?? null,
+            'expires_at'             => isset($payment['expiration_estimate_date']) 
+                ? \Carbon\Carbon::parse($payment['expiration_estimate_date'])
+                : null,
         ]);
 
         return response()->json([
@@ -120,7 +160,7 @@ class PaymentController extends Controller
             'pay_amount'               => $payment['pay_amount'],
             'pay_currency'             => $payment['pay_currency'],
             'order_uuid'               => $order->uuid,
-            'expiration_estimate_date' => $payment['expiration_estimate_date'] ?? null,
+            'expiration_estimate_date' => $order->expires_at?->toIso8601String(),
         ]);
     }
 

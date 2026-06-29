@@ -79,6 +79,43 @@ class UserCourseController extends Controller
     }
 
     /**
+     * Get up to 3 published courses for the public home page (no auth required)
+     */
+    public function publicCourses()
+    {
+        $courses = Course::where('is_published', true)
+            ->with(['chapters.videos' => function ($query) {
+                $query->where('is_published', true);
+            }])
+            ->orderBy('published_at', 'desc')
+            ->limit(3)
+            ->get();
+
+        $publicCourses = $courses->map(function ($course) {
+            $totalVideos = $course->chapters->sum(function ($chapter) {
+                return $chapter->videos->count();
+            });
+
+            return [
+                'uuid'           => $course->uuid,
+                'title'          => $course->title,
+                'description'    => $course->description,
+                'thumbnail_url'  => $course->thumbnail_url,
+                'level'          => $course->level,
+                'price'          => $course->price,
+                'totalLessons'   => $totalVideos,
+                'length_seconds' => $course->length_seconds,
+                'published_at'   => $course->published_at,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'courses' => $publicCourses,
+        ]);
+    }
+
+    /**
      * Get courses available to explore (not enrolled)
      */
     public function exploreCourses(Request $request)

@@ -35,16 +35,6 @@ class NowPaymentsService
         return $response->json();
     }
 
-    // Get available currencies
-    public function getAvailableCurrencies(): array
-    {
-        $response = Http::withHeaders([
-            'x-api-key' => $this->apiKey,
-        ])->get("{$this->apiUrl}/currencies");
-
-        return $response->json();
-    }
-
     // Get payment status
     public function getPaymentStatus(string $paymentId): array
     {

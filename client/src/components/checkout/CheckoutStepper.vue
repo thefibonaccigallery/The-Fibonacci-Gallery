@@ -8,7 +8,8 @@ const props = defineProps<{
 
 const steps = [
   { number: 1, label: 'Summary' },
-  { number: 2, label: 'Payment' },
+  { number: 2, label: 'Currency' },
+  { number: 3, label: 'Payment' },
 ]
 
 const getStepStatus = (stepNumber: number) => {

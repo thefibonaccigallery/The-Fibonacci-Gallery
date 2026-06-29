@@ -29,7 +29,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  next: [couponCode: string | null]
+  next: [couponCode: string | null, isFree: boolean]
 }>()
 
 const couponInput = ref('')
@@ -85,7 +85,8 @@ const handleClear = () => {
 
 const handlePay = () => {
   const appliedCode = couponResult.value?.valid ? (couponResult.value.code ?? couponInput.value.trim()) : null
-  emit('next', appliedCode)
+  const courseIsFree = originalPrice.value === 0 || isFree.value
+  emit('next', appliedCode, courseIsFree)
 }
 </script>
 
@@ -249,9 +250,9 @@ const handlePay = () => {
         <PhSpinner v-if="loading" class="h-4 w-4 animate-spin" />
         <span v-if="isFree">Enroll for Free</span>
         <span v-else-if="couponResult?.valid">
-          Pay ${{ finalPrice.toFixed(2) }} with USDT (TRC20)
+          Pay ${{ finalPrice.toFixed(2) }} with USDT 
         </span>
-        <span v-else>Pay with USDT (TRC20)</span>
+        <span v-else>Pay with USDT </span>
       </Button>
     </div>
   </div>

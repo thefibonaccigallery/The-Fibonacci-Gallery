@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import router from '@/router'
+import { useRoute } from 'vue-router'
 import Cookies from 'js-cookie'
 import axiosInstance from '@/api/axiosInstance'
 import { useMutation } from '@tanstack/vue-query'
@@ -21,6 +22,20 @@ export const useAuthStore = defineStore('auth', () => {
   // State
   const user = ref<User | null>(null)
   const errors = ref<NormalizedErrors<RegisterFormField | LoginFormField>>({})
+
+  /** Helper: get redirect path from query, fallback to default */
+  function getRedirectPath(defaultPath: string): string {
+    try {
+      const route = useRoute()
+      const redirectTo = route.query.redirect as string | undefined
+      if (redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) {
+        return redirectTo
+      }
+    } catch {
+      // useRoute() can throw outside component context — safe to ignore
+    }
+    return defaultPath
+  }
   const countries = ref<string[]>([
     'Afghanistan',
     'Albania',
@@ -302,7 +317,7 @@ export const useAuthStore = defineStore('auth', () => {
       if (data.user?.role === 'admin') {
         router.push('/admin/dashboard')
       } else {
-        router.push('/user-home')
+        router.push(getRedirectPath('/user-home'))
       }
       toast.success('Signed in successfully')
     },
@@ -327,8 +342,8 @@ export const useAuthStore = defineStore('auth', () => {
       // Store user data
       setUserData(data.user)
 
-      // Always redirect to user-home after registration
-      router.push('/user-home')
+      // Redirect after registration — honour ?redirect= if present
+      router.push(getRedirectPath('/user-home'))
       toast.success('Account created successfully')
     },
     onError: (error: any) => {

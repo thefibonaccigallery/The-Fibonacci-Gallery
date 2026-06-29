@@ -25,6 +25,7 @@ class Order extends Model
         'actually_paid',
         'status',
         'paid_at',
+        'expires_at',
     ];
 
     protected function casts(): array
@@ -37,6 +38,7 @@ class Order extends Model
             'pay_amount'    => 'decimal:8',
             'actually_paid' => 'decimal:8',
             'paid_at'       => 'datetime',
+            'expires_at'    => 'datetime',
         ];
     }
 

@@ -38,6 +38,13 @@ interface PaymentStatus {
   course_uuid: string | null
 }
 
+interface Currency {
+  id: string
+  name: string
+  network: string
+  fee: string
+}
+
 const terminalStatuses = ['finished', 'failed', 'expired', 'refunded']
 
 export function useCheckout() {
@@ -47,6 +54,7 @@ export function useCheckout() {
   const paymentDetails = ref<PaymentDetails | null>(null)
   const timeLeft = ref('')
   const qrDataUrl = ref('')
+  const selectedCurrency = ref<string | null>(null)
 
   // Module-level interval ref so it can be safely cleared from onUnmounted
   // (can't use onUnmounted inside the async onSuccess callback of a mutation)
@@ -58,6 +66,17 @@ export function useCheckout() {
       countdownInterval = null
     }
   })
+
+  // Fetch accepted currencies
+  const useCurrencies = () => {
+    return useQuery<Currency[]>({
+      queryKey: ['accepted-currencies'],
+      queryFn: async () => {
+        const response = await axiosInstance.get('/payments/currencies')
+        return response.data
+      },
+    })
+  }
 
   // Fetch course details
   const useCourseDetails = (courseUuid: string) => {
@@ -96,7 +115,7 @@ export function useCheckout() {
           return
         }
         paymentDetails.value = data
-        currentStep.value = 2
+        currentStep.value = 3
         startCountdown(data.expiration_estimate_date)
         generateQr(data.pay_address)
       },
@@ -138,15 +157,22 @@ export function useCheckout() {
   }
 
   // Countdown timer
-  const startCountdown = (expiryDate: string) => {
+  const startCountdown = (expiryDate: string | null) => {
     if (countdownInterval !== null) clearInterval(countdownInterval)
+
+    // If no expiry date provided, don't start countdown
+    if (!expiryDate) {
+      timeLeft.value = 'Checking...'
+      return
+    }
 
     countdownInterval = window.setInterval(() => {
       const diff = new Date(expiryDate).getTime() - Date.now()
       if (diff <= 0) {
-        timeLeft.value = 'Expired'
+        timeLeft.value = 'Checking expiration...'
         clearInterval(countdownInterval!)
         countdownInterval = null
+        // Don't navigate - let the status polling detect actual expiration
         return
       }
       const minutes = Math.floor(diff / 1000 / 60)
@@ -189,8 +215,10 @@ export function useCheckout() {
     paymentDetails,
     timeLeft,
     qrDataUrl,
+    selectedCurrency,
 
     // Queries and Mutations
+    useCurrencies,
     useCourseDetails,
     useInitiatePayment,
     usePaymentStatus,

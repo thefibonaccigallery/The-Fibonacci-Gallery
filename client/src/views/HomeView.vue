@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
+import Cookies from 'js-cookie'
 import { Button } from '@/components/ui/button'
 import ThemeToggle from '@/components/blocks/ThemeToggle.vue'
 import AnimatedHeading from '@/components/blocks/AnimatedHeading.vue'
 import FadeIn from '@/components/blocks/FadeIn.vue'
 import VideoBackground from '@/components/blocks/VideoBackground.vue'
 import TraderviewWidget from '@/components/blocks/TraderviewWidget.vue'
+import axiosInstance from '@/api/axiosInstance'
 import {
   PhChartLineUp,
   PhShieldCheck,
@@ -115,38 +117,76 @@ const features = [
   },
 ]
 
-const courses = [
-  {
-    title: 'Fibonacci Foundations',
-    level: 'Beginner',
-    lessons: 24,
-    duration: '12 hours',
-    price: '$97',
-    description:
-      'Start your trading journey with the mathematical principles behind market movements.',
-    video: courseVideos[0],
-  },
-  {
-    title: 'Advanced Chart Patterns',
-    level: 'Intermediate',
-    lessons: 36,
-    duration: '18 hours',
-    price: '$197',
-    description:
-      'Dive deep into harmonic patterns, supply & demand zones, and multi-timeframe analysis.',
-    video: courseVideos[1],
-  },
-  {
-    title: 'Elite Trading Masterclass',
-    level: 'Advanced',
-    lessons: 48,
-    duration: '24 hours',
-    price: '$497',
-    description:
-      'The complete system: institutional order flow, smart money concepts, and algorithmic edge detection.',
-    video: courseVideos[2],
-  },
-]
+// ── Courses from backend ──────────────────────────────────────────────────────
+interface BackendCourse {
+  uuid: string
+  title: string
+  description: string
+  thumbnail_url: string | null
+  level: string
+  price: string
+  totalLessons: number
+  length_seconds: number
+  published_at: string
+}
+
+const fetchedCourses = ref<BackendCourse[]>([])
+const coursesLoading = ref(true)
+const coursesError = ref(false)
+
+onMounted(async () => {
+  try {
+    const res = await axiosInstance.get('/public-courses')
+    fetchedCourses.value = res.data.courses ?? []
+  } catch {
+    coursesError.value = true
+  } finally {
+    coursesLoading.value = false
+  }
+})
+
+/** Format length_seconds → human-readable string */
+function formatDuration(seconds: number): string {
+  if (!seconds) return 'N/A'
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  if (h > 0) return `${h}h ${m > 0 ? m + 'm' : ''}`.trim()
+  return `${m}m`
+}
+
+/** Always show exactly 3 cards; pad with coming-soon placeholders */
+const displayCourses = computed(() => {
+  const real = fetchedCourses.value.slice(0, 3).map((c, i) => ({
+    type: 'real' as const,
+    uuid: c.uuid,
+    title: c.title,
+    description: c.description,
+    thumbnail_url: c.thumbnail_url,
+    level: c.level,
+    price: `$${parseFloat(c.price).toFixed(0)}`,
+    lessons: c.totalLessons,
+    duration: formatDuration(c.length_seconds),
+    video: courseVideos[i] ?? courseVideos[0],
+  }))
+  const slots = 3 - real.length
+  const placeholders = Array.from({ length: slots }, (_, i) => ({
+    type: 'coming-soon' as const,
+    id: `cs-${i}`,
+    video: courseVideos[(real.length + i) % courseVideos.length],
+  }))
+  return [...real, ...placeholders]
+})
+
+// ── Auth-aware enroll handler ─────────────────────────────────────────────────
+const router = useRouter()
+function enrollOrLogin(courseUuid: string) {
+  const token = Cookies.get('access_token')
+  if (token) {
+    router.push(`/courses/${courseUuid}/details`)
+  } else {
+    router.push({ path: '/login', query: { redirect: `/courses/${courseUuid}/details` } })
+  }
+}
 
 const testimonials = [
   {
@@ -187,11 +227,6 @@ const faqs = [
     question: 'How long do I have access to the courses?',
     answer:
       "You get lifetime access to all course materials, including future updates. Plus, you'll have access to our community Discord and weekly live sessions for as long as your membership is active.",
-  },
-  {
-    question: 'Is there a money-back guarantee?',
-    answer:
-      "Yes! We offer a 30-day money-back guarantee on all courses. If you're not satisfied with the content, simply reach out and we'll process a full refund within 48 hours.",
   },
   {
     question: 'What makes The Fibonacci Gallery different?',
@@ -492,76 +527,165 @@ of Trading"
           </p>
         </div>
 
-        <!-- Course cards -->
-        <div class="grid md:grid-cols-3 gap-6">
+        <!-- Loading skeleton -->
+        <div v-if="coursesLoading" class="grid md:grid-cols-3 gap-6">
           <div
-            v-for="(course, i) in courses"
-            :key="course.title"
-            class="group relative rounded-2xl overflow-hidden border border-border/20 transition-all duration-500 hover:border-primary/30 flex flex-col"
-            :style="{
-              opacity: visibleSections.has('courses') ? 1 : 0,
-              transform: visibleSections.has('courses') ? 'translateY(0)' : 'translateY(30px)',
-              transitionDelay: `${i * 150 + 200}ms`,
-            }"
+            v-for="n in 3"
+            :key="n"
+            class="rounded-2xl overflow-hidden border border-border/20 animate-pulse flex flex-col"
           >
-            <!-- Video thumbnail -->
-            <div class="relative h-48 overflow-hidden">
-              <video
-                autoplay
-                loop
-                muted
-                playsinline
-                class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              >
-                <source :src="course.video" type="video/mp4" />
-              </video>
-              <div class="absolute inset-0 bg-background/30 dark:bg-black/30" />
-              <!-- Level badge -->
-              <div class="absolute top-4 left-4 z-10">
-                <span
-                  class="liquid-glass rounded-full px-3 py-1 text-xs font-medium border border-border/20"
-                  :class="[
-                    course.level === 'Beginner'
-                      ? 'text-green-600 dark:text-green-400'
-                      : course.level === 'Intermediate'
-                        ? 'text-yellow-600 dark:text-yellow-400'
-                        : 'text-red-500 dark:text-red-400',
-                  ]"
-                >
-                  {{ course.level }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Card body -->
-            <div class="flex flex-col flex-1 p-6 bg-card">
-              <h3 class="text-lg font-medium mb-2 text-foreground">{{ course.title }}</h3>
-              <p class="text-sm text-muted-foreground mb-4 flex-1">{{ course.description }}</p>
-
-              <!-- Meta -->
-              <div class="flex items-center gap-4 text-xs text-muted-foreground mb-4">
-                <span class="flex items-center gap-1">
-                  <PhVideoCamera class="h-3.5 w-3.5" />
-                  {{ course.lessons }} Lessons
-                </span>
-                <span class="flex items-center gap-1">
-                  <PhClock class="h-3.5 w-3.5" />
-                  {{ course.duration }}
-                </span>
-              </div>
-
-              <!-- Price & CTA -->
-              <div class="flex items-center justify-between pt-4 border-t border-border/20">
-                <span class="text-2xl font-semibold text-foreground">{{ course.price }}</span>
-                <Button size="sm" class="rounded-lg" as-child>
-                  <RouterLink to="/register">
-                    Enroll Now
-                    <PhArrowRight class="ml-1 h-3.5 w-3.5" />
-                  </RouterLink>
-                </Button>
+            <div class="h-48 bg-muted/40" />
+            <div class="p-6 bg-card flex flex-col gap-3">
+              <div class="h-4 bg-muted/40 rounded w-3/4" />
+              <div class="h-3 bg-muted/30 rounded w-full" />
+              <div class="h-3 bg-muted/30 rounded w-5/6" />
+              <div class="mt-auto pt-4 border-t border-border/20 flex justify-between items-center">
+                <div class="h-6 bg-muted/40 rounded w-16" />
+                <div class="h-8 bg-muted/40 rounded w-24" />
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Course cards (real + coming soon) -->
+        <div v-else class="grid md:grid-cols-3 gap-6">
+          <template
+            v-for="(item, i) in displayCourses"
+            :key="item.type === 'real' ? item.uuid : item.id"
+          >
+            <!-- ── Real course card ── -->
+            <div
+              v-if="item.type === 'real'"
+              class="group relative rounded-2xl overflow-hidden border border-border/20 transition-all duration-500 hover:border-primary/30 flex flex-col"
+              :style="{
+                opacity: visibleSections.has('courses') ? 1 : 0,
+                transform: visibleSections.has('courses') ? 'translateY(0)' : 'translateY(30px)',
+                transitionDelay: `${i * 150 + 200}ms`,
+              }"
+            >
+              <!-- Thumbnail: backend image or fallback video -->
+              <div class="relative h-48 overflow-hidden">
+                <img
+                  v-if="item.thumbnail_url"
+                  :src="item.thumbnail_url"
+                  :alt="item.title"
+                  class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <video
+                  v-else
+                  autoplay
+                  loop
+                  muted
+                  playsinline
+                  class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                >
+                  <source :src="item.video" type="video/mp4" />
+                </video>
+                <div class="absolute inset-0 bg-background/30 dark:bg-black/30" />
+                <!-- Level badge -->
+                <div class="absolute top-4 left-4 z-10">
+                  <span
+                    class="liquid-glass rounded-full px-3 py-1 text-xs font-medium border border-border/20"
+                    :class="[
+                      item.level === 'Beginner'
+                        ? 'text-green-600 dark:text-green-400'
+                        : item.level === 'Intermediate'
+                          ? 'text-yellow-600 dark:text-yellow-400'
+                          : 'text-red-500 dark:text-red-400',
+                    ]"
+                  >
+                    {{ item.level }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Card body -->
+              <div class="flex flex-col flex-1 p-6 bg-card">
+                <h3 class="text-lg font-medium mb-2 text-foreground">{{ item.title }}</h3>
+                <p class="text-sm text-muted-foreground mb-4 flex-1">{{ item.description }}</p>
+
+                <!-- Meta -->
+                <div class="flex items-center gap-4 text-xs text-muted-foreground mb-4">
+                  <span class="flex items-center gap-1">
+                    <PhVideoCamera class="h-3.5 w-3.5" />
+                    {{ item.lessons }} Lessons
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <PhClock class="h-3.5 w-3.5" />
+                    {{ item.duration }}
+                  </span>
+                </div>
+
+                <!-- Price & CTA -->
+                <div class="flex items-center justify-between pt-4 border-t border-border/20">
+                  <span class="text-2xl font-semibold text-foreground">{{ item.price }}</span>
+                  <Button size="sm" class="rounded-lg" @click="enrollOrLogin(item.uuid)">
+                    Enroll Now
+                    <PhArrowRight class="ml-1 h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Coming Soon card ── -->
+            <div
+              v-else
+              class="group relative rounded-2xl overflow-hidden border border-dashed border-border/40 transition-all duration-500 hover:border-primary/30 flex flex-col"
+              :style="{
+                opacity: visibleSections.has('courses') ? 1 : 0,
+                transform: visibleSections.has('courses') ? 'translateY(0)' : 'translateY(30px)',
+                transitionDelay: `${i * 150 + 200}ms`,
+              }"
+            >
+              <!-- Blurred video background -->
+              <div class="relative h-48 overflow-hidden">
+                <video
+                  autoplay
+                  loop
+                  muted
+                  playsinline
+                  class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-30"
+                >
+                  <source :src="item.video" type="video/mp4" />
+                </video>
+                <div class="absolute inset-0 bg-background/70 dark:bg-black/70 backdrop-blur-sm" />
+                <!-- Coming soon badge -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10">
+                  <div
+                    class="w-12 h-12 rounded-full liquid-glass border border-border/30 flex items-center justify-center"
+                  >
+                    <PhRocket class="h-5 w-5 text-primary opacity-60" />
+                  </div>
+                  <span
+                    class="liquid-glass rounded-full px-3 py-1 text-xs font-medium border border-border/20 text-muted-foreground"
+                  >
+                    Coming Soon
+                  </span>
+                </div>
+              </div>
+
+              <!-- Card body -->
+              <div class="flex flex-col flex-1 p-6 bg-card/50">
+                <div class="flex-1 flex flex-col items-center justify-center text-center py-4">
+                  <h3 class="text-lg font-medium mb-2 text-muted-foreground/60">New Course</h3>
+                  <p class="text-sm text-muted-foreground/50">
+                    We're crafting something incredible. Stay tuned for the next level of trading
+                    education.
+                  </p>
+                </div>
+
+                <!-- Placeholder footer -->
+                <div
+                  class="flex items-center justify-between pt-4 border-t border-border/20 border-dashed"
+                >
+                  <span class="text-sm text-muted-foreground/40 italic">Price TBA</span>
+                  <Button size="sm" variant="outline" class="rounded-lg opacity-50" disabled>
+                    Coming Soon
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </template>
         </div>
       </div>
     </section>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { ref, computed } from 'vue'
+import { RouterLink, useRoute } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import AnimatedHeading from '@/components/blocks/AnimatedHeading.vue'
@@ -13,6 +13,11 @@ import { useAuthStore } from '@/stores/auth'
 const authStore = useAuthStore()
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
+const route = useRoute()
+const loginLink = computed(() => {
+  const redirect = route.query.redirect as string | undefined
+  return redirect ? { path: '/login', query: { redirect } } : '/login'
+})
 
 const bgVideoUrl =
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4'
@@ -189,7 +194,7 @@ const bgVideoUrl =
             <div class="text-center text-sm text-muted-foreground pt-4 border-t border-border/20">
               Already have an account?
               <RouterLink
-                to="/login"
+                :to="loginLink"
                 class="text-foreground hover:text-primary transition-colors font-medium ml-1"
               >
                 Sign in
