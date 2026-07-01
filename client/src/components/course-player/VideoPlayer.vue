@@ -3,6 +3,8 @@ import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import Plyr from 'plyr'
 import 'plyr/dist/plyr.css'
 import type { CoursePlayerVideo } from '@/types/CoursePlayerTypes'
+import axiosInstance from '@/api/axiosInstance'
+import { PhSpinner } from '@phosphor-icons/vue'
 
 interface Props {
   video: CoursePlayerVideo | null
@@ -20,14 +22,52 @@ const playerContainer = ref<HTMLDivElement | null>(null)
 let player: Plyr | null = null
 let progressInterval: number | null = null
 
-// Accumulated play time tracking — measures actual seconds the user spent watching,
-// not the current playback position, so fast-forwarding doesn't inflate progress.
-let accumulatedSeconds = 0          // total seconds genuinely watched
-let sessionStartTime: number | null = null  // wall-clock ms when current play segment began
-let lastSentWatchTime = -1          // dedup guard: avoid sending identical values
+const activeYoutubeId = ref<string | null>(null)
+const isLoadingToken = ref<boolean>(false)
+
+// Accumulated play time tracking
+let accumulatedSeconds = 0          
+let sessionStartTime: number | null = null  
+let lastSentWatchTime = -1          
+
+const decodeStreamToken = (token: string): string => {
+  try {
+    const decoded = atob(token)
+    return decoded.replace(/[a-zA-Z]/g, (c) => {
+      return String.fromCharCode(
+        c.charCodeAt(0) + (c.toLowerCase() <= 'm' ? 13 : -13)
+      )
+    })
+  } catch (e) {
+    return ''
+  }
+}
+
+const loadVideoToken = async () => {
+  cleanup()
+  activeYoutubeId.value = null
+  if (!props.video?.uuid) return
+
+  isLoadingToken.value = true
+  try {
+    const response = await axiosInstance.get(`/videos/${props.video.uuid}/token`)
+    if (response.data?.stream_token) {
+      activeYoutubeId.value = decodeStreamToken(response.data.stream_token)
+    }
+  } catch (err) {
+    console.error('Failed to load video token:', err)
+  } finally {
+    isLoadingToken.value = false
+    if (activeYoutubeId.value) {
+      setTimeout(() => {
+        initializePlayer()
+      }, 100)
+    }
+  }
+}
 
 const initializePlayer = () => {
-  if (!playerContainer.value || !props.video?.youtube_video_id) return
+  if (!playerContainer.value || !activeYoutubeId.value) return
 
   if (player) {
     player.destroy()
@@ -44,12 +84,10 @@ const initializePlayer = () => {
     },
   })
 
-  // Seed accumulated time from server so returning users keep their prior progress
   accumulatedSeconds = Math.floor(props.video?.progress?.watch_time_seconds || 0)
   sessionStartTime = null
   lastSentWatchTime = -1
 
-  // Resume from last saved position (skip if the video was already completed — restart from beginning)
   const resumeAt = accumulatedSeconds
   const isCompleted = props.video?.progress?.is_completed === true
   if (resumeAt > 0 && !isCompleted) {
@@ -67,7 +105,6 @@ const initializePlayer = () => {
 
   if (progressInterval) clearInterval(progressInterval)
 
-  // Checkpoint every 10 s while playing: commit the current segment and send progress
   progressInterval = window.setInterval(() => {
     if (player && player.playing) {
       accumulateSession()
@@ -77,12 +114,10 @@ const initializePlayer = () => {
   }, 10000)
 }
 
-// Called when the video starts or resumes playing — begin timing this segment
 const handlePlaying = () => {
   sessionStartTime = Date.now()
 }
 
-// Add the current segment's elapsed time to the accumulator (idempotent: safe to call twice)
 const accumulateSession = () => {
   if (sessionStartTime !== null) {
     accumulatedSeconds += Math.floor((Date.now() - sessionStartTime) / 1000)
@@ -90,7 +125,6 @@ const accumulateSession = () => {
   }
 }
 
-// Seek/scrub: close the current segment; if still playing, start a new one immediately
 const handleSeeked = () => {
   accumulateSession()
   if (player?.playing) sessionStartTime = Date.now()
@@ -107,9 +141,6 @@ const handleEnded = () => {
   emit('ended')
 }
 
-// Emits actual accumulated watch time and a locally-computed percentage for immediate UI feedback.
-// Uses the stored duration_seconds (same value the server uses) so the local percentage always
-// matches the server-computed watch_percentage — prevents the controls and sidebar from diverging.
 const sendProgress = () => {
   if (!player || !props.video) return
   const duration = props.video.duration_seconds
@@ -136,23 +167,16 @@ const cleanup = () => {
   }
 }
 
-// Watch for video changes
 watch(
   () => props.video?.uuid,
   () => {
-    cleanup()
-    if (props.video?.youtube_video_id) {
-      // Small delay to ensure DOM is ready
-      setTimeout(() => {
-        initializePlayer()
-      }, 100)
-    }
+    loadVideoToken()
   },
 )
 
 onMounted(() => {
-  if (props.video?.youtube_video_id) {
-    initializePlayer()
+  if (props.video?.uuid) {
+    loadVideoToken()
   }
 })
 
@@ -163,11 +187,14 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="video-player-wrapper">
-    <div v-if="video?.youtube_video_id" class="aspect-video bg-black rounded-lg overflow-hidden">
+    <div v-if="isLoadingToken" class="aspect-video bg-muted rounded-lg flex items-center justify-center text-primary">
+      <PhSpinner class="h-8 w-8 animate-spin" />
+    </div>
+    <div v-else-if="activeYoutubeId" class="aspect-video bg-black rounded-lg overflow-hidden">
       <div
         ref="playerContainer"
         :data-plyr-provider="'youtube'"
-        :data-plyr-embed-id="video.youtube_video_id"
+        :data-plyr-embed-id="activeYoutubeId"
       ></div>
     </div>
     <div

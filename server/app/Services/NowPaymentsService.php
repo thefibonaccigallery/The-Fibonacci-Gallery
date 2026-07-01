@@ -30,6 +30,7 @@ class NowPaymentsService
             'ipn_callback_url' => route('payments.webhook'),
             'success_url'      => config('app.frontend_url') . '/payment/success',
             'cancel_url'       => config('app.frontend_url') . '/payment/cancel',
+            'is_fee_paid_by_user' => false,
         ]);
 
         return $response->json();
@@ -43,6 +44,21 @@ class NowPaymentsService
         ])->get("{$this->apiUrl}/payment/{$paymentId}");
 
         return $response->json();
+    }
+
+    // Get minimum payment amount for a currency pair
+    public function getMinAmount(string $payCurrency): float
+    {
+        $response = Http::withHeaders([
+            'x-api-key' => $this->apiKey,
+        ])->get("{$this->apiUrl}/min-amount", [
+            'currency_from' => 'usdtbsc',
+            'currency_to'   => $payCurrency,
+            'fiat_equivalent'     => 'usd',
+            'is_fee_paid_by_user' => false,
+        ]);
+
+        return (float) ($response->json('min_amount') ?? 0);
     }
 
     // Verify IPN webhook signature

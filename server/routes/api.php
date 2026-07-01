@@ -35,6 +35,7 @@ Route::middleware('auth:api')->group(function () {
 
     // Course player routes
     Route::get('/courses/{uuid}/player', [CoursePlayerController::class, 'show']);
+    Route::get('/videos/{uuid}/token', [CoursePlayerController::class, 'getVideoToken']);
     Route::post('/progress/{uuid}', [CoursePlayerController::class, 'updateProgress']);
 
     // User course routes
@@ -51,6 +52,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/payments/currencies', [PaymentController::class, 'currencies']);
     Route::post('/payments/initiate/{uuid}', [PaymentController::class, 'initiatePayment']);
     Route::get('/payments/status/{orderUuid}',   [PaymentController::class, 'checkStatus']);
+    Route::post('/payments/cancel/{orderUuid}', [PaymentController::class, 'cancelPayment']);
 
     // Coupon validation (user-facing)
     Route::post('/coupons/validate', [CouponController::class, 'validate']);

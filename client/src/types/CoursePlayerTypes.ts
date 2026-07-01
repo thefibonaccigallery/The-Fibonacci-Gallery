@@ -10,7 +10,7 @@ export interface VideoProgress {
 export interface CoursePlayerVideo {
   uuid: string
   title: string
-  youtube_video_id: string | null
+  youtube_video_id?: string | null
   level: 'beginner' | 'intermediate' | 'advanced' | null
   order: number
   duration_seconds: number

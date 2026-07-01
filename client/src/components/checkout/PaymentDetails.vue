@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
 import PaymentStatusBadge from './PaymentStatusBadge.vue'
-import { PhCopy, PhWarning, PhX } from '@phosphor-icons/vue'
+import { PhCopy, PhWarning, PhX, PhSpinner, PhCheckCircle } from '@phosphor-icons/vue'
 
 interface PaymentDetails {
   payment_id: string
@@ -34,6 +34,7 @@ defineProps<{
   timeLeft: string
   onCopyAddress: (address: string) => void
   onCancel: () => void
+  cancelling?: boolean
 }>()
 </script>
 
@@ -44,7 +45,32 @@ defineProps<{
       <PaymentStatusBadge v-if="paymentStatus" :status="paymentStatus.status" />
     </div>
 
-    <div class="space-y-6">
+    <!-- Sending Status State -->
+    <div v-if="paymentStatus?.status === 'sending'" class="space-y-6">
+      <div class="flex flex-col items-center justify-center py-12 text-center space-y-4">
+        <div class="relative">
+          <PhSpinner class="h-16 w-16 text-primary animate-spin" />
+        </div>
+        <div class="space-y-1">
+          <h3 class="text-lg font-bold">Payment Sending</h3>
+          <p class="text-sm text-muted-foreground">Your payment is currently being processed on the blockchain.</p>
+        </div>
+      </div>
+      
+      <div class="p-4 rounded-xl bg-secondary/50 border border-border/40 space-y-3">
+        <div class="flex justify-between text-sm">
+          <span class="text-muted-foreground">Amount Received</span>
+          <span class="font-medium font-primary">{{ paymentStatus.actually_paid }} {{ paymentDetails.pay_currency }}</span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-muted-foreground">Target Amount</span>
+          <span class="font-medium font-primary">{{ paymentStatus.payment_amount }} {{ paymentDetails.pay_currency }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Default View -->
+    <div v-else class="space-y-6">
       <!-- Warning Notice -->
       <div
         class="flex items-start gap-3 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-600 dark:text-yellow-400"
@@ -114,11 +140,13 @@ defineProps<{
       <!-- Cancel Button -->
       <Button
         @click="onCancel"
+        :disabled="cancelling"
         variant="outline"
         class="w-full text-sm font-semibold rounded-xl border-destructive/40 text-destructive hover:bg-destructive/10 flex items-center justify-center gap-2"
       >
-        <PhX class="h-4 w-4" weight="bold" />
-        Cancel Payment
+        <PhSpinner v-if="cancelling" class="h-4 w-4 animate-spin" />
+        <PhX v-else class="h-4 w-4" weight="bold" />
+        {{ cancelling ? 'Cancelling...' : 'Cancel Payment' }}
       </Button>
     </div>
   </div>

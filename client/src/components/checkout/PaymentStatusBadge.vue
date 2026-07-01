@@ -48,10 +48,10 @@ const statusConfig = computed(() => {
       bgColor: 'bg-green-500/10',
     },
     sending: {
-      label: 'Processing',
-      color: 'text-green-500',
+      label: 'Sending Payment',
+      color: 'text-blue-500',
       icon: PhArrowsClockwise,
-      bgColor: 'bg-green-500/10',
+      bgColor: 'bg-blue-500/10',
     },
     partially_paid: {
       label: 'Partially paid',

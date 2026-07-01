@@ -1,16 +1,42 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { computed, onMounted, ref } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import { Button } from '@/components/ui/button'
-import { PhCheckCircle, PhPlay } from '@phosphor-icons/vue'
+import { PhCheckCircle, PhPlay, PhSpinner } from '@phosphor-icons/vue'
+import axiosInstance from '@/api/axiosInstance'
 
 const router = useRouter()
+const route = useRoute()
 
-// TODO: Get course ID from payment session or route query
-const courseId = 1
+// Get course UUID from query parameter (passed from payment flow)
+const courseUuid = computed(() => (route.query.courseUuid as string) || '')
+const courseTitle = ref<string>('')
+const isLoadingCourse = ref(false)
+
+// Fetch course details to get the title
+onMounted(async () => {
+  if (courseUuid.value) {
+    isLoadingCourse.value = true
+    try {
+      const response = await axiosInstance.get(`/courses/${courseUuid.value}`)
+      courseTitle.value = response.data.course?.title || 'the course'
+    } catch (error) {
+      console.error('Failed to fetch course details:', error)
+      courseTitle.value = 'the course'
+    } finally {
+      isLoadingCourse.value = false
+    }
+  }
+})
 
 const handleStartLearning = () => {
-  router.push(`/courses/${courseId}/player`)
+  if (courseUuid.value) {
+    router.push(`/courses/${courseUuid.value}/player`)
+  } else {
+    // Fallback to dashboard if no course UUID
+    router.push('/dashboard')
+  }
 }
 
 const handleBackToDashboard = () => {
@@ -46,7 +72,10 @@ const handleBackToDashboard = () => {
           <!-- Course Title -->
           <div class="mb-8 p-4 bg-secondary/50 rounded-xl border border-border/40">
             <p class="text-xs text-muted-foreground mb-1">You're enrolled in</p>
-            <p class="text-lg font-bold text-foreground">The Complete Forex Trading Course</p>
+            <div v-if="isLoadingCourse" class="flex items-center justify-center py-2">
+              <PhSpinner class="h-5 w-5 animate-spin text-primary" />
+            </div>
+            <p v-else class="text-lg font-bold text-foreground">{{ courseTitle }}</p>
           </div>
 
           <!-- Actions -->

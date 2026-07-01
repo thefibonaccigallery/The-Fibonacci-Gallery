@@ -78,6 +78,8 @@ const handleBackToCourse = () => {
   selectedCurrency.value = null
 }
 
+const isCancelling = ref(false)
+
 const handleInitiatePayment = () => {
   if (!selectedCurrency.value) return
   
@@ -88,8 +90,29 @@ const handleInitiatePayment = () => {
   })
 }
 
-const handleCancel = () => {
-  router.push(`/payment/cancel?courseUuid=${courseUuid.value}`)
+const handleCancel = async () => {
+  if (!orderUuid.value) {
+    router.push(`/payment/cancel?courseUuid=${courseUuid.value}`)
+    return
+  }
+
+  isCancelling.value = true
+  try {
+    await axiosInstance.post(`/payments/cancel/${orderUuid.value}`)
+    toast.success('Payment cancelled')
+  } catch (error: any) {
+    // If order was already completed, redirect to player
+    if (error.response?.status === 422) {
+      toast.info(error.response.data.message)
+      router.push(`/courses/${courseUuid.value}/player`)
+      return
+    }
+    
+    toast.error(error.response?.data?.message || 'Failed to cancel payment')
+  } finally {
+    isCancelling.value = false
+    router.push(`/payment/cancel?courseUuid=${courseUuid.value}`)
+  }
 }
 </script>
 
@@ -141,17 +164,68 @@ const handleCancel = () => {
                 <div
                   v-for="currency in currencies"
                   :key="currency.id"
-                  class="liquid-glass rounded-xl p-4 cursor-pointer transition-all border-2"
+                  class="relative liquid-glass rounded-xl p-4 cursor-pointer transition-all duration-300 border-2"
                   :class="
                     selectedCurrency === currency.id
-                      ? 'border-primary bg-primary/5'
-                      : 'border-transparent hover:border-primary/30'
+                      ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20'
+                      : 'border-transparent hover:border-primary/30 hover:bg-primary/5'
                   "
                   @click="selectedCurrency = currency.id"
                 >
-                  <p class="font-semibold text-sm text-foreground">{{ currency.name }}</p>
-                  <p class="text-xs text-muted-foreground mt-1">{{ currency.network }}</p>
-                  <p class="text-xs text-primary mt-1">{{ currency.fee }}</p>
+                  <!-- Selected Indicator -->
+                  <div
+                    v-if="selectedCurrency === currency.id"
+                    class="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center shadow-lg animate-scale-in"
+                  >
+                    <svg
+                      class="w-4 h-4 text-primary-foreground"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="3"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="flex-1">
+                      <p
+                        class="font-semibold text-sm transition-colors"
+                        :class="
+                          selectedCurrency === currency.id ? 'text-primary' : 'text-foreground'
+                        "
+                      >
+                        {{ currency.name }}
+                      </p>
+                      <p class="text-xs text-muted-foreground mt-1">{{ currency.network }}</p>
+                      <p
+                        class="text-xs mt-1 font-medium"
+                        :class="selectedCurrency === currency.id ? 'text-primary' : 'text-primary/70'"
+                      >
+                        {{ currency.fee }}
+                      </p>
+                    </div>
+
+                    <!-- Radio Indicator -->
+                    <div
+                      class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0"
+                      :class="
+                        selectedCurrency === currency.id
+                          ? 'border-primary bg-primary'
+                          : 'border-border bg-background'
+                      "
+                    >
+                      <div
+                        v-if="selectedCurrency === currency.id"
+                        class="w-2 h-2 rounded-full bg-primary-foreground animate-scale-in"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -186,6 +260,7 @@ const handleCancel = () => {
             :time-left="timeLeft"
             :on-copy-address="copyAddress"
             :on-cancel="handleCancel"
+            :cancelling="isCancelling"
           />
         </div>
       </div>

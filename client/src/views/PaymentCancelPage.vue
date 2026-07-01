@@ -55,13 +55,16 @@ const handleBackToDashboard = () => {
           <div class="mb-8 p-4 bg-secondary/50 rounded-xl border border-border/40 text-left">
             <p class="text-sm text-muted-foreground">
               <strong class="text-foreground">What happened?</strong><br />
-              Your payment session was cancelled or expired. This could happen if:
+              Your payment session was cancelled. This could happen if:
             </p>
             <ul class="text-xs text-muted-foreground mt-2 space-y-1 list-disc list-inside">
+              <li>You clicked the "Cancel Payment" button</li>
               <li>Payment was not completed within the time limit</li>
-              <li>You cancelled the transaction</li>
-              <li>Payment failed or was rejected</li>
+              <li>Payment was rejected or failed</li>
             </ul>
+            <p class="text-xs text-muted-foreground mt-3">
+              No charges were made to your wallet. You can start a new payment session anytime.
+            </p>
           </div>
 
           <!-- Actions -->

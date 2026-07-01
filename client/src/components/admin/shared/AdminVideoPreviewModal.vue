@@ -23,7 +23,7 @@ const close = () => emit('update:open', false)
 const playerVideo = computed<CoursePlayerVideo | null>(() => {
   if (!props.video) return null
   return {
-    id: props.video.id,
+    uuid: props.video.uuid,
     title: props.video.title,
     youtube_video_id: props.video.youtube_video_id,
     level: props.video.level,

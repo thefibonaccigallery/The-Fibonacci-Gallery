@@ -71,16 +71,21 @@ class PaymentController extends Controller
             ->first();
 
         if ($existingOrder) {
+            // Check if order has expired based on timestamp
+            if ($existingOrder->expires_at && $existingOrder->expires_at < now()) {
+                $existingOrder->update(['status' => 'expired']);
+                // Continue to create new order below
+            }
             // Previous attempt failed before NowPayments responded — delete and retry
-            if (!$existingOrder->nowpayments_payment_id) {
+            elseif (!$existingOrder->nowpayments_payment_id) {
                 $existingOrder->delete();
             } else {
                 // Check if course price has changed since the order was created
                 $priceChanged = abs((float)$existingOrder->amount - $amount) > 0.01;
-                
+
                 // Check if payment currency has changed
                 $currencyChanged = $existingOrder->pay_currency !== $request->pay_currency;
-                
+
                 if ($priceChanged || $currencyChanged) {
                     // Price or currency changed - mark old order as expired and create new one
                     $existingOrder->update(['status' => 'expired']);
@@ -88,7 +93,7 @@ class PaymentController extends Controller
                     // Check if the payment is still active on NowPayments
                     try {
                         $liveStatus = $this->nowPayments->getPaymentStatus($existingOrder->nowpayments_payment_id);
-                        
+
                         // If payment has expired/failed on NowPayments, update our status and allow new payment
                         if (isset($liveStatus['payment_status']) && in_array($liveStatus['payment_status'], ['expired', 'failed', 'refunded'])) {
                             $existingOrder->update(['status' => $liveStatus['payment_status']]);
@@ -129,12 +134,22 @@ class PaymentController extends Controller
             'pay_currency' => $request->pay_currency,
         ]);
 
+        $minAmount = $this->nowPayments->getMinAmount($request->pay_currency);
+        if ($amount < $minAmount) {
+            $order->update(['status' => 'failed']);
+            return response()->json([
+                'message' => "The minimum payment amount for {$request->pay_currency} is \${$minAmount} USD. Please select a different currency.",
+            ], 422);
+        }
+
         $payment = $this->nowPayments->createPayment([
             'amount'       => $amount,
             'pay_currency' => $request->pay_currency,
             'order_id'     => $order->uuid,
-            'description'  => "Enrollment: {$course->title}",
+            'description'  => "Enrollment: {$course->title} | {$user->email}",
         ]);
+
+        \Log::info('NOWPayments full response', $payment);
 
         if (!isset($payment['payment_id'])) {
             $order->update(['status' => 'failed']);
@@ -149,9 +164,7 @@ class PaymentController extends Controller
             'nowpayments_order_id'   => $payment['order_id'] ?? null,
             'pay_address'            => $payment['pay_address'] ?? null,
             'pay_amount'             => $payment['pay_amount'] ?? null,
-            'expires_at'             => isset($payment['expiration_estimate_date']) 
-                ? \Carbon\Carbon::parse($payment['expiration_estimate_date'])
-                : null,
+            'expires_at'             => now()->addDay(),
         ]);
 
         return response()->json([
@@ -211,6 +224,38 @@ class PaymentController extends Controller
             'actually_paid'  => (float) $order->actually_paid,
             'is_enrolled'    => $order->status === 'finished',
             'course_uuid'    => $course?->uuid,
+        ]);
+    }
+
+    public function cancelPayment(string $orderUuid)
+    {
+        $order = Order::where('uuid', $orderUuid)
+            ->where('user_id', auth()->id())
+            ->whereIn('status', ['waiting', 'confirming'])
+            ->firstOrFail();
+
+        // Sync with NowPayments to check current status
+        if ($order->nowpayments_payment_id) {
+            try {
+                $live = $this->nowPayments->getPaymentStatus($order->nowpayments_payment_id);
+                
+                // If already finished/paid, don't allow cancellation
+                if (isset($live['payment_status']) && in_array($live['payment_status'], ['finished', 'confirmed', 'sending'])) {
+                    return response()->json([
+                        'message' => 'Payment has already been completed or is being processed.',
+                        'status' => $live['payment_status'],
+                    ], 422);
+                }
+            } catch (\Exception $e) {
+                // Continue with cancellation even if status check fails
+                \Log::warning("Could not verify payment status before cancellation for order {$orderUuid}: " . $e->getMessage());
+            }
+        }
+
+        $order->update(['status' => 'expired']);
+
+        return response()->json([
+            'message' => 'Payment cancelled successfully.',
         ]);
     }
 

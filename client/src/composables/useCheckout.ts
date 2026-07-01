@@ -133,7 +133,8 @@ export function useCheckout() {
         const response = await axiosInstance.get(`/payments/status/${orderUuid.value}`)
         return response.data
       },
-      refetchInterval: (data) => {
+      refetchInterval: (query) => {
+        const data = query.state.data
         if (data && terminalStatuses.includes(data.status)) return false
         return 15000
       },
@@ -145,7 +146,8 @@ export function useCheckout() {
       () => query.data.value?.status,
       (status) => {
         if (status === 'finished') {
-          router.push('/payment/success')
+          const courseUuidParam = query.data.value?.course_uuid || courseUuid
+          router.push(`/payment/success?courseUuid=${courseUuidParam}`)
         }
         if (status === 'failed' || status === 'expired') {
           router.push(`/payment/cancel?courseUuid=${courseUuid}`)

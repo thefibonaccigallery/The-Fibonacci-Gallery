@@ -186,7 +186,7 @@ const isSaving = computed(() => isCreating.value || isUpdating.value)
             id="title"
             v-model="form.title"
             placeholder="e.g., Introduction to Forex"
-            :class="{ 'border-destructive': errors.title }"
+            :class="errors.title ? 'border-destructive' : ''"
           />
           <p v-if="errors.title" class="text-sm text-destructive">{{ errors.title }}</p>
         </div>
@@ -218,7 +218,7 @@ const isSaving = computed(() => isCreating.value || isUpdating.value)
             type="number"
             min="1"
             placeholder="Auto-assigned if left empty"
-            :class="{ 'border-destructive': errors.order }"
+            :class="errors.order ? 'border-destructive' : ''"
           />
           <p class="text-xs text-muted-foreground">
             Position of this chapter in the course. Auto-assigned to the end if left empty.

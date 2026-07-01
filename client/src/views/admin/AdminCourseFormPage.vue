@@ -208,7 +208,7 @@ const isSaving = computed(() => isCreating.value || isUpdating.value || isUpload
             v-model="form.title"
             @input="handleTitleChange"
             placeholder="e.g., Forex Fundamentals"
-            :class="{ 'border-destructive': errors.title }"
+            :class="errors.title ? 'border-destructive' : ''"
           />
           <p v-if="errors.title" class="text-sm text-destructive">{{ errors.title }}</p>
         </div>
@@ -222,7 +222,7 @@ const isSaving = computed(() => isCreating.value || isUpdating.value || isUpload
             id="slug"
             v-model="form.slug"
             placeholder="e.g., forex-fundamentals"
-            :class="{ 'border-destructive': errors.slug }"
+            :class="errors.slug ? 'border-destructive' : ''"
           />
           <p class="text-xs text-muted-foreground">
             URL-friendly version of the title. Auto-generated if left empty.
@@ -270,7 +270,7 @@ const isSaving = computed(() => isCreating.value || isUpdating.value || isUpload
             step="0.01"
             min="0"
             placeholder="0.00"
-            :class="{ 'border-destructive': errors.price }"
+            :class="errors.price ? 'border-destructive' : ''"
           />
           <p v-if="errors.price" class="text-sm text-destructive">{{ errors.price }}</p>
         </div>

@@ -51,7 +51,6 @@ class CoursePlayerController extends Controller
                 'videos'         => $chapter->videos->map(fn($video) => [
                     'uuid'             => $video->uuid,
                     'title'            => $video->title,
-                    'youtube_video_id' => $video->youtube_video_id,
                     'level'            => $video->level,
                     'order'            => $video->order,
                     'duration_seconds' => $video->duration_seconds,
@@ -66,6 +65,23 @@ class CoursePlayerController extends Controller
                     ] : null,
                 ]),
             ]),
+        ]);
+    }
+
+    public function getVideoToken($uuid)
+    {
+        $video = CourseVideo::where('uuid', $uuid)->with('chapter.course')->firstOrFail();
+        $this->authorize('access', $video->chapter->course);
+
+        if (!$video->youtube_video_id) {
+            return response()->json(['stream_token' => null]);
+        }
+
+        // Obfuscate YouTube video ID in transit
+        $obfuscated = base64_encode(str_rot13($video->youtube_video_id));
+
+        return response()->json([
+            'stream_token' => $obfuscated,
         ]);
     }
 
