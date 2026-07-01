@@ -164,7 +164,9 @@ class PaymentController extends Controller
             'nowpayments_order_id'   => $payment['order_id'] ?? null,
             'pay_address'            => $payment['pay_address'] ?? null,
             'pay_amount'             => $payment['pay_amount'] ?? null,
-            'expires_at'             => now()->addDay(),
+            'expires_at'             => isset($payment['expiration_estimate_date']) 
+                ? \Carbon\Carbon::parse($payment['expiration_estimate_date'])
+                : null,
         ]);
 
         return response()->json([
