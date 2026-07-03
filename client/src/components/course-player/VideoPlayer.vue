@@ -5,6 +5,8 @@ import 'plyr/dist/plyr.css'
 import type { CoursePlayerVideo } from '@/types/CoursePlayerTypes'
 import axiosInstance from '@/api/axiosInstance'
 import { PhSpinner } from '@phosphor-icons/vue'
+import { useVideoSecurity } from '@/composables/useVideoSecurity'
+import { useVideoWatermark } from '@/composables/useVideoWatermark'
 
 interface Props {
   video: CoursePlayerVideo | null
@@ -19,10 +21,16 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const playerContainer = ref<HTMLDivElement | null>(null)
+const playerWrapper   = ref<HTMLDivElement | null>(null)
 let player: Plyr | null = null
 let progressInterval: number | null = null
 
 const activeYoutubeId = ref<string | null>(null)
+
+// ── Security composables ────────────────────────────────────────────────────
+useVideoWatermark(playerWrapper)
+useVideoSecurity({ onDevToolsDetected: () => player?.pause() })
+// ───────────────────────────────────────────────────────────────────────────
 const isLoadingToken = ref<boolean>(false)
 
 // Accumulated play time tracking
@@ -81,6 +89,10 @@ const initializePlayer = () => {
       showinfo: 0,
       iv_load_policy: 3,
       modestbranding: 1,
+      controls: 0,
+      disablekb: 1,
+      fs: 0,
+      playsinline: 1,
     },
   })
 
@@ -187,16 +199,31 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="video-player-wrapper">
+    <!-- Loading state -->
     <div v-if="isLoadingToken" class="aspect-video bg-muted rounded-lg flex items-center justify-center text-primary">
       <PhSpinner class="h-8 w-8 animate-spin" />
     </div>
-    <div v-else-if="activeYoutubeId" class="aspect-video bg-black rounded-lg overflow-hidden">
+
+    <!-- Active player: right-click disabled on the entire wrapper -->
+    <div
+      v-else-if="activeYoutubeId"
+      ref="playerWrapper"
+      class="aspect-video bg-black rounded-lg overflow-hidden relative"
+      @contextmenu.prevent
+    >
+      <!-- Transparent overlay: blocks right-click directly on the iframe surface.
+           pointer-events: none keeps Plyr's own controls fully clickable. -->
+      <div class="absolute inset-0 z-10" style="pointer-events: none;" @contextmenu.prevent />
+
+      <!-- Plyr player container -->
       <div
         ref="playerContainer"
         :data-plyr-provider="'youtube'"
         :data-plyr-embed-id="activeYoutubeId"
       ></div>
     </div>
+
+    <!-- No video state -->
     <div
       v-else
       class="aspect-video bg-muted rounded-lg flex items-center justify-center text-muted-foreground"
@@ -226,14 +253,21 @@ onBeforeUnmount(() => {
 /* Hide YouTube branding, title, and link elements as much as possible */
 .video-player-wrapper :deep(.plyr__video-embed) {
   overflow: hidden !important;
+  position: relative !important;
 }
 
 .video-player-wrapper :deep(.plyr__video-embed iframe) {
   /* Prevent pointer events from opening YouTube pages or showing info overlays on hover */
   pointer-events: none !important;
-  /* Scale height to 115% and offset top by -7.5% to crop the top title bar and bottom logo */
-  /* This vertical-only crop preserves 100% of the horizontal width so no chart content is cut off */
-  height: 115% !important;
-  top: -7.5% !important;
+  /* Uniformly scale the iframe up and re-center it so the title bar (top),
+     "Watch on YouTube" link and logo (bottom-right), and other chrome that
+     YouTube renders flush against its own edges are pushed outside the
+     visible, clipped area on all four sides at once. */
+  position: absolute !important;
+  width: 140% !important;
+  height: 140% !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
 }
 </style>
