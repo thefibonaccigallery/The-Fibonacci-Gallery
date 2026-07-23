@@ -18,6 +18,7 @@ const detailedFeatures = [
   {
     icon: PhChartLineUp,
     title: 'Technical Analysis Mastery',
+    image: '/images/features/technical-analysis.png',
     description: 'Learn to read charts like a professional. Master Fibonacci retracements, extensions, Elliott Wave theory, and advanced geometric pattern recognition.',
     points: [
       'Fibonacci Retracement and Extension ratios (0.236, 0.382, 0.5, 0.618, 0.786, etc.)',
@@ -29,6 +30,7 @@ const detailedFeatures = [
   {
     icon: PhShieldCheck,
     title: 'Advanced Risk Management',
+    image: '/images/features/risk-management.png',
     description: 'Protect your capital with battle-tested risk management strategies. Position sizing, stop-loss placement, and portfolio diversification.',
     points: [
       'Strict 1-2% risk model placement algorithms',
@@ -40,6 +42,7 @@ const detailedFeatures = [
   {
     icon: PhVideoCamera,
     title: 'Live Market Sessions',
+    image: '/images/features/live-sessions.png',
     description: 'Trade alongside expert traders in real-time. Watch live analysis, get instant feedback, and learn from every market move.',
     points: [
       'Interactive London & New York session live streams',
@@ -51,6 +54,7 @@ const detailedFeatures = [
   {
     icon: PhUsers,
     title: 'Exclusive Trading Community',
+    image: '/images/features/community.png',
     description: 'Connect with a network of over 2,500 active traders sharing insights, setups, and milestones daily.',
     points: [
       'Categorized discord channels (Forex, Crypto, Stocks)',
@@ -104,9 +108,13 @@ const detailedFeatures = [
             
             <!-- Graphic/Visual Element -->
             <div class="md:col-span-5 flex justify-center">
-              <div class="w-full aspect-4/3 rounded-2xl bg-muted/30 border border-border/10 flex items-center justify-center relative overflow-hidden group">
-                <div class="absolute inset-0 bg-linear-to-tr from-primary/10 to-transparent opacity-60"></div>
-                <component :is="feat.icon" class="h-20 w-20 text-primary/30 group-hover:scale-110 transition-transform duration-500" />
+              <div class="w-full aspect-4/3 rounded-2xl bg-muted/30 border border-border/20 flex items-center justify-center relative overflow-hidden group shadow-xl">
+                <img
+                  :src="feat.image"
+                  :alt="feat.title"
+                  class="w-full h-full object-cover rounded-2xl transform group-hover:scale-105 transition-transform duration-500"
+                />
+                <div class="absolute inset-0 bg-linear-to-t from-background/30 via-transparent to-transparent pointer-events-none"></div>
               </div>
             </div>
           </div>
