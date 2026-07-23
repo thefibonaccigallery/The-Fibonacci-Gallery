@@ -65,11 +65,6 @@ const router = createRouter({
       component: () => import('@/views/FaqView.vue'),
     },
     {
-      path: '/blog',
-      name: 'blog',
-      component: () => import('@/views/BlogView.vue'),
-    },
-    {
       path: '/privacy',
       name: 'privacy',
       component: () => import('@/views/PrivacyView.vue'),

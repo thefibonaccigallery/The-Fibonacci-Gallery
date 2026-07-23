@@ -206,20 +206,6 @@ const markets = {
           </div>
         </div>
       </div>
-
-      <!-- Public Footer (only shown if not authenticated) -->
-      <footer v-if="!authStore.isAuthenticated" class="border-t border-border/20 py-12 px-6 bg-card mt-24">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <p class="text-xs text-muted-foreground">
-            &copy; {{ new Date().getFullYear() }} The Fibonacci Gallery. All rights reserved.
-          </p>
-          <div class="flex gap-6">
-            <RouterLink to="/privacy" class="text-xs text-muted-foreground hover:text-foreground">Privacy Policy</RouterLink>
-            <RouterLink to="/terms" class="text-xs text-muted-foreground hover:text-foreground">Terms of Service</RouterLink>
-            <RouterLink to="/disclaimer" class="text-xs text-muted-foreground hover:text-foreground">Disclaimer</RouterLink>
-          </div>
-        </div>
-      </footer>
     </div>
   </DashboardLayout>
 </template>

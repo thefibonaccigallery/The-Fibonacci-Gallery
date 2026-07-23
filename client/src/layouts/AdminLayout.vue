@@ -16,6 +16,8 @@ import {
   PhTicket,
 } from '@phosphor-icons/vue'
 
+import AppFooter from '@/components/layout/AppFooter.vue'
+
 const route = useRoute()
 const showMobileSidebar = ref(false)
 
@@ -120,14 +122,18 @@ const toggleMobileSidebar = () => {
     </Transition>
 
     <!-- Main Content Area -->
-    <main class="flex-1 h-screen overflow-y-auto w-full relative">
-      <!-- Header -->
-      <AdminHeader @toggle-mobile-sidebar="toggleMobileSidebar" />
+    <main class="flex-1 h-screen overflow-y-auto w-full relative flex flex-col justify-between">
+      <div>
+        <!-- Header -->
+        <AdminHeader @toggle-mobile-sidebar="toggleMobileSidebar" />
 
-      <!-- Page Content -->
-      <div class="w-full px-4 lg:px-6 py-4 lg:py-6 pb-24 lg:pb-6">
-        <RouterView />
+        <!-- Page Content -->
+        <div class="w-full px-4 lg:px-6 py-4 lg:py-6 pb-24 lg:pb-6">
+          <RouterView />
+        </div>
       </div>
+
+      <AppFooter />
     </main>
 
     <!-- Bottom Navigation (Mobile) -->
