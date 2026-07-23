@@ -58,6 +58,18 @@ export const useLanguageStore = defineStore('language', () => {
         },
       },
     },
+    notFound: {
+      heading: 'Looks like this trade went wrong!',
+      subtext: 'The asset or pattern you are looking for has been liquidated, moved, or never existed in this timeline.',
+      backHome: 'Back to Home',
+      nav: {
+        home: 'Home',
+        courses: 'Courses',
+        about: 'About',
+        contact: 'Contact',
+        menu: 'Menu',
+      },
+    },
     common: {
       notAvailable: 'Not available',
     },
