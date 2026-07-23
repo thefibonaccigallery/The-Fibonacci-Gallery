@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CoursePlayerController;
 use App\Http\Controllers\CouponController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserCourseController;
 use App\Http\Controllers\TypesController;
 use App\Http\Controllers\Admin\CouponController as AdminCouponController;
@@ -24,6 +25,8 @@ Route::get('/types', [TypesController::class, 'index']);
 Route::post('/payments/webhook', [PaymentController::class, 'webhook'])
     ->name('payments.webhook');
 Route::get('/public-courses', [UserCourseController::class, 'publicCourses']);
+Route::get('/explore-courses', [UserCourseController::class, 'exploreCourses']);
+Route::get('/courses/{uuid}', [UserCourseController::class, 'showCourse']);
 
 
 // Protected routes
@@ -40,10 +43,11 @@ Route::middleware('auth:api')->group(function () {
 
     // User course routes
     Route::get('/my-courses', [UserCourseController::class, 'myEnrolledCourses']);
-    Route::get('/explore-courses', [UserCourseController::class, 'exploreCourses']);
-    Route::get('/courses/{uuid}', [UserCourseController::class, 'showCourse']);
     Route::post('/courses/{uuid}/enroll', [UserCourseController::class, 'enrollCourse']);
     Route::get('/continue-learning', [UserCourseController::class, 'continueLearningSuggestion']);
+
+    // Dashboard stats
+    Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
     // Enrollment routes
     Route::post('/enroll/{uuid}', [EnrollmentController::class, 'enroll']);

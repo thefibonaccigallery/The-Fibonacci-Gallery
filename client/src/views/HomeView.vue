@@ -180,12 +180,7 @@ const displayCourses = computed(() => {
 // ── Auth-aware enroll handler ─────────────────────────────────────────────────
 const router = useRouter()
 function enrollOrLogin(courseUuid: string) {
-  const token = Cookies.get('access_token')
-  if (token) {
-    router.push(`/courses/${courseUuid}/details`)
-  } else {
-    router.push({ path: '/login', query: { redirect: `/courses/${courseUuid}/details` } })
-  }
+  router.push(`/courses/${courseUuid}/details`)
 }
 
 const testimonials = [
@@ -236,11 +231,11 @@ const faqs = [
 ]
 
 const navLinks = [
-  { label: 'Features', href: '#features' },
-  { label: 'Courses', href: '#courses' },
-  { label: 'Markets', href: '#markets' },
-  { label: 'Testimonials', href: '#testimonials' },
-  { label: 'FAQ', href: '#faq' },
+  { label: 'Features', href: '/features' },
+  { label: 'Courses', href: '/explore' },
+  { label: 'Markets', href: '/markets' },
+  { label: 'Testimonials', href: '/testimonials' },
+  { label: 'FAQ', href: '/faq' },
 ]
 </script>
 
@@ -254,20 +249,20 @@ const navLinks = [
     >
       <div class="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 flex items-center justify-between">
         <!-- Brand -->
-        <a href="#" class="text-xl font-semibold tracking-tight text-foreground">
+        <RouterLink to="/" class="text-xl font-semibold tracking-tight text-foreground hover:text-primary transition-colors">
           The Fibonacci Gallery
-        </a>
+        </RouterLink>
 
         <!-- Desktop Nav -->
         <div class="hidden md:flex items-center gap-8">
-          <a
+          <RouterLink
             v-for="link in navLinks"
             :key="link.label"
-            :href="link.href"
+            :to="link.href"
             class="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             {{ link.label }}
-          </a>
+          </RouterLink>
         </div>
 
         <!-- Right Side -->
@@ -296,17 +291,17 @@ const navLinks = [
       <!-- Mobile Menu -->
       <div v-if="mobileMenuOpen" class="md:hidden liquid-glass border-t border-border/20 mt-2">
         <div class="px-6 py-4 flex flex-col gap-3">
-          <a
+          <RouterLink
             v-for="link in navLinks"
             :key="link.label"
-            :href="link.href"
+            :to="link.href"
             class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
             @click="mobileMenuOpen = false"
           >
             {{ link.label }}
-          </a>
+          </RouterLink>
           <Button class="mt-2 w-full" size="sm" as-child>
-            <RouterLink to="/register">
+            <RouterLink to="/register" @click="mobileMenuOpen = false">
               Get Started
               <PhArrowRight class="ml-1 h-4 w-4" />
             </RouterLink>
@@ -363,9 +358,12 @@ of Trading"
               variant="outline"
               size="lg"
               class="px-8 py-3 rounded-lg font-medium text-base liquid-glass border border-border/20"
+              as-child
             >
-              Explore Courses
-              <PhCaretDown class="ml-2 h-4 w-4" />
+              <RouterLink to="/explore">
+                Explore Courses
+                <PhArrowRight class="ml-2 h-4 w-4" />
+              </RouterLink>
             </Button>
           </div>
         </FadeIn>
@@ -687,6 +685,28 @@ of Trading"
             </div>
           </template>
         </div>
+
+        <!-- View All Courses Button -->
+        <div
+          class="mt-12 text-center transition-all duration-700"
+          :style="{
+            opacity: visibleSections.has('courses') ? 1 : 0,
+            transform: visibleSections.has('courses') ? 'translateY(0)' : 'translateY(20px)',
+            transitionDelay: '600ms',
+          }"
+        >
+          <Button
+            variant="outline"
+            size="lg"
+            class="px-8 py-3 rounded-lg font-medium text-base liquid-glass border border-border/20"
+            as-child
+          >
+            <RouterLink to="/explore">
+              View All Courses
+              <PhArrowRight class="ml-2 h-4 w-4" />
+            </RouterLink>
+          </Button>
+        </div>
       </div>
     </section>
 
@@ -723,15 +743,15 @@ of Trading"
             </p>
             <ul class="space-y-3 text-sm text-muted-foreground">
               <li class="flex items-center gap-2">
-                <PhChartLineUp class="h-4 w-4 text-primary flex-shrink-0" />
+                <PhChartLineUp class="h-4 w-4 text-primary shrink-0" />
                 Live price feeds across all major markets
               </li>
               <li class="flex items-center gap-2">
-                <PhShieldCheck class="h-4 w-4 text-primary flex-shrink-0" />
+                <PhShieldCheck class="h-4 w-4 text-primary shrink-0" />
                 Institutional-grade charting tools
               </li>
               <li class="flex items-center gap-2">
-                <PhClock class="h-4 w-4 text-primary flex-shrink-0" />
+                <PhClock class="h-4 w-4 text-primary shrink-0" />
                 24/7 market monitoring and alerts
               </li>
             </ul>
@@ -918,13 +938,12 @@ of Trading"
               <PhArrowRight class="ml-2 h-4 w-4" />
             </RouterLink>
           </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            class="px-10 py-4 rounded-lg font-medium text-base liquid-glass border border-border/20"
+          <RouterLink
+            to="/explore"
+            class="px-10 flex items-center justify-center py-1 rounded-lg font-medium text-base liquid-glass border border-border/20"
           >
             View All Courses
-          </Button>
+          </RouterLink>
         </div>
       </div>
     </section>
@@ -948,24 +967,24 @@ of Trading"
             <p class="text-sm font-medium text-foreground mb-3">Platform</p>
             <ul class="space-y-2">
               <li>
-                <a
-                  href="#courses"
+                <RouterLink
+                  to="/explore"
                   class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >Courses</a
+                  >Courses</RouterLink
                 >
               </li>
               <li>
-                <a
-                  href="#features"
+                <RouterLink
+                  to="/features"
                   class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >Features</a
+                  >Features</RouterLink
                 >
               </li>
               <li>
-                <a
-                  href="#markets"
+                <RouterLink
+                  to="/markets"
                   class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >Live Markets</a
+                  >Live Markets</RouterLink
                 >
               </li>
             </ul>
@@ -976,24 +995,24 @@ of Trading"
             <p class="text-sm font-medium text-foreground mb-3">Resources</p>
             <ul class="space-y-2">
               <li>
-                <a
-                  href="#faq"
+                <RouterLink
+                  to="/faq"
                   class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >FAQ</a
+                  >FAQ</RouterLink
                 >
               </li>
               <li>
-                <a
-                  href="#testimonials"
+                <RouterLink
+                  to="/testimonials"
                   class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >Testimonials</a
+                  >Testimonials</RouterLink
                 >
               </li>
               <li>
-                <a
-                  href="#"
+                <RouterLink
+                  to="/blog"
                   class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >Blog</a
+                  >Blog</RouterLink
                 >
               </li>
             </ul>
@@ -1004,24 +1023,24 @@ of Trading"
             <p class="text-sm font-medium text-foreground mb-3">Legal</p>
             <ul class="space-y-2">
               <li>
-                <a
-                  href="#"
+                <RouterLink
+                  to="/privacy"
                   class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >Privacy Policy</a
+                  >Privacy Policy</RouterLink
                 >
               </li>
               <li>
-                <a
-                  href="#"
+                <RouterLink
+                  to="/terms"
                   class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >Terms of Service</a
+                  >Terms of Service</RouterLink
                 >
               </li>
               <li>
-                <a
-                  href="#"
+                <RouterLink
+                  to="/disclaimer"
                   class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >Disclaimer</a
+                  >Disclaimer</RouterLink
                 >
               </li>
             </ul>

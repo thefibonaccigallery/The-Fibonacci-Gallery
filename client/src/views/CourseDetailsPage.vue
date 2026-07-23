@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserCourses } from '@/composables/useUserCourses'
+import { useAuthStore } from '@/stores/auth'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import { Button } from '@/components/ui/button'
 import {
@@ -22,8 +23,20 @@ import {
 const route = useRoute()
 const router = useRouter()
 const { useCourseDetail } = useUserCourses()
+const authStore = useAuthStore()
 
 const courseUuid = computed(() => route.params.uuid as string)
+
+const handleEnrollClick = () => {
+  if (authStore.isAuthenticated) {
+    router.push(`/checkout/${courseUuid.value}`)
+  } else {
+    router.push({
+      path: '/login',
+      query: { redirect: `/courses/${courseUuid.value}/details` }
+    })
+  }
+}
 const { data, isLoading, error } = useCourseDetail(courseUuid.value)
 
 const course = computed(() => data.value?.course)
@@ -221,7 +234,7 @@ const getLevelColor = (level: string) => {
               <div class="space-y-3">
                 <Button
                   v-if="!course.is_enrolled"
-                  @click="router.push(`/checkout/${courseUuid}`)"
+                  @click="handleEnrollClick"
                   class="w-full text-base font-semibold py-6 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   Enroll Now

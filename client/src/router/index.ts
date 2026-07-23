@@ -45,6 +45,46 @@ const router = createRouter({
       component: () => import('@/views/ExploreCoursesPage.vue'),
     },
     {
+      path: '/features',
+      name: 'features',
+      component: () => import('@/views/FeaturesView.vue'),
+    },
+    {
+      path: '/markets',
+      name: 'markets',
+      component: () => import('@/views/MarketsView.vue'),
+    },
+    {
+      path: '/testimonials',
+      name: 'testimonials',
+      component: () => import('@/views/TestimonialsView.vue'),
+    },
+    {
+      path: '/faq',
+      name: 'faq',
+      component: () => import('@/views/FaqView.vue'),
+    },
+    {
+      path: '/blog',
+      name: 'blog',
+      component: () => import('@/views/BlogView.vue'),
+    },
+    {
+      path: '/privacy',
+      name: 'privacy',
+      component: () => import('@/views/PrivacyView.vue'),
+    },
+    {
+      path: '/terms',
+      name: 'terms',
+      component: () => import('@/views/TermsView.vue'),
+    },
+    {
+      path: '/disclaimer',
+      name: 'disclaimer',
+      component: () => import('@/views/DisclaimerView.vue'),
+    },
+    {
       path: '/courses/:uuid/details',
       name: 'course-details',
       component: () => import('@/views/CourseDetailsPage.vue'),

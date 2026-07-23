@@ -120,19 +120,24 @@ class UserCourseController extends Controller
      */
     public function exploreCourses(Request $request)
     {
-        $user = Auth::user();
+        $user = auth('api')->user();
 
         // Get IDs of courses the user is already enrolled in
-        $enrolledCourseIds = Enrollment::where('user_id', $user->id)
-            ->pluck('course_id')
-            ->toArray();
+        $enrolledCourseIds = [];
+        if ($user) {
+            $enrolledCourseIds = Enrollment::where('user_id', $user->id)
+                ->pluck('course_id')
+                ->toArray();
+        }
 
         // Get published courses that the user is not enrolled in
-        $query = Course::where('is_published', true)
-            ->whereNotIn('id', $enrolledCourseIds)
-            ->with(['chapters.videos' => function ($query) {
-                $query->where('is_published', true);
-            }]);
+        $query = Course::where('is_published', true);
+        if (!empty($enrolledCourseIds)) {
+            $query->whereNotIn('id', $enrolledCourseIds);
+        }
+        $query->with(['chapters.videos' => function ($query) {
+            $query->where('is_published', true);
+        }]);
 
         // Search filter
         if ($request->has('search')) {
@@ -183,7 +188,7 @@ class UserCourseController extends Controller
      */
     public function showCourse($uuid)
     {
-        $user = Auth::user();
+        $user = auth('api')->user();
 
         $course = Course::where('is_published', true)
             ->with(['chapters' => function ($query) {
@@ -195,9 +200,12 @@ class UserCourseController extends Controller
             ->firstOrFail();
 
         // Check if user is enrolled
-        $enrollment = Enrollment::where('user_id', $user->id)
-            ->where('course_id', $course->id)
-            ->first();
+        $enrollment = null;
+        if ($user) {
+            $enrollment = Enrollment::where('user_id', $user->id)
+                ->where('course_id', $course->id)
+                ->first();
+        }
 
         $totalVideos = $course->chapters->sum(function ($chapter) {
             return $chapter->videos->count();

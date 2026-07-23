@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useDashboard } from '@/composables/useDashboard'
+import { useUserCourses } from '@/composables/useUserCourses'
 import AppSidebar from '@/components/dashboard/AppSidebar.vue'
 import BottomNav from '@/components/dashboard/BottomNav.vue'
 import WelcomeBar from '@/components/dashboard/WelcomeBar.vue'
@@ -9,6 +11,24 @@ import MyCourses from '@/components/dashboard/MyCourses.vue'
 import ExploreCourses from '@/components/dashboard/ExploreCourses.vue'
 
 const { student, activeTab, setActiveTab, currentDate } = useDashboard()
+
+// Fetch enrolled courses once here — MyCourses uses the same queryKey
+// so TanStack Query deduplicates the request automatically
+const { useMyEnrolledCourses } = useUserCourses()
+const { data: enrolledData, isLoading: statsLoading } = useMyEnrolledCourses()
+
+const courses = computed(() => enrolledData.value?.courses ?? [])
+
+const coursesEnrolled = computed(() => courses.value.length)
+const lessonsCompleted = computed(() =>
+  courses.value.reduce((sum, c) => sum + (c.completedLessons ?? 0), 0),
+)
+const totalLessons = computed(() =>
+  courses.value.reduce((sum, c) => sum + (c.totalLessons ?? 0), 0),
+)
+const overallProgress = computed(() =>
+  totalLessons.value > 0 ? Math.round((lessonsCompleted.value / totalLessons.value) * 100) : 0,
+)
 </script>
 
 <template>
@@ -22,7 +42,13 @@ const { student, activeTab, setActiveTab, currentDate } = useDashboard()
         <!-- Dashboard Content (only visible when 'home' tab is active) -->
         <div v-if="activeTab === 'home'" class="w-full">
           <WelcomeBar :studentName="student.name" :currentDate="currentDate" />
-          <StatsRow />
+          <StatsRow
+            :isLoading="statsLoading"
+            :coursesEnrolled="coursesEnrolled"
+            :lessonsCompleted="lessonsCompleted"
+            :totalLessons="totalLessons"
+            :overallProgress="overallProgress"
+          />
           <ContinueLearning />
           <MyCourses />
           <ExploreCourses />

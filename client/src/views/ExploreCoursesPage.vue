@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserCourses } from '@/composables/useUserCourses'
+import { useAuthStore } from '@/stores/auth'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -23,6 +24,15 @@ import {
 const router = useRouter()
 const route = useRoute()
 const { useExploreCourses } = useUserCourses()
+const authStore = useAuthStore()
+
+const handleEnroll = (courseUuid: string) => {
+  if (authStore.isAuthenticated) {
+    router.push(`/checkout/${courseUuid}`)
+  } else {
+    router.push(`/courses/${courseUuid}/details`)
+  }
+}
 
 const searchQuery = ref('')
 const selectedLevel = ref<string>('all')
@@ -91,6 +101,7 @@ const getLevelColor = (level: string) => {
               </p>
             </div>
             <Button
+              v-if="authStore.isAuthenticated"
               @click="router.push('/my-courses')"
               variant="outline"
               class="border-primary/30 text-primary hover:bg-primary/10"
@@ -265,7 +276,7 @@ const getLevelColor = (level: string) => {
               </div>
 
               <Button
-                @click="router.push(`/checkout/${course.uuid}`)"
+                @click="handleEnroll(course.uuid)"
                 class="w-full text-sm font-semibold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 Enroll Now
