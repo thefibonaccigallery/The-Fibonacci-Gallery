@@ -30,13 +30,6 @@ import { RouterLink } from 'vue-router'
             </li>
             <li>
               <RouterLink
-                to="/features"
-                class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >Features</RouterLink
-              >
-            </li>
-            <li>
-              <RouterLink
                 to="/markets"
                 class="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >Live Markets</RouterLink

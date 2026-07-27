@@ -234,7 +234,6 @@ const faqs = [
 ]
 
 const navLinks = [
-  { label: 'Features', href: '/features' },
   { label: 'Courses', href: '/explore' },
   { label: 'Markets', href: '/markets' },
   { label: 'Testimonials', href: '/testimonials' },
@@ -940,8 +939,8 @@ of Trading"
         </h2>
 
         <p class="text-base md:text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
-          Join 2,500+ traders who've already discovered the power of Fibonacci-based analysis. Your
-          first profitable trade is closer than you think.
+          Access our masterclasses, specialize The Big Five, and join the supportive trading
+          community right now.
         </p>
 
         <div class="flex flex-wrap gap-4 justify-center">

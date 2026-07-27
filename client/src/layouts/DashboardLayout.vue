@@ -38,7 +38,6 @@ const mobileMenuOpen = ref(false)
             <!-- Desktop Nav -->
             <div class="hidden md:flex items-center gap-8">
               <RouterLink to="/" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Home</RouterLink>
-              <a href="/#features" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
               <a href="/#courses" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Courses</a>
               <a href="/#markets" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Markets</a>
               <a href="/#testimonials" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Testimonials</a>
@@ -72,7 +71,6 @@ const mobileMenuOpen = ref(false)
           <div v-if="mobileMenuOpen" class="md:hidden border-t border-border/20 mt-2 bg-background">
             <div class="px-6 py-4 flex flex-col gap-3">
               <RouterLink to="/" class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2" @click="mobileMenuOpen = false">Home</RouterLink>
-              <a href="/#features" class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2" @click="mobileMenuOpen = false">Features</a>
               <a href="/#courses" class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2" @click="mobileMenuOpen = false">Courses</a>
               <a href="/#markets" class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2" @click="mobileMenuOpen = false">Markets</a>
               <a href="/#testimonials" class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2" @click="mobileMenuOpen = false">Testimonials</a>
