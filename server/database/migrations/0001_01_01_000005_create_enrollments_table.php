@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('enrollments', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->uuid()->unique();
-            $table->bigInteger('user_id')->constrained('users')->onDelete('cascade');
-            $table->bigInteger('course_id')->constrained('courses')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
             $table->enum('type', ['free', 'paid', 'coupon'])->default('free');
             $table->foreignId('coupon_id')->nullable()->constrained('coupons')->nullOnDelete();
             $table->timestamp('enrolled_at')->useCurrent();

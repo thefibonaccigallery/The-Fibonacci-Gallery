@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->uuid()->unique();
-            $table->bigInteger('user_id')->constrained('users')->onDelete('cascade');
-            $table->bigInteger('course_id')->constrained('courses')->onDelete('cascade');
-            $table->unsignedBigInteger('coupon_id')->nullable();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
+            $table->foreignId('coupon_id')->nullable()->constrained('coupons')->nullOnDelete();
             $table->decimal('amount', 10, 2);
             $table->string('currency')->default('USD');
             $table->string('nowpayments_payment_id')->unique()->nullable();

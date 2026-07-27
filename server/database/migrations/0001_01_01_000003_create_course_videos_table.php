@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('course_videos', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->uuid()->unique();
-            $table->bigInteger('chapter_id')->constrained('chapters')->onDelete('cascade');
+            $table->foreignId('chapter_id')->constrained('chapters')->onDelete('cascade');
             $table->string('title');
             $table->string('youtube_video_id', 20)->nullable();
             $table->string('level')->nullable();

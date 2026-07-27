@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('chapters', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->uuid()->unique();
-            $table->bigInteger('course_id')->constrained('courses')->onDelete('cascade');
+            $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
             $table->string('title');
             $table->string('level')->nullable();
             $table->integer('length_seconds')->default(0);

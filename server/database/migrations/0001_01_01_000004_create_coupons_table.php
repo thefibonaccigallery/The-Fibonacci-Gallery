@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('coupons', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->uuid()->unique();
-            $table->bigInteger('course_id')->constrained('courses')->onDelete('cascade');
+            $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
             $table->string('code', 50)->unique();
             $table->decimal('discount_percentage', 5, 2);
             $table->unsignedInteger('max_uses')->nullable();

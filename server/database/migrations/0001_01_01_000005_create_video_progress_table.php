@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('video_progress', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->uuid()->unique();
-            $table->bigInteger('user_id')->constrained('users')->onDelete('cascade');
-            $table->bigInteger('course_video_id')->constrained('course_videos')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('course_video_id')->constrained('course_videos')->onDelete('cascade');
             $table->boolean('is_completed')->default(false);
             $table->timestamp('completed_at')->nullable();
             $table->integer('watch_time_seconds')->default(0);

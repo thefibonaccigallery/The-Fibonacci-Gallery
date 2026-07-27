@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
+use Spatie\Permission\Models\Role;
+
 class AuthController extends Controller
 {
     public function register(RegisterRequest $request)
@@ -23,7 +25,8 @@ class AuthController extends Controller
             'country'  => $request->country,
         ]);
 
-        $user->assignRole('user');
+        $role = Role::firstOrCreate(['name' => 'user', 'guard_name' => 'api']);
+        $user->assignRole($role);
 
         $token = $user->createToken('auth_token')->accessToken;
 
