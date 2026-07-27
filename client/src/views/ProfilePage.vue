@@ -11,7 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { PhIdentificationCard, PhLockKey, PhUserCircle } from '@phosphor-icons/vue'
+import ThemeToggle from '@/components/blocks/ThemeToggle.vue'
+import { PhIdentificationCard, PhLockKey, PhUserCircle, PhSunDim } from '@phosphor-icons/vue'
 
 const {
   lang,
@@ -215,6 +216,18 @@ const {
               <p class="text-xs text-muted-foreground">
                 {{ lang.profile.helper.emailReadOnly }}
               </p>
+            </section>
+
+            <section class="liquid-glass rounded-2xl border border-border/20 p-6 space-y-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <PhSunDim class="h-6 w-6 text-primary" />
+                  <h2 class="text-lg font-semibold text-foreground">
+                    Appearance
+                  </h2>
+                </div>
+                <ThemeToggle />
+              </div>
             </section>
           </aside>
         </div>

@@ -18,6 +18,8 @@ import {
   PhUsers,
   PhCertificate,
   PhClock,
+  PhGlobe,
+  PhTrendUp,
   PhArrowRight,
   PhStar,
   PhList,
@@ -99,21 +101,21 @@ const features = [
     icon: PhChartLineUp,
     title: 'Technical Analysis Mastery',
     description:
-      'Learn to read charts like a professional. Master Fibonacci retracements, Elliott Wave theory, and advanced pattern recognition.',
+      'Learn to read charts like a professional. Master The Big Five strategy  and advanced patterns.',
     video: featureVideos[0],
   },
   {
     icon: PhShieldCheck,
     title: 'Risk Management',
     description:
-      'Protect your capital with battle-tested risk management strategies. Position sizing, stop-loss placement, and portfolio diversification.',
+      'Protect vour capital with back-tested risk management strategies. Position sizing ,capital preservation, Mental & Psychological Discipline.',
     video: featureVideos[1],
   },
   {
-    icon: PhVideoCamera,
-    title: 'Live Market Sessions',
+    icon: PhTrendUp,
+    title: 'Weekly Gold Analysis',
     description:
-      'Trade alongside expert traders in real-time. Watch live analysis, get instant feedback, and learn from every market move.',
+      'Stay ahead of the market with in-depth weekly gold analysis. Get detailed breakdowns of price action, key market levels, and high-probability setups.',
     video: featureVideos[2],
   },
 ]
@@ -246,11 +248,14 @@ const navLinks = [
     <nav
       id="navbar"
       class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
-      :class="[scrolled ? 'liquid-glass border-b border-border/20 py-3' : 'py-5']"
+      :class="[scrolled ? 'bg-background border-b border-border/20 py-3' : 'bg-background py-5']"
     >
       <div class="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 flex items-center justify-between">
         <!-- Brand -->
-        <RouterLink to="/" class="text-xl font-semibold tracking-tight text-foreground hover:text-primary transition-colors">
+        <RouterLink
+          to="/"
+          class="text-xl font-semibold tracking-tight text-foreground hover:text-primary transition-colors"
+        >
           The Fibonacci Gallery
         </RouterLink>
 
@@ -290,7 +295,7 @@ const navLinks = [
       </div>
 
       <!-- Mobile Menu -->
-      <div v-if="mobileMenuOpen" class="md:hidden liquid-glass border-t border-border/20 mt-2">
+      <div v-if="mobileMenuOpen" class="md:hidden bg-background border-t border-border/20 mt-2">
         <div class="px-6 py-4 flex flex-col gap-3">
           <RouterLink
             v-for="link in navLinks"
@@ -339,10 +344,15 @@ of Trading"
 
         <!-- Subheadline -->
         <FadeIn :delay="1000" :duration="1000">
-          <p class="text-base md:text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Unlock the hidden patterns in financial markets with our Fibonacci-based trading system.
-            Learn from expert traders, access live sessions, and join a community of 2,500+ traders
-            who've transformed their approach to the markets.
+          <p
+            class="text-base md:text-lg text-black dark:text-muted-foreground mb-8 max-w-2xl mx-auto"
+          >
+            Spot hidden market patterns with our Big Five (S.R.S.F.T.R.) trading system. It was
+            built by an expert who spent 5+ years studying, backtesting, and developing it. This
+            course offers a detailed breakdown for beginners, intermediates, and pros. It covers The
+            Big Five strategy, each part individually and combined, with backtesting on 3 months of
+            data from the most common market movements: trending and ranging structures each. Plus,
+            you'll join 200+ traders who've already changed how they trade.
           </p>
         </FadeIn>
 
@@ -385,13 +395,12 @@ of Trading"
       <div
         class="max-w-5xl mx-auto liquid-glass rounded-2xl border border-border/20 px-6 py-8 md:px-12 md:py-10"
       >
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
           <div
             v-for="(stat, i) in [
-              { value: '2,500+', label: 'Active Traders', icon: PhUsers },
-              { value: '95%', label: 'Success Rate', icon: PhChartLineUp },
-              { value: '50+', label: 'Trading Courses', icon: PhCertificate },
-              { value: '24/7', label: 'Live Markets', icon: PhClock },
+              { value: '200+', label: 'Active Traders', icon: PhUsers },
+              { value: '20+', label: 'Member Countries', icon: PhGlobe },
+              { value: 'Weekly', label: 'Gold Analysis', icon: PhTrendUp },
             ]"
             :key="stat.label"
             class="text-center transition-all duration-700"
@@ -440,8 +449,8 @@ of Trading"
             <span class="text-primary">Succeed</span>
           </h2>
           <p class="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-            Our platform combines world-class education with real-time market tools to give you the
-            ultimate trading advantage.
+            Our courses combine world-class education, institutional-grade market analysis, and
+            real-time tools to give you the ultimate trading advantage.
           </p>
         </div>
 
@@ -450,7 +459,7 @@ of Trading"
           <div
             v-for="(feature, i) in features"
             :key="feature.title"
-            class="group relative rounded-2xl overflow-hidden border border-border/30 dark:border-border/20 transition-all duration-500 hover:border-primary/40 min-h-[380px]"
+            class="group relative rounded-2xl overflow-hidden border border-border/30 dark:border-border/20 transition-all duration-500 hover:border-primary/40 min-h-95"
             :style="{
               opacity: visibleSections.has('features') ? 1 : 0,
               transform: visibleSections.has('features') ? 'translateY(0)' : 'translateY(30px)',
@@ -482,7 +491,7 @@ of Trading"
                 <component :is="feature.icon" class="h-6 w-6 text-primary" />
               </div>
               <h3 class="text-xl font-semibold mb-3 text-foreground">{{ feature.title }}</h3>
-              <p class="text-sm text-foreground/70 dark:text-muted-foreground leading-relaxed">
+              <p class="text-sm text-black dark:text-muted-foreground leading-relaxed">
                 {{ feature.description }}
               </p>
             </div>
@@ -510,7 +519,7 @@ of Trading"
             class="inline-flex items-center gap-2 liquid-glass rounded-full px-4 py-1.5 border border-border/20 mb-6"
           >
             <span class="text-xs text-primary font-medium uppercase tracking-wider"
-              >Our Courses</span
+              >Our Purpose</span
             >
           </div>
           <h2
@@ -629,7 +638,7 @@ of Trading"
             <!-- ── Coming Soon card ── -->
             <div
               v-else
-              class="group relative rounded-2xl overflow-hidden border border-dashed border-border/40 transition-all duration-500 hover:border-primary/30 flex flex-col"
+              class="group relative rounded-2xl overflow-hidden border border-dashed border-border/60 dark:border-border/40 transition-all duration-500 hover:border-primary/40 flex flex-col bg-card shadow-sm"
               :style="{
                 opacity: visibleSections.has('courses') ? 1 : 0,
                 transform: visibleSections.has('courses') ? 'translateY(0)' : 'translateY(30px)',
@@ -637,26 +646,26 @@ of Trading"
               }"
             >
               <!-- Blurred video background -->
-              <div class="relative h-48 overflow-hidden">
+              <div class="relative h-48 overflow-hidden bg-muted/40">
                 <video
                   autoplay
                   loop
                   muted
                   playsinline
-                  class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-30"
+                  class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-25 dark:opacity-30"
                 >
                   <source :src="item.video" type="video/mp4" />
                 </video>
-                <div class="absolute inset-0 bg-background/70 dark:bg-black/70 backdrop-blur-sm" />
+                <div class="absolute inset-0 bg-background/80 dark:bg-black/80 backdrop-blur-sm" />
                 <!-- Coming soon badge -->
                 <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10">
                   <div
-                    class="w-12 h-12 rounded-full liquid-glass border border-border/30 flex items-center justify-center"
+                    class="w-12 h-12 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center shadow-xs"
                   >
-                    <PhRocket class="h-5 w-5 text-primary opacity-60" />
+                    <PhRocket class="h-5 w-5 text-primary" />
                   </div>
                   <span
-                    class="liquid-glass rounded-full px-3 py-1 text-xs font-medium border border-border/20 text-muted-foreground"
+                    class="bg-background/90 dark:bg-card/90 rounded-full px-3.5 py-1 text-xs font-semibold border border-border/40 text-foreground shadow-xs"
                   >
                     Coming Soon
                   </span>
@@ -664,10 +673,10 @@ of Trading"
               </div>
 
               <!-- Card body -->
-              <div class="flex flex-col flex-1 p-6 bg-card/50">
+              <div class="flex flex-col flex-1 p-6 bg-card">
                 <div class="flex-1 flex flex-col items-center justify-center text-center py-4">
-                  <h3 class="text-lg font-medium mb-2 text-muted-foreground/60">New Course</h3>
-                  <p class="text-sm text-muted-foreground/50">
+                  <h3 class="text-lg font-semibold mb-2 text-foreground/80">New Course</h3>
+                  <p class="text-sm text-muted-foreground leading-relaxed">
                     We're crafting something incredible. Stay tuned for the next level of trading
                     education.
                   </p>
@@ -675,10 +684,9 @@ of Trading"
 
                 <!-- Placeholder footer -->
                 <div
-                  class="flex items-center justify-between pt-4 border-t border-border/20 border-dashed"
+                  class="flex items-center justify-between pt-4 border-t border-border/40 border-dashed"
                 >
-                  <span class="text-sm text-muted-foreground/40 italic">Price TBA</span>
-                  <Button size="sm" variant="outline" class="rounded-lg opacity-50" disabled>
+                  <Button size="sm" variant="outline" class="rounded-lg font-medium" disabled>
                     Coming Soon
                   </Button>
                 </div>

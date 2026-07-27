@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button'
 import ThemeToggle from '@/components/blocks/ThemeToggle.vue'
 import { RouterLink } from 'vue-router'
 import { ref } from 'vue'
-import { PhArrowRight, PhList, PhX } from '@phosphor-icons/vue'
+import logo from '@/assets/images/white_final.webp'
+import { PhArrowRight, PhList, PhX, PhSignOut } from '@phosphor-icons/vue'
 
 const { activeTab, setActiveTab } = useDashboard()
 const authStore = useAuthStore()
@@ -26,7 +27,7 @@ const mobileMenuOpen = ref(false)
         <!-- Public header for unauthenticated users -->
         <nav
           v-if="!authStore.isAuthenticated"
-          class="sticky top-0 z-50 w-full border-b border-border/20 bg-background/80 backdrop-blur-md py-3"
+          class="sticky top-0 z-50 w-full border-b border-border/20 bg-background py-3"
         >
           <div class="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 flex items-center justify-between">
             <!-- Brand -->
@@ -68,7 +69,7 @@ const mobileMenuOpen = ref(false)
           </div>
 
           <!-- Mobile Menu -->
-          <div v-if="mobileMenuOpen" class="md:hidden border-t border-border/20 mt-2 bg-background/95 backdrop-blur-md">
+          <div v-if="mobileMenuOpen" class="md:hidden border-t border-border/20 mt-2 bg-background">
             <div class="px-6 py-4 flex flex-col gap-3">
               <RouterLink to="/" class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2" @click="mobileMenuOpen = false">Home</RouterLink>
               <a href="/#features" class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2" @click="mobileMenuOpen = false">Features</a>
@@ -85,6 +86,35 @@ const mobileMenuOpen = ref(false)
             </div>
           </div>
         </nav>
+
+        <!-- Mobile Header for authenticated users -->
+        <header
+          v-else
+          class="md:hidden sticky top-0 z-40 w-full border-b border-border/20 bg-background/80 backdrop-blur-md px-4 py-3 flex items-center justify-between"
+        >
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30 shrink-0">
+              <img :src="logo" alt="Logo" class="w-5 h-5 rounded-lg" />
+            </div>
+            <div class="font-semibold text-xs tracking-tight text-foreground">
+              <span class="block leading-tight">The Fibonacci</span>
+              <span class="block text-[10px] text-muted-foreground leading-tight">Gallery</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <ThemeToggle />
+            <Button
+              variant="ghost"
+              size="icon"
+              class="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl"
+              @click="authStore.logout()"
+              title="Logout"
+            >
+              <PhSignOut class="h-5 w-5" />
+            </Button>
+          </div>
+        </header>
 
         <div :class="[authStore.isAuthenticated ? 'pl-4' : '']">
           <slot />
