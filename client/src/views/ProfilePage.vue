@@ -222,11 +222,9 @@ const {
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <PhSunDim class="h-6 w-6 text-primary" />
-                  <h2 class="text-lg font-semibold text-foreground">
-                    Appearance
-                  </h2>
+                  <h2 class="text-lg font-semibold text-foreground">Appearance</h2>
                 </div>
-                <ThemeToggle />
+                <!-- <ThemeToggle /> -->
               </div>
             </section>
           </aside>

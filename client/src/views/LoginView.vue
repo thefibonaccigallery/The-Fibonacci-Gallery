@@ -34,7 +34,7 @@ const bgVideoUrl =
           Back to Home
         </RouterLink>
       </Button>
-      <ThemeToggle />
+      <!-- <ThemeToggle /> -->
     </nav>
 
     <!-- Main Content -->
@@ -76,9 +76,12 @@ const bgVideoUrl =
                   <label for="login-password" class="text-sm font-medium text-foreground"
                     >Password</label
                   >
-                  <a href="#" class="text-xs text-primary hover:text-primary/80 transition-colors">
+                  <RouterLink
+                    to="/forgot-password"
+                    class="text-xs text-primary hover:text-primary/80 transition-colors"
+                  >
                     Forgot password?
-                  </a>
+                  </RouterLink>
                 </div>
                 <div class="relative">
                   <Input

@@ -86,7 +86,7 @@ const isActive = (item: (typeof navItems)[0]) => {
     <div class="pt-6 border-t border-border/10 space-y-4">
       <div class="flex items-center justify-between">
         <span class="text-xs text-muted-foreground font-medium">Appearance</span>
-        <ThemeToggle />
+        <!-- <ThemeToggle /> -->
       </div>
 
       <Button

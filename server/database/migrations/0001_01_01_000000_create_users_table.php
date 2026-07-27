@@ -27,11 +27,13 @@ return new class extends Migration
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->uuid()->unique();
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-       });
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('token')->index();
+            $table->boolean('used')->default(false);
+            $table->timestamp('expires_at');
+            $table->timestamps();
+        });
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();

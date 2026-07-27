@@ -7,7 +7,7 @@ import { computed } from 'vue'
 
 const mode = useColorMode()
 const toasterTheme = computed(() => {
-  return mode.value === 'dark' ? 'dark' : 'light'
+  return mode.value === 'dark'
 })
 </script>
 

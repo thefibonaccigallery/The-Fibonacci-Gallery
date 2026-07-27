@@ -147,7 +147,7 @@ const handleLogout = () => {
       </button>
 
       <!-- Theme Toggle -->
-      <button
+      <!-- <button
         @click="toggleTheme"
         :class="[
           'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
@@ -163,7 +163,7 @@ const handleLogout = () => {
             {{ mode === 'light' ? 'Dark Mode' : 'Light Mode' }}
           </span>
         </transition>
-      </button>
+      </button> -->
 
       <!-- Logout Button -->
       <button

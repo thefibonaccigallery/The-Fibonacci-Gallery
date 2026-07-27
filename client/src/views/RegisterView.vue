@@ -35,7 +35,7 @@ const bgVideoUrl =
           Back to Home
         </RouterLink>
       </Button>
-      <ThemeToggle />
+      <!-- <ThemeToggle /> -->
     </nav>
 
     <!-- Main Content -->

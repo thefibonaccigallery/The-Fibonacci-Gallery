@@ -7,25 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class PasswordResetToken extends Model
 {
-    use HasUuid;
-
     protected $table = 'password_reset_tokens';
 
-    protected $primaryKey = 'email';
-
-    public $incrementing = false;
-
-    protected $keyType = 'string';
-
-    public $timestamps = false;
-
     protected $fillable = [
-        'email',
+        'user_id',
         'token',
-        'created_at',
+        'used',
+        'expires_at',
     ];
 
     protected $casts = [
-        'created_at' => 'datetime',
+        'used'       => 'boolean',
+        'expires_at' => 'datetime',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

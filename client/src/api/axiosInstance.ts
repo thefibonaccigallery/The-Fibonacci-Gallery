@@ -31,9 +31,18 @@ axiosInstance.interceptors.response.use(
 
       // Do not hard redirect if the failed request was the login attempt itself
       // or if the user is already on the login/register pages
-      const isAuthEndpoint = error.config && error.config.url && error.config.url.includes('/login')
+      const isAuthEndpoint =
+        error.config &&
+        error.config.url &&
+        (error.config.url.includes('/login') ||
+          error.config.url.includes('/forgot-password') ||
+          error.config.url.includes('/reset-password') ||
+          error.config.url.includes('/verify-reset-token'))
       const isAuthPage =
-        window.location.pathname === '/login' || window.location.pathname === '/register'
+        window.location.pathname === '/login' ||
+        window.location.pathname === '/register' ||
+        window.location.pathname === '/forgot-password' ||
+        window.location.pathname === '/reset-password'
 
       if (!isAuthEndpoint && !isAuthPage) {
         window.location.href = '/login'

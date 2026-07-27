@@ -272,7 +272,7 @@ const navLinks = [
 
         <!-- Right Side -->
         <div class="flex items-center gap-3">
-          <ThemeToggle />
+          <!-- <ThemeToggle /> -->
           <Button class="hidden md:inline-flex" size="sm" as-child>
             <RouterLink to="/login">
               Get Started
@@ -323,7 +323,7 @@ const navLinks = [
         <!-- Glass pill tagline -->
         <FadeIn :delay="100" :duration="600">
           <div
-            class="inline-flex items-center gap-2 liquid-glass rounded-full px-5 py-2 border border-border/20 mb-8"
+            class="inline-flex mt-4 items-center gap-2 liquid-glass rounded-full px-5 py-2 border border-border/20 mb-8"
           >
             <PhRocket class="h-4 w-4 text-primary" />
             <span class="text-sm text-balack dark:text-muted-foreground"

@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\EnrollmentController as AdminEnrollmentController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\Api\PasswordResetController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -27,6 +28,9 @@ Route::post('/payments/webhook', [PaymentController::class, 'webhook'])
 Route::get('/public-courses', [UserCourseController::class, 'publicCourses']);
 Route::get('/explore-courses', [UserCourseController::class, 'exploreCourses']);
 Route::get('/courses/{uuid}', [UserCourseController::class, 'showCourse']);
+Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
+Route::get('/verify-reset-token', [PasswordResetController::class, 'verifyToken']);
+Route::post('/reset-password',  [PasswordResetController::class, 'resetPassword']);
 
 
 // Protected routes

@@ -111,7 +111,7 @@ onBeforeUnmount(() => {
           ></span>
         </button>
 
-        <!-- Theme Toggle (Mobile Only) -->
+        Theme Toggle (Mobile Only)
         <button
           @click="toggleTheme"
           class="lg:hidden p-2 rounded-lg hover:bg-accent/50 transition-colors text-foreground/70 hover:text-foreground"
