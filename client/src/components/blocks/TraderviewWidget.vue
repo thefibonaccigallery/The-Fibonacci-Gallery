@@ -1,11 +1,11 @@
 <template>
-  <div class="tradingview-widget-container" ref="container">
-    <div class="tradingview-widget-container__widget"></div>
-    <div class="tradingview-widget-copyright">
-      <a href="https://www.tradingview.com/markets/" rel="noopener nofollow" target="_blank">
+  <div class="tradingview-widget-container w-full overflow-hidden" ref="container">
+    <div class="tradingview-widget-container__widget w-full"></div>
+    <div class="tradingview-widget-copyright text-center text-xs py-1">
+      <a href="https://www.tradingview.com/markets/" rel="noopener nofollow" target="_blank" class="text-primary hover:underline">
         <span class="blue-text">Market summary</span>
       </a>
-      <span class="trademark"> by TradingView</span>
+      <span class="trademark text-muted-foreground"> by TradingView</span>
     </div>
   </div>
 </template>
@@ -144,7 +144,7 @@ onMounted(() => {
     ],
     "support_host": "https://www.tradingview.com",
     "backgroundColor": "#0f0f0f",
-    "width": "400",
+    "width": "100%",
     "height": "550",
     "showSymbolLogo": true,
     "showChart": true

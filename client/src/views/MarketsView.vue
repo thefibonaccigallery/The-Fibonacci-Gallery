@@ -61,8 +61,8 @@ const markets = {
         </div>
 
         <!-- TradingView Chart Component -->
-        <div class="rounded-3xl border border-border/20 overflow-hidden liquid-glass p-2 mb-16 shadow-2xl shadow-primary/5">
-          <div class="h-[500px] w-full rounded-2xl overflow-hidden bg-zinc-950">
+        <div class="rounded-3xl border border-border/20 overflow-hidden liquid-glass p-2 mb-16 shadow-2xl shadow-primary/5 w-full">
+          <div class="min-h-[580px] w-full rounded-2xl overflow-hidden bg-card">
             <TraderviewWidget />
           </div>
         </div>

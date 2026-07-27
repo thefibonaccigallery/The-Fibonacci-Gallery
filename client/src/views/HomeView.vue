@@ -214,22 +214,22 @@ const faqs = [
   {
     question: 'What markets do the courses cover?',
     answer:
-      'Our courses cover Forex, Crypto, Stocks, and Commodities. The Fibonacci principles and technical analysis methods taught are universal and apply across all financial markets.',
+      'Our courses cover strategies for Forex, Commodities, Crypto, and more. The Big Five principles and technical analysis methods we teach are universal, yet modified to apply effectively across all financial markets.',
   },
   {
     question: 'Do I need prior trading experience?',
     answer:
-      'Not at all. Our Fibonacci Foundations course is designed for complete beginners. We start from the very basics and progressively build your knowledge up to advanced strategies.',
+      'Not at all. Our Big Five Foundations course is designed for complete beginners. We start from the very basics and progressively build your knowledge up to advanced strategies.',
   },
   {
     question: 'How long do I have access to the courses?',
     answer:
-      "You get lifetime access to all course materials, including future updates. Plus, you'll have access to our community Discord and weekly live sessions for as long as your membership is active.",
+      "You get lifetime access to all course materials, including future updates. Plus, you'll have access to our free telegram channel and priority customer support for as long as you subscribed the courses.",
   },
   {
     question: 'What makes The Fibonacci Gallery different?',
     answer:
-      'We combine cinematic-quality educational content with real-time market analysis. Our unique approach blends technical artistry with mathematical precision, helping you see the markets as living, breathing patterns of opportunity.',
+      'We combine cinematic-quality educational content with real-time market analysis. Our unique approach blends technical artistry with mathematical and structural precision, helping you see the markets as living, breathing patterns of opportunity',
   },
 ]
 
@@ -327,7 +327,9 @@ const navLinks = [
             class="inline-flex items-center gap-2 liquid-glass rounded-full px-5 py-2 border border-border/20 mb-8"
           >
             <PhRocket class="h-4 w-4 text-primary" />
-            <span class="text-sm text-muted-foreground">Master the Markets with Precision</span>
+            <span class="text-sm text-balack dark:text-muted-foreground"
+              >Master the Markets with Precision</span
+            >
           </div>
         </FadeIn>
 
@@ -767,8 +769,10 @@ of Trading"
           </div>
 
           <!-- TradingView Widget -->
-          <div class="flex justify-center lg:justify-end">
-            <div class="rounded-2xl overflow-hidden border border-border/20 liquid-glass p-1">
+          <div class="flex justify-center lg:justify-end w-full overflow-hidden">
+            <div
+              class="rounded-2xl overflow-hidden border border-border/20 liquid-glass p-1 sm:p-2 w-full max-w-md"
+            >
               <TraderviewWidget />
             </div>
           </div>

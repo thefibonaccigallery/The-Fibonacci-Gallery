@@ -12,7 +12,8 @@ import { RouterLink } from 'vue-router'
             The Fibonacci Gallery
           </p>
           <p class="text-sm text-muted-foreground leading-relaxed">
-            Where mathematics meets market mastery. Learn to trade with precision and confidence.
+            Where elite strategy meets artistic precision. Learn to trade with precision and
+            confidence.
           </p>
         </div>
 
