@@ -99,7 +99,7 @@ import { RouterLink } from 'vue-router'
           Trading involves risk. Past performance is not indicative of future results.
         </p>
       </div>
-      <div class="w-full flex justify-around mt-6">
+      <!-- <div class="w-full flex justify-around mt-6">
         <p class="mx-auto text-sm">
           Made By
           <a
@@ -110,7 +110,7 @@ import { RouterLink } from 'vue-router'
           >
           with ❤️
         </p>
-      </div>
+      </div> -->
     </div>
   </footer>
 </template>
