@@ -3,10 +3,11 @@ import { useColorMode } from '@vueuse/core'
 import { Button } from '@/components/ui/button'
 import { PhMoon, PhSun } from '@phosphor-icons/vue'
 
-const mode = useColorMode()
+const mode = useColorMode({ initialValue: 'dark' })
+mode.value = 'dark'
 
 const toggleTheme = () => {
-  mode.value = mode.value === 'dark' ? 'light' : 'dark'
+  mode.value = 'dark'
 }
 </script>
 
