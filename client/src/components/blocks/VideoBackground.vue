@@ -34,8 +34,25 @@ const isSlowConnection = computed(() => {
 
 let observer: IntersectionObserver | null = null
 
+function tryPlay() {
+  if (!videoRef.value) return
+  const playPromise = videoRef.value.play()
+  if (playPromise !== undefined) {
+    playPromise.catch(() => {
+      // Autoplay was prevented — browser policy; silently ignore
+    })
+  }
+}
+
 onMounted(() => {
   if (isSlowConnection.value) return
+
+  // When the video has enough data to play, trigger play if visible
+  if (videoRef.value) {
+    videoRef.value.addEventListener('canplay', () => {
+      if (isVisible.value) tryPlay()
+    })
+  }
 
   observer = new IntersectionObserver(
     (entries) => {
@@ -43,7 +60,8 @@ onMounted(() => {
         if (entry.isIntersecting) {
           isVisible.value = true
           shouldLoadVideo.value = true
-          videoRef.value?.play()
+          // Try to play; if video isn't ready yet, the canplay listener will handle it
+          tryPlay()
         } else {
           isVisible.value = false
           videoRef.value?.pause()
@@ -75,6 +93,7 @@ onUnmounted(() => {
     <video
       v-if="!isSlowConnection"
       ref="videoRef"
+      autoplay
       loop
       muted
       playsinline
