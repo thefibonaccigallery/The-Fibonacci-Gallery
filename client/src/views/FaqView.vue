@@ -31,7 +31,7 @@ const faqs = [
     category: 'general',
     question: 'What markets do the courses cover?',
     answer:
-      'Our courses cover Forex, Crypto, Stocks, and Commodities. The Fibonacci principles and technical analysis methods taught are universal and apply across all financial markets.',
+      'Our courses cover strategies for Forex, Commodities, Crypto, and more. The Big Five principles and technical analysis methods we teach are universal, yet modified to apply effectively across all financial markets.',
   },
   {
     category: 'general',
@@ -40,10 +40,16 @@ const faqs = [
       'Not at all. Our Fibonacci Foundations course is designed for complete beginners. We start from the very basics and progressively build your knowledge up to advanced strategies.',
   },
   {
+    category: 'general',
+    question: 'What makes The Fibonacci Gallery different',
+    answer:
+      'We combine cinematic-quality educational content with real-time market analysis. Our unique approach blends technical artistry with mathematical and structural precision, helping you see the markets as living, breathing patterns of opportunity.',
+  },
+  {
     category: 'platform',
     question: 'How long do I have access to the courses?',
     answer:
-      'You get lifetime access to all course materials, including future updates. Plus, you will have access to our community Discord and weekly live sessions for as long as your membership is active.',
+      "You get lifetime access to all course materials, including future updates. Plus, you'll have access to our free telegram channel and priority customer support for as long as you subscribed the courses.",
   },
   {
     category: 'platform',
