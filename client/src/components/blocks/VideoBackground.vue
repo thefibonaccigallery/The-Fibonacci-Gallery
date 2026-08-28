@@ -6,12 +6,14 @@ interface Props {
   src: string
   poster?: string
   overlayOpacity?: number
+  videoClass?: string
   class?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   overlayOpacity: 0.55,
   poster: undefined,
+  videoClass: undefined,
 })
 
 const mode = useColorMode()
@@ -99,9 +101,32 @@ onUnmounted(() => {
       playsinline
       :poster="poster"
       :src="shouldLoadVideo ? src : undefined"
-      class="absolute inset-0 w-full h-full object-cover"
+      class="hero-video absolute inset-0 w-full h-full object-cover"
+      :class="videoClass"
     />
 
     <div class="absolute inset-0 z-[1]" :style="overlayStyle" />
   </div>
 </template>
+
+<style scoped>
+/*
+ * On mobile portrait screens the container is very tall and narrow,
+ * which causes object-cover to crop most of a landscape video.
+ * We scale the video wider and reposition it so more content is visible.
+ */
+@media (max-width: 767px) and (orientation: portrait) {
+  .hero-video {
+    object-position: center 30%;
+    /* Widen the video beyond the viewport so more horizontal content shows */
+    width: 140% !important;
+    left: -20% !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hero-video {
+    object-position: center 40%;
+  }
+}
+</style>

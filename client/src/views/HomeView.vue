@@ -316,10 +316,10 @@ const navLinks = [
     </nav>
 
     <!-- ═══════ HERO SECTION ═══════ -->
-    <section id="hero" class="relative min-h-screen flex items-center justify-center">
+    <section id="hero" class="relative min-h-[75vh] md:min-h-screen flex items-center justify-center">
       <VideoBackground :src="heroVideoUrl" :overlay-opacity="0.5" />
 
-      <div class="relative z-10 max-w-4xl mx-auto px-6 md:px-12 text-center pt-24">
+      <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 md:px-12 text-center pt-20 md:pt-24">
         <!-- Glass pill tagline -->
         <FadeIn :delay="100" :duration="600">
           <div
