@@ -62,4 +62,9 @@ class Order extends Model
     {
         return $this->belongsTo(Coupon::class);
     }
+
+    public function commission(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(AffiliateCommission::class, 'order_id');
+    }
 }

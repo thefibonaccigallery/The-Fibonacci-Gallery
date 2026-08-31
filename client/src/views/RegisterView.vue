@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -7,16 +7,24 @@ import AnimatedHeading from '@/components/blocks/AnimatedHeading.vue'
 import FadeIn from '@/components/blocks/FadeIn.vue'
 import VideoBackground from '@/components/blocks/VideoBackground.vue'
 import ThemeToggle from '@/components/blocks/ThemeToggle.vue'
-import { PhArrowLeft, PhUserPlus, PhEye, PhEyeSlash } from '@phosphor-icons/vue'
+import { PhArrowLeft, PhUserPlus, PhEye, PhEyeSlash, PhUserCheck } from '@phosphor-icons/vue'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 const route = useRoute()
+const referralCode = computed(() => (route.query.ref as string) || (route.query.referral as string) || '')
+
 const loginLink = computed(() => {
   const redirect = route.query.redirect as string | undefined
   return redirect ? { path: '/login', query: { redirect } } : '/login'
+})
+
+onMounted(() => {
+  if (referralCode.value) {
+    authStore.registerForm.state.values.referral_code = referralCode.value.trim()
+  }
 })
 
 const bgVideoUrl =

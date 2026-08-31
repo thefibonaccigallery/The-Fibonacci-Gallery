@@ -18,6 +18,7 @@ import {
   PhX,
   PhSignOut,
   PhTicket,
+  PhHandCoins,
 } from '@phosphor-icons/vue'
 
 const route = useRoute()
@@ -48,7 +49,10 @@ const navSections = [
   },
   {
     label: 'PAYMENTS',
-    items: [{ name: 'Orders', path: '/admin/orders', icon: PhShoppingCart }],
+    items: [
+      { name: 'Orders', path: '/admin/orders', icon: PhShoppingCart },
+      { name: 'Affiliate Payouts', path: '/admin/payouts', icon: PhHandCoins },
+    ],
   },
   {
     label: 'SETTINGS',
@@ -84,7 +88,7 @@ const handleLogout = () => {
   >
     <!-- Logo & Platform Name -->
     <div class="flex items-center gap-3 p-6 border-b border-border/50">
-      <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+      <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
         <PhBook :size="20" weight="bold" class="text-primary-foreground" />
       </div>
       <transition name="fade">
@@ -118,7 +122,7 @@ const handleLogout = () => {
           ]"
           :title="isCollapsed ? item.name : ''"
         >
-          <component :is="item.icon" :size="20" weight="regular" class="flex-shrink-0" />
+          <component :is="item.icon" :size="20" weight="regular" class="shrink-0" />
           <transition name="fade">
             <span v-if="!isCollapsed" class="text-sm">{{ item.name }}</span>
           </transition>

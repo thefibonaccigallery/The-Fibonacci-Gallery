@@ -14,6 +14,7 @@ import {
   PhShoppingCart,
   PhGear,
   PhTicket,
+  PhHandCoins,
 } from '@phosphor-icons/vue'
 
 import AppFooter from '@/components/layout/AppFooter.vue'
@@ -44,7 +45,10 @@ const navSections = [
   },
   {
     label: 'PAYMENTS',
-    items: [{ name: 'Orders', path: '/admin/orders', icon: PhShoppingCart }],
+    items: [
+      { name: 'Orders', path: '/admin/orders', icon: PhShoppingCart },
+      { name: 'Affiliate Payouts', path: '/admin/payouts', icon: PhHandCoins },
+    ],
   },
   {
     label: 'SETTINGS',
@@ -79,7 +83,7 @@ const toggleMobileSidebar = () => {
       >
         <!-- Logo & Platform Name -->
         <div class="flex items-center gap-3 p-6 border-b border-border/50">
-          <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+          <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
             <PhBook :size="20" weight="bold" class="text-primary-foreground" />
           </div>
           <span class="font-semibold text-lg text-foreground">Trading Academy</span>
@@ -105,7 +109,7 @@ const toggleMobileSidebar = () => {
                   : 'text-foreground/70 hover:text-foreground',
               ]"
             >
-              <component :is="item.icon" :size="20" weight="regular" class="flex-shrink-0" />
+              <component :is="item.icon" :size="20" weight="regular" class="shrink-0" />
               <span class="text-sm">{{ item.name }}</span>
             </RouterLink>
           </div>

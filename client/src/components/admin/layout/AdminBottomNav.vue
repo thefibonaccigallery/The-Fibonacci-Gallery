@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { PhHouse, PhBook, PhUsers, PhShoppingCart, PhGear } from '@phosphor-icons/vue'
+import { PhHouse, PhBook, PhUsers, PhShoppingCart, PhGear, PhHandCoins } from '@phosphor-icons/vue'
 
 const route = useRoute()
 
@@ -9,6 +9,7 @@ const navItems = [
   { name: 'Courses', path: '/admin/courses', icon: PhBook },
   { name: 'Students', path: '/admin/students', icon: PhUsers },
   { name: 'Orders', path: '/admin/orders', icon: PhShoppingCart },
+  { name: 'Payouts', path: '/admin/payouts', icon: PhHandCoins },
   { name: 'Settings', path: '/admin/settings', icon: PhGear },
 ]
 
@@ -25,7 +26,7 @@ const isActive = (path: string) => {
         :key="item.path"
         :to="item.path"
         :class="[
-          'flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 min-w-[64px]',
+          'flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 min-w-16',
           isActive(item.path)
             ? 'text-primary'
             : 'text-foreground/60 hover:text-foreground hover:bg-accent/30',

@@ -14,8 +14,9 @@ class UserResource extends JsonResource
             'uuid'    => $this->uuid,
             'name'    => $this->name,
             'email'   => $this->email,
-            'country' => $this->country,
-            'role'    => $this->getRoleNames()->first(),
+            'country'       => $this->country,
+            'role'          => $this->getRoleNames()->first(),
+            'referral_code' => $this->referral_code,
         ];
     }
 }

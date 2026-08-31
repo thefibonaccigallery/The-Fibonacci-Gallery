@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Enrollment;
 use App\Models\Order;
+use App\Services\AffiliateService;
 use App\Services\NowPaymentsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +26,10 @@ class OrderController extends Controller
         'refunded',
     ];
 
-    public function __construct(private NowPaymentsService $nowPayments) {}
+    public function __construct(
+        private NowPaymentsService $nowPayments,
+        private AffiliateService $affiliateService
+    ) {}
 
     public function index(Request $request)
     {
@@ -89,6 +93,8 @@ class OrderController extends Controller
                     ['user_id' => $order->user_id, 'course_id' => $order->course_id],
                     ['enrolled_at' => now()]
                 );
+
+                $this->affiliateService->processCommissionForOrder($order);
             }
         });
 

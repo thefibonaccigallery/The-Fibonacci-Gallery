@@ -9,6 +9,7 @@ const registerSchemaRaw = z
     password: z.string().min(8, 'Password must be at least 8 characters'),
     password_confirmation: z.string().min(1, 'Password confirmation is required'),
     country: z.string().min(1, 'Country is required').max(255),
+    referral_code: z.string().optional(),
   })
   .refine((data) => data.password === data.password_confirmation, {
     message: 'Passwords do not match',

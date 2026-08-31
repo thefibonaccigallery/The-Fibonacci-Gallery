@@ -16,6 +16,8 @@ use App\Http\Controllers\Admin\EnrollmentController as AdminEnrollmentController
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\Api\PasswordResetController;
+use App\Http\Controllers\AffiliateController;
+use App\Http\Controllers\Admin\AffiliatePayoutController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -64,6 +66,12 @@ Route::middleware('auth:api')->group(function () {
 
     // Coupon validation (user-facing)
     Route::post('/coupons/validate', [CouponController::class, 'validate']);
+
+    // Affiliate routes (student-facing)
+    Route::get('/affiliate/dashboard', [AffiliateController::class, 'dashboard']);
+    Route::get('/affiliate/commissions', [AffiliateController::class, 'commissions']);
+    Route::get('/affiliate/payouts', [AffiliateController::class, 'payouts']);
+    Route::post('/affiliate/payouts', [AffiliateController::class, 'requestPayout']);
 });
 
 // Admin routes (protected by auth and admin middleware)
@@ -116,4 +124,11 @@ Route::middleware(['auth:api', 'role:admin|super_admin'])->prefix('admin')->grou
     Route::delete('/coupons/{uuid}', [AdminCouponController::class, 'destroy']);
     Route::patch('/coupons/{uuid}/toggle', [AdminCouponController::class, 'toggle']);
     Route::get('/coupons/{uuid}/usage', [AdminCouponController::class, 'usage']);
+
+    // Affiliate payout routes
+    Route::get('/affiliate/payouts', [AffiliatePayoutController::class, 'index']);
+    Route::get('/affiliate/payouts/{uuid}', [AffiliatePayoutController::class, 'show']);
+    Route::post('/affiliate/payouts/{uuid}/approve', [AffiliatePayoutController::class, 'approve']);
+    Route::post('/affiliate/payouts/{uuid}/complete', [AffiliatePayoutController::class, 'complete']);
+    Route::post('/affiliate/payouts/{uuid}/reject', [AffiliatePayoutController::class, 'reject']);
 });

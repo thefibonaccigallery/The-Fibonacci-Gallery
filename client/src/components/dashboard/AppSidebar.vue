@@ -4,7 +4,14 @@ import type { DashboardTab } from '@/types/DashboardType'
 import ThemeToggle from '@/components/blocks/ThemeToggle.vue'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/auth'
-import { PhHouse, PhGraduationCap, PhCompass, PhUser, PhSignOut } from '@phosphor-icons/vue'
+import {
+  PhHouse,
+  PhGraduationCap,
+  PhCompass,
+  PhUser,
+  PhSignOut,
+  PhHandCoins,
+} from '@phosphor-icons/vue'
 import logo from '@/assets/images/white_final.webp'
 
 const props = defineProps<{
@@ -28,6 +35,7 @@ const navItems = [
     route: '/my-courses',
   },
   { id: 'explore' as DashboardTab, label: 'Explore', icon: PhCompass, route: '/explore' },
+  { id: 'affiliate' as DashboardTab, label: 'Affiliate', icon: PhHandCoins, route: '/affiliate' },
   { id: 'profile' as DashboardTab, label: 'Profile', icon: PhUser, route: '/profile' },
 ]
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
 import type { DashboardTab } from '@/types/DashboardType'
-import { PhHouse, PhGraduationCap, PhCompass, PhUser } from '@phosphor-icons/vue'
+import { PhHouse, PhGraduationCap, PhCompass, PhUser, PhHandCoins } from '@phosphor-icons/vue'
 
 const props = defineProps<{
   activeTab: DashboardTab
@@ -18,6 +18,7 @@ const navItems = [
   { id: 'home' as DashboardTab, label: 'Home', icon: PhHouse, route: '/dashboard' },
   { id: 'courses' as DashboardTab, label: 'Courses', icon: PhGraduationCap, route: '/my-courses' },
   { id: 'explore' as DashboardTab, label: 'Explore', icon: PhCompass, route: '/explore' },
+  { id: 'affiliate' as DashboardTab, label: 'Affiliate', icon: PhHandCoins, route: '/affiliate' },
   { id: 'profile' as DashboardTab, label: 'Profile', icon: PhUser, route: '/profile' },
 ]
 

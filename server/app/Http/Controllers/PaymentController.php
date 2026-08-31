@@ -7,13 +7,17 @@ use App\Models\Coupon;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Order;
+use App\Services\AffiliateService;
 use App\Services\NowPaymentsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
-    public function __construct(private NowPaymentsService $nowPayments) {}
+    public function __construct(
+        private NowPaymentsService $nowPayments,
+        private AffiliateService $affiliateService
+    ) {}
 
     public function currencies()
     {
@@ -211,6 +215,8 @@ class PaymentController extends Controller
                                 'coupon_id'   => $order->coupon_id,
                             ]
                         );
+
+                        $this->affiliateService->processCommissionForOrder($order);
                     }
                 });
 
@@ -293,6 +299,8 @@ class PaymentController extends Controller
                         'coupon_id'   => $order->coupon_id,
                     ]
                 );
+
+                $this->affiliateService->processCommissionForOrder($order);
             }
         });
 

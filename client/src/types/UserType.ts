@@ -5,6 +5,7 @@ export interface User {
   email: string
   country: string
   role: string
+  referral_code?: string
 }
 
 export interface AuthResponse {
@@ -25,4 +26,5 @@ export interface RegisterData {
   password: string
   password_confirmation: string
   country: string
+  referral_code?: string
 }

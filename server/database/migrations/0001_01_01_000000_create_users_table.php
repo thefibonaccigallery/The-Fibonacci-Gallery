@@ -22,6 +22,9 @@ return new class extends Migration
             $table->boolean('is_banned')->default(false);
             $table->timestamp('banned_at')->nullable();
             $table->string('ban_reason')->nullable();
+            $table->string('referral_code', 32)->unique()->nullable();
+            $table->foreignId('referred_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('referred_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

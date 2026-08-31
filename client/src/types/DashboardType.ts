@@ -18,4 +18,4 @@ export interface ExploreCourse {
   thumbnail?: string | null
 }
 
-export type DashboardTab = 'home' | 'courses' | 'explore' | 'profile'
+export type DashboardTab = 'home' | 'courses' | 'explore' | 'profile' | 'affiliate'

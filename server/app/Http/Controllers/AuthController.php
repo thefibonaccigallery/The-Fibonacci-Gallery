@@ -18,11 +18,24 @@ class AuthController extends Controller
 {
     public function register(RegisterRequest $request)
     {
+        $referredBy = null;
+        $referredAt = null;
+
+        if ($request->filled('referral_code')) {
+            $referrer = User::where('referral_code', trim($request->referral_code))->first();
+            if ($referrer) {
+                $referredBy = $referrer->id;
+                $referredAt = now();
+            }
+        }
+
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'country'  => $request->country,
+            'name'          => $request->name,
+            'email'         => $request->email,
+            'password'      => Hash::make($request->password),
+            'country'       => $request->country,
+            'referred_by'   => $referredBy,
+            'referred_at'   => $referredAt,
         ]);
 
         $role = Role::firstOrCreate(['name' => 'user', 'guard_name' => 'api']);

@@ -119,6 +119,12 @@ const router = createRouter({
       component: () => import('@/views/ProfilePage.vue'),
     },
     {
+      path: '/affiliate',
+      name: 'affiliate',
+      component: () => import('@/views/AffiliatePage.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/admin-home',
       redirect: '/admin/dashboard',
     },
@@ -194,6 +200,11 @@ const router = createRouter({
           path: 'orders',
           name: 'admin-orders',
           component: () => import('@/views/admin/AdminOrdersPage.vue'),
+        },
+        {
+          path: 'payouts',
+          name: 'admin-payouts',
+          component: () => import('@/views/admin/AdminPayoutsPage.vue'),
         },
         {
           path: 'coupons',

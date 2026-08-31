@@ -242,6 +242,7 @@ export const useAuthStore = defineStore('auth', () => {
       password: '',
       password_confirmation: '',
       country: '',
+      referral_code: '',
     } as RegisterFormState,
     validators: {
       onChange: useRegisterSchema.value,

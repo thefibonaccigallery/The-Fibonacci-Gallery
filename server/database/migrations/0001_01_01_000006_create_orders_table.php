@@ -27,6 +27,7 @@ return new class extends Migration
             $table->decimal('actually_paid', 20, 8)->default(0);
             $table->string('status')->default('waiting');
             $table->timestamp('paid_at')->nullable();
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
             $table->index('user_id');
             $table->index('nowpayments_payment_id');
