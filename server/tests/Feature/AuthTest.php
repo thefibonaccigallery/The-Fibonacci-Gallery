@@ -43,8 +43,11 @@ class AuthTest extends TestCase
 
         $this->assertDatabaseHas('users', [
             'email' => 'newuser@example.com',
-            'role' => 'user',
         ]);
+
+        $user = User::where('email', 'newuser@example.com')->first();
+        $this->assertNotNull($user);
+        $this->assertTrue($user->hasRole('user'));
     }
 
     public function test_user_cannot_register_with_existing_email()

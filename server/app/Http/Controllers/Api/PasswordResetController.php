@@ -44,7 +44,21 @@ class PasswordResetController extends Controller
         ]);
 
         // Build reset URL pointing to frontend
-        $resetUrl = config('app.frontend_url') . '/reset-password?token=' . $token;
+        $frontendUrl = config('app.frontend_url');
+        if (empty($frontendUrl) || str_contains($frontendUrl, 'localhost') || str_contains($frontendUrl, '127.0.0.1')) {
+            $origin = $request->header('Origin');
+            if (!empty($origin)) {
+                $frontendUrl = $origin;
+            } elseif ($referer = $request->header('Referer')) {
+                $parsed = parse_url($referer);
+                if (!empty($parsed['scheme']) && !empty($parsed['host'])) {
+                    $port = !empty($parsed['port']) ? ':' . $parsed['port'] : '';
+                    $frontendUrl = "{$parsed['scheme']}://{$parsed['host']}{$port}";
+                }
+            }
+        }
+        $frontendUrl = rtrim($frontendUrl ?: env('FRONTEND_URL', 'http://localhost:5174'), '/');
+        $resetUrl = $frontendUrl . '/reset-password?token=' . $token;
 
         // Send email
         Mail::to($user->email)->send(new ForgotPasswordMail($resetUrl, $user->name));

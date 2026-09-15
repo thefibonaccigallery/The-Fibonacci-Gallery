@@ -75,7 +75,23 @@ class AffiliateService
             $user->save();
         }
 
-        $frontendUrl = rtrim(config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:5174')), '/');
+        $frontendUrl = config('app.frontend_url');
+
+        // If frontend_url is not configured or still defaults to localhost, attempt to resolve from request headers
+        if (empty($frontendUrl) || str_contains($frontendUrl, 'localhost') || str_contains($frontendUrl, '127.0.0.1')) {
+            $origin = request()?->header('Origin');
+            if (!empty($origin)) {
+                $frontendUrl = $origin;
+            } elseif ($referer = request()?->header('Referer')) {
+                $parsed = parse_url($referer);
+                if (!empty($parsed['scheme']) && !empty($parsed['host'])) {
+                    $port = !empty($parsed['port']) ? ':' . $parsed['port'] : '';
+                    $frontendUrl = "{$parsed['scheme']}://{$parsed['host']}{$port}";
+                }
+            }
+        }
+
+        $frontendUrl = rtrim($frontendUrl ?: env('FRONTEND_URL', 'http://localhost:5174'), '/');
         $referralLink = "{$frontendUrl}/register?ref={$user->referral_code}";
 
         return [

@@ -84,11 +84,20 @@ const payoutsPagination = computed(() => ({
   to: payoutsData.value?.to || 0,
 }))
 
-// ── Clipboard ──
+// ── Referral Link & Clipboard ──
+const referralLink = computed(() => {
+  return (
+    summary.value?.referral_link ||
+    (summary.value?.referral_code && typeof window !== 'undefined'
+      ? `${window.location.origin}/register?ref=${summary.value.referral_code}`
+      : '')
+  )
+})
+
 const { copy, copied } = useClipboard()
 const handleCopyLink = () => {
-  if (summary.value?.referral_link) {
-    copy(summary.value.referral_link)
+  if (referralLink.value) {
+    copy(referralLink.value)
     toast.success(lang.value.toasts.copySuccess)
   }
 }
@@ -114,7 +123,7 @@ const generateQrCode = async (text: string) => {
 }
 
 watch(
-  () => summary.value?.referral_link,
+  referralLink,
   (newLink) => {
     if (newLink) {
       generateQrCode(newLink)
@@ -192,7 +201,9 @@ const openPayoutDialog = () => {
         <!-- Total Earned -->
         <div class="liquid-glass rounded-2xl p-5 border border-border/20 space-y-3">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-medium text-muted-foreground">{{ lang.stats.totalEarned }}</span>
+            <span class="text-xs font-medium text-muted-foreground">{{
+              lang.stats.totalEarned
+            }}</span>
             <div class="p-2 rounded-xl bg-primary/10 text-primary">
               <PhWallet :size="20" />
             </div>
@@ -245,7 +256,9 @@ const openPayoutDialog = () => {
         <!-- Total Referrals -->
         <div class="liquid-glass rounded-2xl p-5 border border-border/20 space-y-3">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-medium text-muted-foreground">{{ lang.stats.totalReferrals }}</span>
+            <span class="text-xs font-medium text-muted-foreground">{{
+              lang.stats.totalReferrals
+            }}</span>
             <div class="p-2 rounded-xl bg-secondary/50 text-foreground">
               <PhUsersThree :size="20" />
             </div>
@@ -294,7 +307,7 @@ const openPayoutDialog = () => {
           <div
             class="flex-1 flex items-center px-4 py-2.5 rounded-xl bg-background/50 border border-border/40 text-sm font-mono text-foreground overflow-x-auto select-all"
           >
-            <span class="truncate">{{ summary?.referral_link ?? 'Loading link...' }}</span>
+            <span class="truncate">{{ referralLink || 'Loading link...' }}</span>
           </div>
 
           <Button @click="handleCopyLink" size="default" class="h-10 shrink-0">
@@ -337,7 +350,9 @@ const openPayoutDialog = () => {
         <div v-if="activeTab === 'commissions'" class="space-y-4">
           <!-- Loading -->
           <div v-if="isCommissionsLoading" class="text-center py-12">
-            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"></div>
+            <div
+              class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"
+            ></div>
             <p class="text-muted-foreground text-sm mt-3">Loading commissions...</p>
           </div>
 
@@ -357,7 +372,9 @@ const openPayoutDialog = () => {
             <div class="overflow-x-auto">
               <table class="w-full text-sm">
                 <thead class="border-b border-border/30 bg-muted/20">
-                  <tr class="text-left text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                  <tr
+                    class="text-left text-xs uppercase tracking-wider text-muted-foreground font-medium"
+                  >
                     <th class="px-4 py-3.5">{{ lang.commissionsTable.student }}</th>
                     <th class="px-4 py-3.5">{{ lang.commissionsTable.course }}</th>
                     <th class="px-4 py-3.5">{{ lang.commissionsTable.orderAmount }}</th>
@@ -448,7 +465,9 @@ const openPayoutDialog = () => {
         <div v-if="activeTab === 'payouts'" class="space-y-4">
           <!-- Loading -->
           <div v-if="isPayoutsLoading" class="text-center py-12">
-            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"></div>
+            <div
+              class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto"
+            ></div>
             <p class="text-muted-foreground text-sm mt-3">Loading payout history...</p>
           </div>
 
@@ -468,7 +487,9 @@ const openPayoutDialog = () => {
             <div class="overflow-x-auto">
               <table class="w-full text-sm">
                 <thead class="border-b border-border/30 bg-muted/20">
-                  <tr class="text-left text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                  <tr
+                    class="text-left text-xs uppercase tracking-wider text-muted-foreground font-medium"
+                  >
                     <th class="px-4 py-3.5">{{ lang.payoutsTable.amount }}</th>
                     <th class="px-4 py-3.5">{{ lang.payoutsTable.wallet }}</th>
                     <th class="px-4 py-3.5">{{ lang.payoutsTable.network }}</th>
@@ -488,7 +509,9 @@ const openPayoutDialog = () => {
                       ${{ Number(payout.amount).toFixed(2) }}
                     </td>
                     <td class="px-4 py-3.5 max-w-50">
-                      <span class="font-mono text-xs text-muted-foreground truncate block select-all">
+                      <span
+                        class="font-mono text-xs text-muted-foreground truncate block select-all"
+                      >
                         {{ payout.wallet_address }}
                       </span>
                     </td>
@@ -564,8 +587,12 @@ const openPayoutDialog = () => {
 
         <form @submit.prevent="handlePayoutSubmit" class="space-y-4 py-2">
           <!-- Available Amount Display -->
-          <div class="p-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-between">
-            <span class="text-sm font-medium text-foreground">{{ lang.payout.availableLabel }}</span>
+          <div
+            class="p-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-between"
+          >
+            <span class="text-sm font-medium text-foreground">{{
+              lang.payout.availableLabel
+            }}</span>
             <span class="text-xl font-bold text-primary">
               ${{ Number(summary?.available_balance ?? 0).toFixed(2) }}
             </span>
@@ -573,7 +600,9 @@ const openPayoutDialog = () => {
 
           <!-- Network (USDT BEP20 Only) -->
           <div class="space-y-1.5">
-            <label class="text-xs font-medium text-foreground">{{ lang.payout.networkLabel }}</label>
+            <label class="text-xs font-medium text-foreground">{{
+              lang.payout.networkLabel
+            }}</label>
             <Input
               value="USDT (BEP20) - BNB Smart Chain"
               disabled
@@ -600,7 +629,9 @@ const openPayoutDialog = () => {
           </div>
 
           <!-- Warning Notice -->
-          <div class="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-xs text-yellow-500 leading-relaxed">
+          <div
+            class="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-xs text-yellow-500 leading-relaxed"
+          >
             {{ lang.payout.networkNote }}
           </div>
 
@@ -646,9 +677,7 @@ const openPayoutDialog = () => {
         </div>
 
         <DialogFooter>
-          <Button class="w-full" variant="outline" @click="showQrModal = false">
-            Close
-          </Button>
+          <Button class="w-full" variant="outline" @click="showQrModal = false"> Close </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
