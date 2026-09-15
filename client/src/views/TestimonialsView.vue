@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import { useAuthStore } from '@/stores/auth'
 import { RouterLink } from 'vue-router'
@@ -8,78 +7,72 @@ import { PhStar, PhArrowRight } from '@phosphor-icons/vue'
 
 const authStore = useAuthStore()
 
-const activeFilter = ref('all')
-
 const reviews = [
   {
-    name: 'Marcus Chen',
-    role: 'Forex Trader',
-    level: 'intermediate',
-    quote: 'The Fibonacci Gallery completely transformed my approach to the markets. The live sessions alone are worth 10x the price. Being able to watch professional traders execute trades in real-time gave me the confidence I was missing.',
+    name: 'Yohannes Bekele',
+    quote:
+      'The Fibonacci Gallery completely changed how I look at market liquidity. Instead of gambling on volatile US30 and Gold sessions, I now wait patiently for golden pocket retracements and structural confluence. The live trade breakdowns are pure gold.',
     rating: 5,
   },
   {
-    name: 'Sarah Williams',
-    role: 'Crypto Analyst',
-    level: 'advanced',
-    quote: 'Finally a trading course that goes beyond the basics. The risk management module saved my portfolio during the last crash. I appreciate the strict focus on protecting capital first.',
+    name: 'Selamawit Girma',
+    quote:
+      'Most trading courses online only scratch the surface, but this academy dives deep into market psychology and capital protection. The risk management framework alone prevented me from blowing accounts during volatile market swings.',
     rating: 5,
   },
   {
-    name: 'David Okonkwo',
-    role: 'Swing Trader',
-    level: 'beginner',
-    quote: 'I went from losing consistently to being profitable in 3 months. The chart pattern recognition course is incredible. The step-by-step guidance is very easy to follow for newcomers.',
+    name: 'Dawit Alemu',
+    quote:
+      'I used to follow random Telegram signal channels and lost money constantly. Enrolling here was the best decision—the step-by-step curriculum took me from absolute zero to building a real trading plan with consistent risk-to-reward.',
     rating: 5,
   },
   {
-    name: 'Elena Rostova',
-    role: 'Quantitative Analyst',
-    level: 'advanced',
-    quote: 'The mathematical approach to market structures taught here is elite. Understanding Fibonacci clusters and confluence points has taken my automated strategies to a whole new level.',
+    name: 'Bethlehem Haile',
+    quote:
+      'The structural approach to market cycles taught here is unmatched. Understanding Fibonacci confluence and institutional order flow refined my strategy completely. My entries are cleaner and my stop-losses much tighter.',
     rating: 5,
   },
   {
-    name: 'Liam Davis',
-    role: 'Retail Investor',
-    level: 'beginner',
-    quote: 'Before this, charts looked like noise. The Fibonacci Foundations course broke down technical analysis into simple, logical pieces. I feel confident looking at any asset chart now.',
+    name: 'Natnael Abebe',
+    quote:
+      'Charts always looked like overwhelming chaos to me before taking the foundations course. The lessons break technical analysis down into clear, logical rules. Now I can analyze EURUSD and Gold on my own with confidence.',
     rating: 5,
   },
   {
-    name: 'Chloe Vance',
-    role: 'Forex Scalper',
-    level: 'intermediate',
-    quote: 'The community setup reviews are insanely valuable. Sharing ideas and having them vetted by mentors prevents making stupid mistakes. My win rate has jumped from 48% to 62%.',
+    name: 'Ermias Kassahun',
+    quote:
+      'The community setup discussions and mentor feedback are invaluable. Having experienced traders review setups before taking entries has transformed my discipline. My win rate has steadily risen and my drawdown is under control.',
     rating: 5,
   },
 ]
-
-const filteredReviews = computed(() => {
-  if (activeFilter.value === 'all') return reviews
-  return reviews.filter((r) => r.level === activeFilter.value)
-})
 </script>
 
 <template>
   <DashboardLayout>
-    <div class="min-h-screen bg-background text-foreground flex flex-col justify-between font-primary">
+    <div
+      class="min-h-screen bg-background text-foreground flex flex-col justify-between font-primary"
+    >
       <div class="container mx-auto px-6 pt-24 pb-16 md:pt-32 md:pb-24 max-w-6xl">
         <!-- Hero Section -->
         <div class="text-center mb-24">
-          <div class="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 text-xs font-semibold text-primary mb-6 uppercase tracking-wider">
+          <div
+            class="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 text-xs font-semibold text-primary mb-6 uppercase tracking-wider"
+          >
             Student Reviews
           </div>
           <h1 class="text-4xl md:text-5xl lg:text-6xl font-normal mb-6 tracking-tight">
             Trusted by <span class="text-primary">Traders</span> Globally
           </h1>
           <p class="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            See how our students transformed their trading consistency and confidence using our Fibonacci-based education and live trading community workspace.
+            See how our students transformed their trading consistency and confidence using our
+            Fibonacci-based education and live trading community workspace.
           </p>
         </div>
 
         <!-- Rating Highlight -->
-        <div class="max-w-md mx-auto text-center border border-border/20 rounded-3xl p-6 mb-12 liquid-glass flex flex-col items-center justify-center gap-2">
+        <div
+          class="max-w-md mx-auto text-center border border-border/20 rounded-3xl p-6 mb-16 liquid-glass flex flex-col items-center justify-center gap-2"
+        >
           <div class="flex gap-1">
             <PhStar v-for="n in 5" :key="n" class="h-6 w-6 text-primary" weight="fill" />
           </div>
@@ -87,47 +80,37 @@ const filteredReviews = computed(() => {
           <p class="text-xs text-muted-foreground">Based on 2,500+ student ratings worldwide</p>
         </div>
 
-        <!-- Interactive Filters -->
-        <div class="flex justify-center gap-2 mb-12 flex-wrap">
-          <Button
-            v-for="filter in ['all', 'beginner', 'intermediate', 'advanced']"
-            :key="filter"
-            @click="activeFilter = filter"
-            :variant="activeFilter === filter ? 'default' : 'outline'"
-            size="sm"
-            class="capitalize rounded-full px-5"
-          >
-            {{ filter }}
-          </Button>
-        </div>
-
         <!-- Testimonial Grid -->
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div
-            v-for="review in filteredReviews"
+            v-for="review in reviews"
             :key="review.name"
             class="liquid-glass border border-border/20 rounded-2xl p-6 flex flex-col justify-between hover:border-primary/30 transition-all duration-300"
           >
             <div class="space-y-4">
               <!-- Rating -->
               <div class="flex gap-1">
-                <PhStar v-for="n in review.rating" :key="n" class="h-4 w-4 text-primary" weight="fill" />
+                <PhStar
+                  v-for="n in review.rating"
+                  :key="n"
+                  class="h-4 w-4 text-primary"
+                  weight="fill"
+                />
               </div>
               <!-- Quote -->
-              <p class="text-sm text-foreground/80 leading-relaxed italic">
-                "{{ review.quote }}"
-              </p>
+              <p class="text-sm text-foreground/80 leading-relaxed italic">"{{ review.quote }}"</p>
             </div>
-            
+
             <!-- Author -->
-            <div class="mt-6 pt-4 border-t border-border/10 flex justify-between items-center">
-              <div>
-                <h4 class="text-sm font-semibold">{{ review.name }}</h4>
-                <p class="text-xs text-muted-foreground mt-0.5">{{ review.role }}</p>
+            <div class="mt-6 pt-4 border-t border-border/10 flex items-center gap-3">
+              <div
+                class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold text-sm"
+              >
+                {{ review.name.charAt(0) }}
               </div>
-              <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded border border-border/20 bg-muted/20 text-muted-foreground tracking-wider">
-                {{ review.level }}
-              </span>
+              <div>
+                <h4 class="text-sm font-semibold text-foreground">{{ review.name }}</h4>
+              </div>
             </div>
           </div>
         </div>

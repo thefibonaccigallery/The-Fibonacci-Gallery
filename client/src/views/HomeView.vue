@@ -188,24 +188,21 @@ function enrollOrLogin(courseUuid: string) {
 
 const testimonials = [
   {
-    name: 'Marcus Chen',
-    role: 'Forex Trader',
+    name: 'Yohannes Bekele',
     quote:
-      'The Fibonacci Gallery completely transformed my approach to the markets. The live sessions alone are worth 10x the price.',
+      'The Fibonacci Gallery completely changed how I analyze market liquidity. The live trade breakdowns and Fibonacci confluence setups alone are worth 10x the price.',
     rating: 5,
   },
   {
-    name: 'Sarah Williams',
-    role: 'Crypto Analyst',
+    name: 'Selamawit Girma',
     quote:
-      'Finally a trading course that goes beyond the basics. The risk management module saved my portfolio during the last crash.',
+      'Finally a trading academy that prioritizes capital preservation. The risk management framework saved my portfolio during volatile market swings.',
     rating: 5,
   },
   {
-    name: 'David Okonkwo',
-    role: 'Swing Trader',
+    name: 'Dawit Alemu',
     quote:
-      'I went from losing consistently to being profitable in 3 months. The chart pattern recognition course is incredible.',
+      'I went from losing money on random signal channels to being profitable in 3 months. The structured curriculum and mentor guidance made all the difference.',
     rating: 5,
   },
 ]
@@ -316,7 +313,10 @@ const navLinks = [
     </nav>
 
     <!-- ═══════ HERO SECTION ═══════ -->
-    <section id="hero" class="relative min-h-[75vh] md:min-h-screen flex items-center justify-center">
+    <section
+      id="hero"
+      class="relative min-h-[75vh] md:min-h-screen flex items-center justify-center"
+    >
       <VideoBackground :src="heroVideoUrl" :overlay-opacity="0.5" />
 
       <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 md:px-12 text-center pt-20 md:pt-24">
@@ -849,7 +849,6 @@ of Trading"
               </div>
               <div>
                 <p class="text-sm font-medium text-foreground">{{ testimonial.name }}</p>
-                <p class="text-xs text-muted-foreground">{{ testimonial.role }}</p>
               </div>
             </div>
           </div>
