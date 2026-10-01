@@ -49,6 +49,7 @@ const form = ref<VideoFormState>({
   duration_seconds: 0,
   is_published: false,
   is_preview: false,
+  is_big_five: false,
   cooldown_hours: 0,
 })
 
@@ -97,6 +98,7 @@ watch(
         duration_seconds: data.duration_seconds,
         is_published: data.is_published,
         is_preview: data.is_preview,
+        is_big_five: data.is_big_five ?? data.isBigFive ?? false,
         cooldown_hours: data.cooldown_hours || 0,
       }
       // Set the course UUID based on the chapter's course
@@ -157,6 +159,7 @@ const previewVideoData = computed<VideoType | null>(() => {
     cooldown_hours: form.value.cooldown_hours,
     is_published: form.value.is_published,
     is_preview: form.value.is_preview,
+    is_big_five: form.value.is_big_five,
     created_at: '',
     updated_at: '',
   }
@@ -391,6 +394,22 @@ const durationDisplay = computed({
             id="is_preview"
             v-model:checked="form.is_preview"
             @update:checked="clearError('is_preview')"
+          />
+        </div>
+
+        <!-- Big 5 Video -->
+        <div class="flex items-center justify-between p-4 rounded-lg border border-border">
+          <div class="space-y-0.5">
+            <Label for="is_big_five">Big 5 Video</Label>
+            <p class="text-sm text-muted-foreground">
+              Mark this video as part of the Big 5 Forex series to display the important trading
+              notice
+            </p>
+          </div>
+          <Switch
+            id="is_big_five"
+            v-model:checked="form.is_big_five"
+            @update:checked="clearError('is_big_five')"
           />
         </div>
       </div>

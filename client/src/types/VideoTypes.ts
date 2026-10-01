@@ -11,6 +11,8 @@ export interface VideoType {
   cooldown_hours: number
   is_published: boolean
   is_preview: boolean
+  is_big_five: boolean
+  isBigFive?: boolean
   created_at: string
   updated_at: string
   chapter?: Chapter
@@ -37,6 +39,8 @@ export interface VideoFormData {
   cooldown_hours: number
   is_published: boolean
   is_preview: boolean
+  is_big_five: boolean
+  isBigFive?: boolean
 }
 
 export interface VideoPaginatedResponse {

@@ -19,6 +19,8 @@ class VideoResource extends JsonResource
             'cooldown_hours'   => $this->cooldown_hours,
             'is_published'     => $this->is_published,
             'is_preview'       => $this->is_preview,
+            'is_big_five'      => (bool) $this->is_big_five,
+            'isBigFive'        => (bool) $this->is_big_five,
             'created_at'       => $this->created_at?->toIso8601String(),
             'updated_at'       => $this->updated_at?->toIso8601String(),
             'chapter'          => new ChapterResource($this->whenLoaded('chapter')),

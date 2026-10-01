@@ -15,6 +15,8 @@ export interface CoursePlayerVideo {
   order: number
   duration_seconds: number
   cooldown_hours: number
+  is_big_five?: boolean
+  isBigFive?: boolean
   progress: VideoProgress | null
 }
 

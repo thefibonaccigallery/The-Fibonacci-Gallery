@@ -4,24 +4,37 @@ import Plyr from 'plyr'
 import 'plyr/dist/plyr.css'
 import type { CoursePlayerVideo } from '@/types/CoursePlayerTypes'
 import axiosInstance from '@/api/axiosInstance'
-import { PhSpinner } from '@phosphor-icons/vue'
+import {
+  PhSpinner,
+  PhArrowCounterClockwise,
+  PhArrowRight,
+  PhWarning,
+  PhCheckCircle,
+} from '@phosphor-icons/vue'
+import { Button } from '@/components/ui/button'
 import { useVideoSecurity } from '@/composables/useVideoSecurity'
 import { useVideoWatermark } from '@/composables/useVideoWatermark'
 
 interface Props {
   video: CoursePlayerVideo | null
+  canGoNext?: boolean
+  hasNext?: boolean
 }
 
 interface Emits {
   (e: 'progress', payload: { watchTime: number; watchPercentage: number }): void
   (e: 'ended'): void
+  (e: 'next'): void
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  canGoNext: false,
+  hasNext: false,
+})
 const emit = defineEmits<Emits>()
 
 const playerContainer = ref<HTMLDivElement | null>(null)
-const playerWrapper   = ref<HTMLDivElement | null>(null)
+const playerWrapper = ref<HTMLDivElement | null>(null)
 let player: Plyr | null = null
 let progressInterval: number | null = null
 
@@ -32,19 +45,24 @@ useVideoWatermark(playerWrapper)
 useVideoSecurity({ onDevToolsDetected: () => player?.pause() })
 // ───────────────────────────────────────────────────────────────────────────
 const isLoadingToken = ref<boolean>(false)
+const isEnded = ref<boolean>(false)
+
+// Countdown / Auto-advance state
+const countdownSeconds = ref(0)
+const isCountingDown = ref(false)
+const isPaused = ref(false)
+let countdownTimer: number | null = null
 
 // Accumulated play time tracking
-let accumulatedSeconds = 0          
-let sessionStartTime: number | null = null  
-let lastSentWatchTime = -1          
+let accumulatedSeconds = 0
+let sessionStartTime: number | null = null
+let lastSentWatchTime = -1
 
 const decodeStreamToken = (token: string): string => {
   try {
     const decoded = atob(token)
     return decoded.replace(/[a-zA-Z]/g, (c) => {
-      return String.fromCharCode(
-        c.charCodeAt(0) + (c.toLowerCase() <= 'm' ? 13 : -13)
-      )
+      return String.fromCharCode(c.charCodeAt(0) + (c.toLowerCase() <= 'm' ? 13 : -13))
     })
   } catch (e) {
     return ''
@@ -53,6 +71,7 @@ const decodeStreamToken = (token: string): string => {
 
 const loadVideoToken = async () => {
   cleanup()
+  isEnded.value = false
   activeYoutubeId.value = null
   if (!props.video?.uuid) return
 
@@ -111,9 +130,9 @@ const initializePlayer = () => {
   }
 
   player.on('playing', handlePlaying)
-  player.on('seeked',  handleSeeked)
-  player.on('pause',   handlePause)
-  player.on('ended',   handleEnded)
+  player.on('seeked', handleSeeked)
+  player.on('pause', handlePause)
+  player.on('ended', handleEnded)
 
   if (progressInterval) clearInterval(progressInterval)
 
@@ -127,6 +146,8 @@ const initializePlayer = () => {
 }
 
 const handlePlaying = () => {
+  isEnded.value = false
+  stopCountdown()
   sessionStartTime = Date.now()
 }
 
@@ -138,6 +159,8 @@ const accumulateSession = () => {
 }
 
 const handleSeeked = () => {
+  isEnded.value = false
+  stopCountdown()
   accumulateSession()
   if (player?.playing) sessionStartTime = Date.now()
 }
@@ -147,10 +170,58 @@ const handlePause = () => {
   sendProgress()
 }
 
+const startCountdown = () => {
+  stopCountdown()
+  const isBigFive = props.video?.is_big_five || props.video?.isBigFive
+  countdownSeconds.value = isBigFive ? 10 : 5
+  isCountingDown.value = true
+  isPaused.value = false
+
+  countdownTimer = window.setInterval(() => {
+    if (isPaused.value) return
+    countdownSeconds.value--
+    if (countdownSeconds.value <= 0) {
+      stopCountdown()
+      emit('next')
+    }
+  }, 1000)
+}
+
+const stopCountdown = () => {
+  if (countdownTimer !== null) {
+    clearInterval(countdownTimer)
+    countdownTimer = null
+  }
+  isCountingDown.value = false
+}
+
+const toggleCountdownPause = () => {
+  isPaused.value = !isPaused.value
+}
+
+const handleNextClick = () => {
+  stopCountdown()
+  emit('next')
+}
+
 const handleEnded = () => {
   accumulateSession()
   sendProgress()
+  isEnded.value = true
   emit('ended')
+
+  if (props.hasNext && props.canGoNext) {
+    startCountdown()
+  }
+}
+
+const handleReplay = () => {
+  stopCountdown()
+  isEnded.value = false
+  if (player) {
+    player.currentTime = 0
+    player.play()
+  }
 }
 
 const sendProgress = () => {
@@ -168,6 +239,9 @@ const sendProgress = () => {
 }
 
 const cleanup = () => {
+  stopCountdown()
+  isEnded.value = false
+  isPaused.value = false
   if (progressInterval) {
     clearInterval(progressInterval)
     progressInterval = null
@@ -178,6 +252,15 @@ const cleanup = () => {
     player = null
   }
 }
+
+watch(
+  [() => props.canGoNext, () => props.hasNext],
+  ([canGoNext, hasNext]) => {
+    if (isEnded.value && canGoNext && hasNext && !isCountingDown.value && countdownTimer === null) {
+      startCountdown()
+    }
+  },
+)
 
 watch(
   () => props.video?.uuid,
@@ -200,7 +283,10 @@ onBeforeUnmount(() => {
 <template>
   <div class="video-player-wrapper">
     <!-- Loading state -->
-    <div v-if="isLoadingToken" class="aspect-video bg-muted rounded-lg flex items-center justify-center text-primary">
+    <div
+      v-if="isLoadingToken"
+      class="aspect-video bg-muted rounded-lg flex items-center justify-center text-primary"
+    >
       <PhSpinner class="h-8 w-8 animate-spin" />
     </div>
 
@@ -213,7 +299,7 @@ onBeforeUnmount(() => {
     >
       <!-- Transparent overlay: blocks right-click directly on the iframe surface.
            pointer-events: none keeps Plyr's own controls fully clickable. -->
-      <div class="absolute inset-0 z-10" style="pointer-events: none;" @contextmenu.prevent />
+      <div class="absolute inset-0 z-10" style="pointer-events: none" @contextmenu.prevent />
 
       <!-- Plyr player container -->
       <div
@@ -221,6 +307,117 @@ onBeforeUnmount(() => {
         :data-plyr-provider="'youtube'"
         :data-plyr-embed-id="activeYoutubeId"
       ></div>
+
+      <!-- Completion & Important Notice Overlay -->
+      <Transition
+        enter-active-class="transition-all duration-300 ease-out"
+        leave-active-class="transition-all duration-200 ease-in"
+        enter-from-class="opacity-0 scale-95"
+        leave-to-class="opacity-0 scale-95"
+      >
+        <div
+          v-if="isEnded"
+          class="absolute inset-0 z-30 bg-black/90 sm:bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-3 sm:p-5 md:p-6 text-foreground overflow-y-auto"
+        >
+          <div
+            class="my-auto w-full max-w-xl mx-auto flex flex-col items-center text-center space-y-2.5 sm:space-y-3.5"
+          >
+            <!-- Big 5 Important Notice Variant -->
+            <template v-if="video?.is_big_five || video?.isBigFive">
+              <div
+                class="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 text-xs sm:text-sm font-bold tracking-wide shadow-lg shadow-amber-500/10"
+              >
+                <PhWarning :size="16" weight="fill" class="text-amber-400 shrink-0" />
+                <span>⚠️ IMPORTANT NOTICE</span>
+              </div>
+
+              <div
+                class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 sm:p-4 text-center space-y-1.5 sm:space-y-2 backdrop-blur-sm"
+              >
+                <h3
+                  class="font-bold text-amber-500 dark:text-amber-400 text-xs sm:text-sm md:text-base leading-snug"
+                >
+                  Do not start live trading before completing all 5 parts of the Big 5 Forex Course.
+                </h3>
+                <p class="text-[11px] sm:text-xs md:text-sm text-foreground/90 leading-relaxed">
+                  Each part covers essential knowledge you need to understand the Forex market,
+                  analyze trades, manage risk, and develop a proper trading plan.
+                </p>
+                <p
+                  class="text-[11px] sm:text-xs md:text-sm font-semibold text-foreground leading-relaxed pt-0.5"
+                >
+                  Finish the Big 5. Build your knowledge, backtest the strategy. Then trade
+                  responsibly.
+                </p>
+              </div>
+            </template>
+
+            <!-- Standard video completion Variant -->
+            <template v-else>
+              <div
+                class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-primary"
+              >
+                <PhCheckCircle :size="24" class="sm:hidden" weight="fill" />
+                <PhCheckCircle :size="28" class="hidden sm:block" weight="fill" />
+              </div>
+              <div class="space-y-1">
+                <h3 class="text-sm sm:text-base md:text-lg font-bold text-foreground">
+                  Lesson Completed!
+                </h3>
+                <p class="text-xs sm:text-sm text-muted-foreground">
+                  {{
+                    hasNext && canGoNext
+                      ? 'Great job! Ready for the next lesson.'
+                      : 'You have completed this video.'
+                  }}
+                </p>
+              </div>
+            </template>
+
+            <!-- Countdown / Auto-advance info -->
+            <div
+              v-if="hasNext && canGoNext && isCountingDown"
+              class="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground bg-muted/50 backdrop-blur-sm px-3 py-1 rounded-full border border-border/50"
+            >
+              <div class="w-2 h-2 rounded-full bg-primary animate-ping"></div>
+              <span>
+                Next video starting in
+                <strong class="text-foreground font-semibold">{{ countdownSeconds }}s</strong>
+              </span>
+              <button
+                type="button"
+                @click="toggleCountdownPause"
+                class="ml-1 text-xs text-amber-500 hover:text-amber-400 underline font-medium cursor-pointer"
+              >
+                {{ isPaused ? 'Resume' : 'Pause' }}
+              </button>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex items-center justify-center gap-2 sm:gap-3 flex-wrap pt-1">
+              <Button
+                v-if="hasNext && canGoNext"
+                @click="handleNextClick"
+                class="gap-1.5 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4 font-semibold shadow-md"
+                size="sm"
+              >
+                <span>Next Video</span>
+                <PhArrowRight :size="15" weight="bold" />
+              </Button>
+
+              <Button
+                @click="handleReplay"
+                variant="outline"
+                size="sm"
+                class="gap-1.5 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4"
+              >
+                <PhArrowCounterClockwise :size="15" weight="bold" />
+                <span>Replay</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Transition>
     </div>
 
     <!-- No video state -->

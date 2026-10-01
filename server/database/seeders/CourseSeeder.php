@@ -130,6 +130,7 @@ class CourseSeeder extends Seeder
                     'is_published'     => true,
                     'uuid'             => Str::uuid(),
                     'is_preview'       => $videoOrder === 0,
+                    'is_big_five'      => false,
                 ]);
             }
         }

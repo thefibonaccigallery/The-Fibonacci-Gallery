@@ -48,7 +48,7 @@ const handleClick = () => {
     ]"
   >
     <!-- Status Icon -->
-    <div class="flex-shrink-0">
+    <div class="shrink-0">
       <PhCheckCircle v-if="isCompleted" :size="20" weight="fill" class="text-primary" />
       <PhClock v-else-if="isInCooldown" :size="20" class="text-yellow-500" />
       <PhLock v-else-if="!isUnlocked" :size="20" class="text-muted-foreground" />

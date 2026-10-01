@@ -55,6 +55,8 @@ class CoursePlayerController extends Controller
                     'order'            => $video->order,
                     'duration_seconds' => $video->duration_seconds,
                     'cooldown_hours'   => $video->cooldown_hours,
+                    'is_big_five'      => (bool) $video->is_big_five,
+                    'isBigFive'        => (bool) $video->is_big_five,
                     'progress'         => $video->progress ? [
                         'watch_time_seconds' => $video->progress->watch_time_seconds,
                         'watch_percentage'   => (float) $video->progress->watch_percentage,

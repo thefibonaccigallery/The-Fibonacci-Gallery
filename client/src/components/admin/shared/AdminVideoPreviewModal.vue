@@ -30,6 +30,7 @@ const playerVideo = computed<CoursePlayerVideo | null>(() => {
     order: props.video.order,
     duration_seconds: props.video.duration_seconds,
     cooldown_hours: props.video.cooldown_hours,
+    is_big_five: props.video.is_big_five ?? props.video.isBigFive ?? false,
     progress: null,
   }
 })
@@ -62,7 +63,7 @@ const playerVideo = computed<CoursePlayerVideo | null>(() => {
             <div class="flex items-center justify-between px-5 py-4 border-b border-border/50">
               <div class="flex items-center gap-3 min-w-0">
                 <div
-                  class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 flex-shrink-0"
+                  class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 shrink-0"
                 >
                   <PhVideo :size="18" class="text-primary" />
                 </div>
@@ -78,7 +79,7 @@ const playerVideo = computed<CoursePlayerVideo | null>(() => {
               <button
                 id="admin-preview-close"
                 @click="close"
-                class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+                class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors shrink-0"
                 aria-label="Close preview"
               >
                 <PhX :size="18" />
@@ -102,6 +103,12 @@ const playerVideo = computed<CoursePlayerVideo | null>(() => {
               </span>
               <span v-if="video?.cooldown_hours">
                 Cooldown: <span class="text-foreground">{{ video.cooldown_hours }}h</span>
+              </span>
+              <span
+                v-if="video?.is_big_five || video?.isBigFive"
+                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+              >
+                Big 5
               </span>
               <span
                 :class="[

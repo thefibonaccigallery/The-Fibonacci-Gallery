@@ -40,6 +40,8 @@ export interface Video {
   duration_seconds: number
   is_published: boolean
   is_preview: boolean
+  is_big_five?: boolean
+  isBigFive?: boolean
   created_at: string
   updated_at: string
   chapter?: Chapter
@@ -70,6 +72,8 @@ export interface VideoFormData {
   duration_seconds?: number
   is_published: boolean
   is_preview: boolean
+  is_big_five?: boolean
+  isBigFive?: boolean
 }
 
 export interface PaginatedResponse<T> {

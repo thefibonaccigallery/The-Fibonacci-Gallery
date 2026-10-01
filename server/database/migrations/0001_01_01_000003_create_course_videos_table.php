@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('duration_seconds')->default(0);
             $table->boolean('is_published')->default(false);
             $table->boolean('is_preview')->default(false);
+            $table->boolean('is_big_five')->default(false);
             $table->integer('cooldown_hours')->default(0);
             $table->timestamps();
             $table->index('chapter_id');

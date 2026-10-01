@@ -33,6 +33,11 @@ const selectedCourseUuid = ref<string | undefined>(undefined)
 const selectedChapterUuid = ref<string | undefined>(undefined)
 const filterPublished = ref<boolean | undefined>(undefined)
 
+const handleCourseChange = () => {
+  page.value = 1
+  selectedChapterUuid.value = undefined
+}
+
 // Delete confirmation dialog state
 const deleteDialogOpen = ref(false)
 const videoToDelete = ref<{ uuid: string; title: string } | null>(null)
@@ -145,22 +150,22 @@ const getLevelColor = (level: string | null) => {
       <div class="flex flex-col sm:flex-row gap-4">
         <Input v-model="search" placeholder="Search videos..." class="flex-1" @input="page = 1" />
         <select
-        v-model="selectedCourseUuid"
-        @change="page = 1; selectedChapterUuid = undefined"
-        class="px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary min-w-50"
-      >
-        <option :value="undefined">All Courses</option>
-        <option v-for="course in courses" :key="course.uuid" :value="course.uuid">
-          {{ course.title }}
-        </option>
-      </select>
-      <select
-        v-model="selectedChapterUuid"
-        @change="page = 1"
-        class="px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary min-w-50"
-      >
-        <option :value="undefined">All Chapters</option>
-        <option v-for="chapter in chapters" :key="chapter.uuid" :value="chapter.uuid">
+          v-model="selectedCourseUuid"
+          @change="handleCourseChange"
+          class="px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary min-w-50"
+        >
+          <option :value="undefined">All Courses</option>
+          <option v-for="course in courses" :key="course.uuid" :value="course.uuid">
+            {{ course.title }}
+          </option>
+        </select>
+        <select
+          v-model="selectedChapterUuid"
+          @change="page = 1"
+          class="px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary min-w-50"
+        >
+          <option :value="undefined">All Chapters</option>
+          <option v-for="chapter in chapters" :key="chapter.uuid" :value="chapter.uuid">
             {{ chapter.course?.title }} - {{ chapter.title }}
           </option>
         </select>
@@ -281,6 +286,13 @@ const getLevelColor = (level: string | null) => {
                 {{ video.is_preview ? 'Preview' : 'Locked' }}
               </span>
 
+              <span
+                v-if="video.is_big_five || video.isBigFive"
+                class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+              >
+                Big 5
+              </span>
+
               <span v-if="video.youtube_video_id" class="text-muted-foreground">
                 YouTube: {{ video.youtube_video_id }}
               </span>
@@ -300,22 +312,22 @@ const getLevelColor = (level: string | null) => {
               Preview
             </Button>
             <Button
-            @click="router.push(`/admin/videos/${video.uuid}/edit`)"
-            variant="outline"
-            size="sm"
-          >
-            <PhPencil :size="16" class="mr-1" />
-            Edit
-          </Button>
-          <Button
-            @click="handleDelete(video.uuid, video.title)"
-            variant="outline"
-            size="sm"
-            :disabled="isDeleting"
-            class="text-destructive hover:text-destructive"
-          >
-            <PhTrash :size="16" />
-          </Button>
+              @click="router.push(`/admin/videos/${video.uuid}/edit`)"
+              variant="outline"
+              size="sm"
+            >
+              <PhPencil :size="16" class="mr-1" />
+              Edit
+            </Button>
+            <Button
+              @click="handleDelete(video.uuid, video.title)"
+              variant="outline"
+              size="sm"
+              :disabled="isDeleting"
+              class="text-destructive hover:text-destructive"
+            >
+              <PhTrash :size="16" />
+            </Button>
           </div>
         </div>
       </div>

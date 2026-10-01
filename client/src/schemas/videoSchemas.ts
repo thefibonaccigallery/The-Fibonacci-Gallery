@@ -13,6 +13,8 @@ export const videoSchema = z.object({
   duration_seconds: z.number().min(0, 'Duration must be at least 0').default(0),
   is_published: z.boolean().default(false),
   is_preview: z.boolean().default(false),
+  is_big_five: z.boolean().default(false),
+  isBigFive: z.boolean().optional(),
   cooldown_hours: z
     .number()
     .min(0, 'Cooldown cannot be negative')

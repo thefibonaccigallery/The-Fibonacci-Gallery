@@ -70,12 +70,7 @@ const handleProgress = (payload: { watchTime: number; watchPercentage: number })
 }
 
 const handleVideoEnded = () => {
-  // Auto-advance to next video if available and unlocked
-  if (canGoNext.value && nextVideo.value) {
-    setTimeout(() => {
-      handleNext()
-    }, 1000)
-  }
+  // Video player overlay displays the completion state / notice and handles auto-advance
 }
 
 const goBack = () => {
@@ -161,8 +156,11 @@ onMounted(() => {
             <div class="animate-fade-in">
               <VideoPlayer
                 :video="activeVideo"
+                :can-go-next="canGoNext"
+                :has-next="!!nextVideo"
                 @progress="handleProgress"
                 @ended="handleVideoEnded"
+                @next="handleNext"
               />
             </div>
 

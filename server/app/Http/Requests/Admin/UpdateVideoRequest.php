@@ -19,6 +19,10 @@ class UpdateVideoRequest extends FormRequest
             $chapter = Chapter::findByUuidOrFail($this->chapter_uuid);
             $this->merge(['chapter_id' => $chapter->id]);
         }
+
+        if ($this->has('isBigFive') && !$this->has('is_big_five')) {
+            $this->merge(['is_big_five' => $this->boolean('isBigFive')]);
+        }
     }
 
     public function rules(): array
@@ -30,8 +34,11 @@ class UpdateVideoRequest extends FormRequest
             'level'            => ['nullable', Rule::in(config('types_course.levels'))],
             'order'            => ['sometimes', 'required', 'integer', 'min:1'],
             'duration_seconds' => ['nullable', 'integer', 'min:0'],
+            'cooldown_hours'   => ['nullable', 'integer', 'min:0', 'max:168'],
             'is_published'     => ['boolean'],
             'is_preview'       => ['boolean'],
+            'is_big_five'      => ['nullable', 'boolean'],
+            'isBigFive'        => ['nullable', 'boolean'],
         ];
     }
 }

@@ -19,8 +19,11 @@ class CourseVideo extends Model
         'level',
         'order',
         'duration_seconds',
+        'cooldown_hours',
         'is_published',
         'is_preview',
+        'is_big_five',
+        'isBigFive',
     ];
 
     protected function casts(): array
@@ -29,9 +32,21 @@ class CourseVideo extends Model
             'chapter_id'       => 'integer',
             'order'            => 'integer',
             'duration_seconds' => 'integer',
+            'cooldown_hours'   => 'integer',
             'is_published'     => 'boolean',
             'is_preview'       => 'boolean',
+            'is_big_five'      => 'boolean',
         ];
+    }
+
+    public function getIsBigFiveAttribute(): bool
+    {
+        return (bool) ($this->attributes['is_big_five'] ?? false);
+    }
+
+    public function setIsBigFiveAttribute($value): void
+    {
+        $this->attributes['is_big_five'] = (bool) $value;
     }
 
     protected static function boot()
@@ -72,5 +87,10 @@ class CourseVideo extends Model
     public function scopePreview($query)
     {
         return $query->where('is_preview', true);
+    }
+
+    public function scopeBigFive($query)
+    {
+        return $query->where('is_big_five', true);
     }
 }
