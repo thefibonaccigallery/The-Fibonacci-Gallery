@@ -102,11 +102,19 @@ const initializePlayer = () => {
 
   player = new Plyr(playerContainer.value, {
     controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+    captions: {
+      active: false,
+      update: false,
+    },
+    storage: {
+      enabled: false,
+    },
     youtube: {
       noCookie: true,
       rel: 0,
       showinfo: 0,
       iv_load_policy: 3,
+      cc_load_policy: 0,
       modestbranding: 1,
       controls: 0,
       disablekb: 1,
@@ -253,14 +261,11 @@ const cleanup = () => {
   }
 }
 
-watch(
-  [() => props.canGoNext, () => props.hasNext],
-  ([canGoNext, hasNext]) => {
-    if (isEnded.value && canGoNext && hasNext && !isCountingDown.value && countdownTimer === null) {
-      startCountdown()
-    }
-  },
-)
+watch([() => props.canGoNext, () => props.hasNext], ([canGoNext, hasNext]) => {
+  if (isEnded.value && canGoNext && hasNext && !isCountingDown.value && countdownTimer === null) {
+    startCountdown()
+  }
+})
 
 watch(
   () => props.video?.uuid,
@@ -453,18 +458,21 @@ onBeforeUnmount(() => {
   position: relative !important;
 }
 
+.video-player-wrapper :deep(.plyr__video-embed > .plyr__video-embed__container) {
+  height: 100% !important;
+  padding-bottom: 0 !important;
+  position: relative !important;
+  transform: none !important;
+}
+
 .video-player-wrapper :deep(.plyr__video-embed iframe) {
   /* Prevent pointer events from opening YouTube pages or showing info overlays on hover */
   pointer-events: none !important;
-  /* Uniformly scale the iframe up and re-center it so the title bar (top),
-     "Watch on YouTube" link and logo (bottom-right), and other chrome that
-     YouTube renders flush against its own edges are pushed outside the
-     visible, clipped area on all four sides at once. */
+  /* Keep the embedded video aligned with the full player area in normal and fullscreen modes. */
   position: absolute !important;
-  width: 140% !important;
-  height: 140% !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform: none !important;
 }
 </style>
