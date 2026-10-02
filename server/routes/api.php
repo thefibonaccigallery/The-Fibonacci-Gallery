@@ -18,6 +18,7 @@ use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\AffiliateController;
 use App\Http\Controllers\Admin\AffiliatePayoutController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -76,6 +77,9 @@ Route::middleware('auth:api')->group(function () {
 
 // Admin routes (protected by auth and admin middleware)
 Route::middleware(['auth:api', 'role:admin|super_admin'])->prefix('admin')->group(function () {
+    // Dashboard stats & recent data
+    Route::get('/dashboard', [AdminDashboardController::class, 'index']);
+
     // Course routes
     Route::get('/courses', [CourseController::class, 'index']);
     Route::post('/courses', [CourseController::class, 'store']);

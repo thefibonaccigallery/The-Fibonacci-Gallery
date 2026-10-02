@@ -1,156 +1,88 @@
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
+import { useQuery } from '@tanstack/vue-query'
+import axiosInstance from '@/api/axiosInstance'
+import type { Order, OrderStatus } from '@/types/OrderTypes'
+import type { Student } from '@/types/StudentTypes'
 
-export interface DashboardStats {
+export interface AdminDashboardStats {
   totalStudents: number
   totalCourses: number
   totalRevenue: number
   totalOrders: number
+  studentsTrend?: string
+  coursesTrend?: string
+  revenueTrend?: string
+  ordersTrend?: string
 }
 
-export interface Order {
-  id: number
-  student: string
-  course: string
-  amount: number
-  currency: string
-  payCurrency: string
-  status: 'waiting' | 'confirming' | 'finished' | 'failed' | 'expired' | 'partially_paid'
-  date: string
+export interface AdminDashboardResponse {
+  success: boolean
+  stats: AdminDashboardStats
+  recentOrders: Order[]
+  recentStudents: Student[]
 }
 
-export interface Student {
-  id: number
-  name: string
-  email: string
-  country: string
-  enrolledCourses: number
-  joinedAt: string
-}
+export type { Order, Student, OrderStatus }
 
 export function useAdminDashboard() {
-  const stats = ref<DashboardStats>({
-    totalStudents: 124,
-    totalCourses: 5,
-    totalRevenue: 8450.0,
-    totalOrders: 198,
+  const { data, isLoading, isError, error, refetch } = useQuery<AdminDashboardResponse>({
+    queryKey: ['admin-dashboard'],
+    queryFn: async () => {
+      const response = await axiosInstance.get<AdminDashboardResponse>('/admin/dashboard')
+      return response.data
+    },
   })
 
-  const recentOrders = ref<Order[]>([
-    {
-      id: 1,
-      student: 'John Doe',
-      course: 'Forex Fundamentals',
-      amount: 99.0,
-      currency: 'USD',
-      payCurrency: 'BTC',
-      status: 'finished',
-      date: '2026-05-01',
-    },
-    {
-      id: 2,
-      student: 'Sara Ali',
-      course: 'Technical Analysis',
-      amount: 79.0,
-      currency: 'USD',
-      payCurrency: 'ETH',
-      status: 'confirming',
-      date: '2026-05-03',
-    },
-    {
-      id: 3,
-      student: 'Mike Chen',
-      course: 'Price Action',
-      amount: 59.0,
-      currency: 'USD',
-      payCurrency: 'USDT',
-      status: 'waiting',
-      date: '2026-05-05',
-    },
-    {
-      id: 4,
-      student: 'Aisha Bekele',
-      course: 'Risk Management',
-      amount: 49.0,
-      currency: 'USD',
-      payCurrency: 'BTC',
-      status: 'failed',
-      date: '2026-05-06',
-    },
-    {
-      id: 5,
-      student: 'Luca Ferrari',
-      course: 'Trading Psychology',
-      amount: 69.0,
-      currency: 'USD',
-      payCurrency: 'ETH',
-      status: 'partially_paid',
-      date: '2026-05-07',
-    },
-  ])
+  const stats = computed<AdminDashboardStats>(() => data.value?.stats ?? {
+    totalStudents: 0,
+    totalCourses: 0,
+    totalRevenue: 0,
+    totalOrders: 0,
+  })
 
-  const recentStudents = ref<Student[]>([
-    {
-      id: 1,
-      name: 'John Doe',
-      email: 'john@example.com',
-      country: 'Ethiopia',
-      enrolledCourses: 2,
-      joinedAt: '2026-04-10',
-    },
-    {
-      id: 2,
-      name: 'Sara Ali',
-      email: 'sara@example.com',
-      country: 'Kenya',
-      enrolledCourses: 1,
-      joinedAt: '2026-04-18',
-    },
-    {
-      id: 3,
-      name: 'Mike Chen',
-      email: 'mike@example.com',
-      country: 'China',
-      enrolledCourses: 3,
-      joinedAt: '2026-04-22',
-    },
-    {
-      id: 4,
-      name: 'Aisha Bekele',
-      email: 'aisha@example.com',
-      country: 'Ethiopia',
-      enrolledCourses: 1,
-      joinedAt: '2026-05-01',
-    },
-    {
-      id: 5,
-      name: 'Luca Ferrari',
-      email: 'luca@example.com',
-      country: 'Italy',
-      enrolledCourses: 2,
-      joinedAt: '2026-05-04',
-    },
-  ])
+  const recentOrders = computed<Order[]>(() => data.value?.recentOrders ?? [])
+  const recentStudents = computed<Student[]>(() => data.value?.recentStudents ?? [])
 
-  const getStatusColor = (status: Order['status']) => {
-    const statusColors = {
-      waiting: 'muted',
-      confirming: 'yellow',
-      finished: 'primary',
-      failed: 'destructive',
-      expired: 'muted',
-      partially_paid: 'orange',
+  const getStatusColor = (status: OrderStatus) => {
+    const statusColors: Record<string, string> = {
+      waiting: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400',
+      confirming: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400',
+      confirmed: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+      sending: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+      finished: 'bg-green-500/10 text-green-600 dark:text-green-400',
+      failed: 'bg-destructive/10 text-destructive',
+      expired: 'bg-muted text-muted-foreground',
+      partially_paid: 'bg-orange-500/10 text-orange-600 dark:text-orange-400',
+      refunded: 'bg-muted text-muted-foreground',
     }
-    return statusColors[status]
+    return statusColors[status] || 'bg-muted text-muted-foreground'
   }
 
-  const formatCurrency = (amount: number, currency: string = 'USD') => {
+  const getStatusLabel = (status: OrderStatus) => {
+    const labels: Record<string, string> = {
+      waiting: 'Waiting',
+      confirming: 'Confirming',
+      confirmed: 'Confirmed',
+      sending: 'Sending',
+      finished: 'Finished',
+      failed: 'Failed',
+      expired: 'Expired',
+      partially_paid: 'Partially Paid',
+      refunded: 'Refunded',
+    }
+    return labels[status] || status
+  }
+
+  const formatCurrency = (amount: number | string, currency: string = 'USD') => {
+    const numericAmount = typeof amount === 'string' ? parseFloat(amount) || 0 : amount
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency,
-    }).format(amount)
+    }).format(numericAmount)
   }
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return ''
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'short',
@@ -159,10 +91,16 @@ export function useAdminDashboard() {
   }
 
   return {
+    data,
     stats,
     recentOrders,
     recentStudents,
+    isLoading,
+    isError,
+    error,
+    refetch,
     getStatusColor,
+    getStatusLabel,
     formatCurrency,
     formatDate,
   }
