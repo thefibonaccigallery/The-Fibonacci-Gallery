@@ -52,6 +52,7 @@ const countdownSeconds = ref(0)
 const isCountingDown = ref(false)
 const isPaused = ref(false)
 let countdownTimer: number | null = null
+let captionKillTimer: number | null = null
 
 // Accumulated play time tracking
 let accumulatedSeconds = 0
@@ -115,6 +116,9 @@ const initializePlayer = () => {
       showinfo: 0,
       iv_load_policy: 3,
       cc_load_policy: 0,
+      cc: 0,
+      hl: 'en',
+      cc_lang_pref: 'none',
       modestbranding: 1,
       controls: 0,
       disablekb: 1,
@@ -136,6 +140,45 @@ const initializePlayer = () => {
     }
     player.on('ready', seekOnReady)
   }
+
+  // Programmatically disable YouTube captions via the IFrame API.
+  // CSS cannot reach inside the iframe, so this is the only reliable way.
+  // YouTube often re-enables captions from account prefs, so we poll aggressively.
+
+  const disableYouTubeCaptions = () => {
+    const yt = (player as any)?.embed
+    if (!yt) return
+    if (typeof yt.unloadModule === 'function') {
+      yt.unloadModule('captions')
+      yt.unloadModule('cc')
+    }
+    // Also try to set subtitle track to empty / off
+    if (typeof yt.setOption === 'function') {
+      try {
+        yt.setOption('captions', 'track', {})
+        yt.setOption('cc', 'track', {})
+      } catch (_) {
+        // silently ignore if the module isn't loaded
+      }
+    }
+  }
+
+  player.on('ready', () => {
+    // Fire immediately and keep retrying for 30 seconds (every 2s).
+    // YouTube can lazily load caption modules well after the player is "ready".
+    disableYouTubeCaptions()
+    let attempts = 0
+    captionKillTimer = window.setInterval(() => {
+      disableYouTubeCaptions()
+      attempts++
+      if (attempts >= 15) {
+        if (captionKillTimer !== null) {
+          clearInterval(captionKillTimer)
+          captionKillTimer = null
+        }
+      }
+    }, 2000)
+  })
 
   player.on('playing', handlePlaying)
   player.on('seeked', handleSeeked)
@@ -253,6 +296,12 @@ const cleanup = () => {
   if (progressInterval) {
     clearInterval(progressInterval)
     progressInterval = null
+  }
+
+  // Clear caption-kill polling timer
+  if (captionKillTimer !== null) {
+    clearInterval(captionKillTimer)
+    captionKillTimer = null
   }
 
   if (player) {
@@ -474,5 +523,11 @@ onBeforeUnmount(() => {
   width: 100% !important;
   height: 100% !important;
   transform: none !important;
+}
+
+/* Hide YouTube captions / subtitles that may render over the embed */
+.video-player-wrapper :deep(.plyr__captions),
+.video-player-wrapper :deep(.plyr__caption) {
+  display: none !important;
 }
 </style>
