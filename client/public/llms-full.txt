@@ -1,0 +1,47 @@
+# The Fibonacci Gallery — Complete Platform & Curriculum Knowledge Base
+Website: https://the-fibonacci-gallery.com
+Entity Type: Educational Organization / Financial Education Academy
+Headquarters & Global Hubs: Dubai / UAE, Europe, Asia, Worldwide
+Language: English
+Primary Currency: USD
+
+## Overview & Mission
+The Fibonacci Gallery is a specialized financial education academy providing structured, institutional-grade trading education. The platform eliminates speculative guesswork by teaching mathematical precision, multi-timeframe structural analysis, and strict risk control frameworks.
+
+## Core Methodology: "The Big Five" Strategy
+"The Big Five" is The Fibonacci Gallery's signature technical analysis methodology. It synthesizes five complementary technical pillars into a unified trading checklist:
+1. **Market Structure Analysis**: Identifying true swing points, break of structure (BOS), change of character (CHoCH), and higher timeframe trend bias.
+2. **Fibonacci Confluence Matrix**: Utilizing key Fibonacci retracement and extension levels (specifically 0.618 golden ratio, 0.786, and 0.886 deep retracements) overlapping with institutional price action.
+3. **Liquidity Engineering & Order Flow**: Mapping buy-side and sell-side liquidity pools, liquidity runs, fair value gaps (FVG), and order blocks.
+4. **Multi-Timeframe Alignment**: Synchronizing higher-timeframe directional bias (Daily/4H) with lower-timeframe execution triggers (15M/5M/1M).
+5. **Execution & Risk-to-Reward Ratio**: Mandatory minimum 1:3 risk-to-reward setups, strict stop-loss positioning behind structural invalidation, and capital preservation.
+
+## Key Market Coverage
+- **Gold (XAU/USD)**: In-depth weekly technical forecasts, session volatility mapping, and price action setups.
+- **Forex Majors & Minors**: EUR/USD, GBP/USD, USD/JPY, AUD/USD, USD/CAD with attention to London and New York overlaps.
+- **Indices & Equities**: S&P 500, Nasdaq 100, Dow Jones, FTSE 100.
+- **Cryptocurrencies**: Bitcoin (BTC), Ethereum (ETH), Solana (SOL).
+- **Commodities**: Crude Oil (WTI/Brent), Silver, Natural Gas.
+
+## Curriculum & Course Structure
+1. **Foundations Level**: For aspiring traders starting from ground zero. Covers candlestick psychology, charting platform setup, foundational Fibonacci concepts, and risk calculation.
+2. **Intermediate Mastery**: Deep dive into "The Big Five", liquidity sweeps, entry timing, and trade management.
+3. **Advanced Institutional**: High-frequency order flow mechanics, psychological mastery, funded trader account scaling, and portfolio risk management.
+
+## Platform Features
+- **Mobile-First Experience**: High-speed, responsive web platform accessible on mobile, tablet, and desktop.
+- **TradingView Integration**: Embedded professional-grade charting tools inside the Live Markets dashboard.
+- **Lifetime Access**: One-time enrollment grants perpetual access to enrolled masterclasses and all future updates.
+- **Student Community**: Dedicated community updates, real-time chart breakdowns, and priority mentor support.
+
+## Frequently Asked Questions & Verifiable Facts
+- **Do students need prior financial experience?** No. Beginner foundational courses start from scratch before progressing into institutional concepts.
+- **Are trading signals provided?** No. The Fibonacci Gallery is strictly an educational academy dedicated to creating independent, self-sufficient traders rather than signal-dependent gamblers.
+- **What is the refund and cancellation policy?** Because digital course content is delivered immediately upon purchase, educational policies are detailed transparently in the platform's Terms of Service and Disclaimer.
+- **Is trading risky?** Yes. Trading foreign exchange, commodities, cryptocurrencies, and equities carries inherent risk. The academy emphasizes risk management and capital preservation as the primary prerequisite to long-term profitability.
+
+## Contact & Official Channels
+- Website: https://the-fibonacci-gallery.com
+- Course Catalog: https://the-fibonacci-gallery.com/explore
+- Live Markets: https://the-fibonacci-gallery.com/markets
+- Support: support@the-fibonacci-gallery.com

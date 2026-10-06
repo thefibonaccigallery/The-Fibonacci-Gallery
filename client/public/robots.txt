@@ -1,0 +1,53 @@
+# Robots.txt for The Fibonacci Gallery
+# https://the-fibonacci-gallery.com
+
+User-agent: *
+Allow: /
+Allow: /explore
+Allow: /markets
+Allow: /testimonials
+Allow: /faq
+Allow: /privacy
+Allow: /terms
+Allow: /disclaimer
+Allow: /courses/*/details
+Disallow: /admin/
+Disallow: /checkout/
+Disallow: /dashboard/
+Disallow: /my-courses/
+Disallow: /courses/*/player
+Disallow: /profile/
+Disallow: /payment/
+Disallow: /forgot-password
+Disallow: /reset-password
+
+# Explicitly welcome AI Search & Answer Engines (GEO)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Cohere-ai
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+# Sitemap Index
+Sitemap: https://the-fibonacci-gallery.com/sitemap.xml

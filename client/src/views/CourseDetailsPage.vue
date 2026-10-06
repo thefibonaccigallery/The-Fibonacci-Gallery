@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserCourses } from '@/composables/useUserCourses'
 import { useAuthStore } from '@/stores/auth'
+import { useSeoMeta } from '@/composables/useSeoMeta'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import { Button } from '@/components/ui/button'
 import {
@@ -24,6 +25,7 @@ const route = useRoute()
 const router = useRouter()
 const { useCourseDetail } = useUserCourses()
 const authStore = useAuthStore()
+const { setSeoMeta, generateCourseSchema } = useSeoMeta()
 
 const courseUuid = computed(() => route.params.uuid as string)
 
@@ -40,6 +42,32 @@ const handleEnrollClick = () => {
 const { data, isLoading, error } = useCourseDetail(courseUuid.value)
 
 const course = computed(() => data.value?.course)
+
+watch(
+  course,
+  (c) => {
+    if (c) {
+      setSeoMeta({
+        title: `${c.title} | Masterclass`,
+        description: c.description || undefined,
+        ogImage: c.thumbnail_url || undefined,
+        canonicalUrl: `/courses/${c.uuid}/details`,
+        jsonLd: generateCourseSchema({
+          uuid: c.uuid,
+          title: c.title,
+          description: c.description,
+          thumbnail_url: c.thumbnail_url,
+          price: Number(c.price) || 0,
+          level: c.level,
+          published_at: c.published_at,
+          totalLessons: c.totalLessons,
+          length_seconds: c.length_seconds,
+        }),
+      })
+    }
+  },
+  { immediate: true },
+)
 
 const formatDuration = (seconds: number) => {
   const hours = Math.floor(seconds / 3600)

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import { useAuthStore } from '@/stores/auth'
+import { useSeoMeta } from '@/composables/useSeoMeta'
 import { RouterLink } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,6 +15,7 @@ import {
 import { PhMagnifyingGlass, PhArrowRight } from '@phosphor-icons/vue'
 
 const authStore = useAuthStore()
+const { setSeoMeta, generateFaqSchema } = useSeoMeta()
 
 const searchQuery = ref('')
 const selectedCategory = ref('all')
@@ -87,6 +89,16 @@ const filteredFaqs = computed(() => {
     return matchesCategory && matchesSearch
   })
 })
+
+onMounted(() => {
+  setSeoMeta({
+    title: 'Frequently Asked Questions',
+    description:
+      'Find answers to common questions about our platform, trading methodologies, pricing, and live sessions.',
+    canonicalUrl: '/faq',
+    jsonLd: generateFaqSchema(faqs),
+  })
+})
 </script>
 
 <template>
@@ -145,7 +157,7 @@ const filteredFaqs = computed(() => {
 
           <!-- FAQ Accordion -->
           <div
-            class="md:col-span-8 border border-border/20 rounded-3xl p-6 md:p-8 liquid-glass min-h-[300px]"
+            class="md:col-span-8 border border-border/20 rounded-3xl p-6 md:p-8 liquid-glass min-h-75"
           >
             <div v-if="filteredFaqs.length === 0" class="text-center py-12 text-muted-foreground">
               No matching questions found. Try searching different keywords.
