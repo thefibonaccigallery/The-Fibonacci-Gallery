@@ -6,10 +6,40 @@ import type {
 } from '@/types/seoType'
 
 const SITE_NAME = 'The Fibonacci Gallery'
+const SHORT_SITE_NAME = 'Fibonacci Gallery'
 const BASE_URL = 'https://the-fibonacci-gallery.com'
 const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`
+const DEFAULT_TITLE = 'The Fibonacci Gallery | Elite Trading Academy'
 const DEFAULT_DESCRIPTION =
-  'The Fibonacci Gallery is a premier international trading academy teaching institutional technical analysis, The Big Five strategy, and capital preservation across Forex, Gold (XAU/USD), Crypto, and Commodities for traders in Dubai, Europe, Asia, and worldwide.'
+  'Master institutional trading, The Big Five strategy, and risk management across Forex, Gold, and Crypto. Built for global traders.'
+
+/**
+ * Format page title to stay within the recommended 50-60 character limit
+ */
+function formatSeoTitle(rawTitle?: string): string {
+  if (!rawTitle) return DEFAULT_TITLE
+
+  if (rawTitle.includes('Fibonacci')) {
+    return rawTitle.length <= 60 ? rawTitle : rawTitle.slice(0, 57) + '...'
+  }
+
+  const withFullBrand = `${rawTitle} | ${SITE_NAME}`
+  if (withFullBrand.length <= 60) return withFullBrand
+
+  const withShortBrand = `${rawTitle} | ${SHORT_SITE_NAME}`
+  if (withShortBrand.length <= 60) return withShortBrand
+
+  return rawTitle.length <= 60 ? rawTitle : rawTitle.slice(0, 57) + '...'
+}
+
+/**
+ * Format description to stay within 120-140 characters for social card visibility
+ */
+function formatSeoDescription(rawDesc?: string): string {
+  if (!rawDesc) return DEFAULT_DESCRIPTION
+  if (rawDesc.length <= 140) return rawDesc
+  return rawDesc.slice(0, 137) + '...'
+}
 
 /**
  * Helper to update or create an HTML meta tag
@@ -62,16 +92,12 @@ export function useSeoMeta() {
   const setSeoMeta = (options: SeoMetaOptions = {}) => {
     if (typeof document === 'undefined') return
 
-    // 1. Page Title
-    const titleText = options.title
-      ? options.title.includes(SITE_NAME)
-        ? options.title
-        : `${options.title} | ${SITE_NAME}`
-      : `${SITE_NAME} | Elite Financial Education & Trading Academy`
+    // 1. Page Title (strictly <= 60 chars)
+    const titleText = formatSeoTitle(options.title)
     document.title = titleText
 
-    // 2. Standard Meta
-    const description = options.description || DEFAULT_DESCRIPTION
+    // 2. Standard Meta (strictly <= 140 chars)
+    const description = formatSeoDescription(options.description)
     setMetaTag('name', 'description', description)
 
     if (options.keywords && options.keywords.length > 0) {

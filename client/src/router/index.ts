@@ -15,9 +15,9 @@ const router = createRouter({
       name: 'home',
       component: HomeView,
       meta: {
-        title: 'Elite Financial Education & Trading Academy',
+        title: 'The Fibonacci Gallery | Elite Trading Academy',
         description:
-          'Master institutional technical analysis, "The Big Five" strategy, and capital preservation across Forex, Gold (XAU/USD), Crypto, and Commodities for traders in Dubai, Europe, Asia, and worldwide.',
+          'Master institutional trading, The Big Five strategy, and risk management across Forex, Gold, and Crypto. Built for global traders.',
         keywords: [
           'forex trading academy',
           'fibonacci trading',
@@ -34,7 +34,7 @@ const router = createRouter({
       name: 'login',
       component: LoginView,
       meta: {
-        title: 'Sign In to Your Workspace',
+        title: 'Sign In',
         noIndex: true,
       },
     },
@@ -43,7 +43,7 @@ const router = createRouter({
       name: 'register',
       component: RegisterView,
       meta: {
-        title: 'Create Your Account',
+        title: 'Create Account',
         noIndex: true,
       },
     },
@@ -84,7 +84,7 @@ const router = createRouter({
       name: 'my-courses',
       component: () => import('@/views/MyCoursesPage.vue'),
       meta: {
-        title: 'My Enrolled Courses',
+        title: 'My Courses',
         noIndex: true,
       },
     },
@@ -93,9 +93,9 @@ const router = createRouter({
       name: 'explore-courses',
       component: () => import('@/views/ExploreCoursesPage.vue'),
       meta: {
-        title: 'Explore Masterclasses & Trading Courses',
+        title: 'Explore Masterclasses',
         description:
-          'Browse our comprehensive catalog of institutional trading courses. Master The Big Five strategy, Fibonacci confluence, and capital preservation with structured video curricula.',
+          'Browse institutional trading masterclasses. Master The Big Five strategy, Fibonacci confluence, and capital preservation.',
         keywords: [
           'trading courses',
           'forex masterclass',
@@ -110,9 +110,9 @@ const router = createRouter({
       name: 'markets',
       component: () => import('@/views/MarketsView.vue'),
       meta: {
-        title: 'Live Market Analytics & Real-Time Intelligence',
+        title: 'Live Market Analytics',
         description:
-          'Access real-time price quotes, technical charting, and volatility metrics across Forex, Indices, Crypto, and Commodities powered by integrated TradingView tools.',
+          'Track real-time quotes, charts, and volatility metrics across Forex, Indices, Crypto, and Commodities via TradingView.',
         keywords: [
           'live market analytics',
           'forex currency rates',
@@ -127,9 +127,9 @@ const router = createRouter({
       name: 'testimonials',
       component: () => import('@/views/TestimonialsView.vue'),
       meta: {
-        title: 'Student Testimonials & Verified Reviews',
+        title: 'Student Testimonials',
         description:
-          'Read verified transformation stories and reviews from traders in Dubai, Europe, Asia, and worldwide who elevated their profitability with The Fibonacci Gallery.',
+          'Verified reviews and transformation stories from traders worldwide who mastered The Big Five strategy with our academy.',
         keywords: [
           'trading academy reviews',
           'student testimonials',
@@ -145,7 +145,7 @@ const router = createRouter({
       meta: {
         title: 'Frequently Asked Questions',
         description:
-          'Get answers about course access, trading requirements, curriculum prerequisites, mobile compatibility, telegram community, and billing policies.',
+          'Get answers on course access, trading prerequisites, mobile learning, community access, and billing policies.',
         keywords: [
           'trading academy faq',
           'course prerequisites',
@@ -161,7 +161,7 @@ const router = createRouter({
       meta: {
         title: 'Privacy Policy',
         description:
-          'Review how The Fibonacci Gallery collects, protects, and manages your personal data and account privacy.',
+          'Learn how The Fibonacci Gallery collects, protects, and manages your personal data and account privacy.',
       },
     },
     {
@@ -171,7 +171,7 @@ const router = createRouter({
       meta: {
         title: 'Terms of Service',
         description:
-          'Terms and conditions governing access, enrollment, and community participation across The Fibonacci Gallery platform.',
+          'Terms and conditions governing access, enrollment, and community participation at The Fibonacci Gallery.',
       },
     },
     {
@@ -179,7 +179,7 @@ const router = createRouter({
       name: 'disclaimer',
       component: () => import('@/views/DisclaimerView.vue'),
       meta: {
-        title: 'Financial Disclaimer & Risk Disclosure',
+        title: 'Financial Disclaimer',
         description:
           'Educational disclosures and financial risk notices for trading Forex, Commodities, Crypto, and Equities.',
       },
@@ -189,9 +189,9 @@ const router = createRouter({
       name: 'course-details',
       component: () => import('@/views/CourseDetailsPage.vue'),
       meta: {
-        title: 'Course Curriculum & Enrollment Details',
+        title: 'Masterclass Curriculum',
         description:
-          'Explore syllabus, lesson chapters, and enrollment options for this institutional masterclass at The Fibonacci Gallery.',
+          'Explore the complete syllabus, chapter video breakdowns, and lifetime enrollment options for this masterclass.',
       },
     },
     {

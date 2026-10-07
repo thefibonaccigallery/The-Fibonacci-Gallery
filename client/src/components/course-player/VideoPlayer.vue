@@ -42,7 +42,10 @@ const activeYoutubeId = ref<string | null>(null)
 
 // ── Security composables ────────────────────────────────────────────────────
 useVideoWatermark(playerWrapper)
-useVideoSecurity({ onDevToolsDetected: () => player?.pause() })
+const { isObscured, dismissObscured } = useVideoSecurity({
+  onDevToolsDetected: () => player?.pause(),
+  onSecurityTriggered: () => player?.pause(),
+})
 // ───────────────────────────────────────────────────────────────────────────
 const isLoadingToken = ref<boolean>(false)
 const isEnded = ref<boolean>(false)
@@ -358,9 +361,31 @@ onBeforeUnmount(() => {
       <!-- Plyr player container -->
       <div
         ref="playerContainer"
+        :class="{ 'opacity-0 pointer-events-none': isObscured }"
         :data-plyr-provider="'youtube'"
         :data-plyr-embed-id="activeYoutubeId"
       ></div>
+
+      <!-- Anti-Snipping / Window Blur shield (defends against Win+Shift+S, Snipping Tool, screen capture) -->
+      <div
+        v-show="isObscured"
+        class="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center p-4 text-center select-none cursor-pointer"
+        @click="dismissObscured"
+      >
+        <div class="space-y-2 pointer-events-none">
+          <div
+            class="w-10 h-10 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400 mx-auto"
+          >
+            <PhWarning :size="22" weight="bold" />
+          </div>
+          <p class="text-white font-semibold text-sm sm:text-base tracking-wide">
+            Playback Protected
+          </p>
+          <p class="text-xs text-zinc-400 max-w-xs">
+            Screen capture and shortcuts are prohibited. Click anywhere to resume.
+          </p>
+        </div>
+      </div>
 
       <!-- Completion & Important Notice Overlay -->
       <Transition
@@ -529,5 +554,11 @@ onBeforeUnmount(() => {
 .video-player-wrapper :deep(.plyr__captions),
 .video-player-wrapper :deep(.plyr__caption) {
   display: none !important;
+}
+
+@media print {
+  .video-player-wrapper {
+    display: none !important;
+  }
 }
 </style>
