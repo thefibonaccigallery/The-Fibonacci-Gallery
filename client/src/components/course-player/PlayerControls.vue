@@ -91,10 +91,9 @@ const formatDuration = (seconds: number) => {
           :style="{ width: `${watchPercentage}%` }"
         ></div>
       </div>
-      <p v-if="watchPercentage < 70" class="text-xs text-muted-foreground">
-        Watch at least 70% to unlock the next video
+      <p v-if="video.progress?.is_completed || watchPercentage >= 100" class="text-xs text-primary">
+        ✓ Video completed!
       </p>
-      <p v-else class="text-xs text-primary">✓ Video completed! Next video unlocked</p>
     </div>
 
     <!-- Navigation Buttons -->

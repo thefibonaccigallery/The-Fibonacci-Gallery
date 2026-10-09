@@ -104,7 +104,7 @@ class CoursePlayerController extends Controller
             ? min(round(($watchTimeSeconds / $video->duration_seconds) * 100, 2), 100.0)
             : 0;
 
-        $threshold        = config('types_course.completion_threshold', 70);
+        $threshold        = config('types.course.completion_threshold', config('types_course.completion_threshold', 0));
         $alreadyCompleted = $existing?->is_completed ?? false;
         $isNowCompleted   = $alreadyCompleted || ($watchPercentage >= $threshold);
         $isNewlyCompleted = !$alreadyCompleted && $isNowCompleted;

@@ -212,13 +212,9 @@ export function useCoursePlayer(courseUuid: string) {
     },
   })
 
-  // Whether the user has watched enough of the current video to advance.
-  // Uses the local percentage so it reacts instantly (no server round-trip needed).
+  // Whether the user can advance to the next video (70% watch requirement removed for development)
   const canGoNext = computed(() => {
-    const next = getNextVideo()
-    if (!next) return false
-    const serverPct = activeVideo.value?.progress?.watch_percentage || 0
-    return Math.max(currentWatchPercentage.value, serverPct) >= 70
+    return getNextVideo() !== null
   })
 
   const canGoPrevious = computed(() => getPreviousVideo() !== null)
