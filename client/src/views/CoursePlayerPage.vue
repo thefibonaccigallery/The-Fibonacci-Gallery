@@ -108,7 +108,7 @@ onMounted(() => {
     <!-- Main Content -->
     <div v-else class="flex flex-col lg:flex-row h-screen">
       <!-- Desktop Sidebar - Left Panel -->
-      <aside class="hidden lg:block lg:w-96 border-r border-border bg-background overflow-hidden">
+      <aside class="hidden lg:block lg:w-96 xl:w-104 shrink-0 border-r border-border bg-background overflow-hidden">
         <CourseCurriculum
           :chapters="chapters"
           :active-video-id="activeVideoId"

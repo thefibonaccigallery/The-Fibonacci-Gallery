@@ -48,6 +48,7 @@ const { isObscured, dismissObscured } = useVideoSecurity({
 })
 // ───────────────────────────────────────────────────────────────────────────
 const isLoadingToken = ref<boolean>(false)
+const isBuffering = ref<boolean>(false)
 const isEnded = ref<boolean>(false)
 
 // Countdown / Auto-advance state
@@ -76,6 +77,7 @@ const decodeStreamToken = (token: string): string => {
 const loadVideoToken = async () => {
   cleanup()
   isEnded.value = false
+  isBuffering.value = true
   activeYoutubeId.value = null
   if (!props.video?.uuid) return
 
@@ -103,6 +105,8 @@ const initializePlayer = () => {
   if (player) {
     player.destroy()
   }
+
+  isBuffering.value = true
 
   player = new Plyr(playerContainer.value, {
     controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
@@ -167,6 +171,28 @@ const initializePlayer = () => {
   }
 
   player.on('ready', () => {
+    // If this is a fresh video with no resume position, release buffer overlay once ready
+    if (resumeAt === 0 && player?.paused) {
+      isBuffering.value = false
+    }
+
+    // Attach native YouTube player state listener to accurately track buffering transitions
+    const yt = (player as any)?.embed
+    if (yt && typeof yt.addEventListener === 'function') {
+      try {
+        yt.addEventListener('onStateChange', (event: any) => {
+          // 3: BUFFERING, -1: UNSTARTED
+          if (event.data === 3) {
+            isBuffering.value = true
+          } else if (event.data === 1) { // PLAYING
+            isBuffering.value = false
+          }
+        })
+      } catch (_) {
+        // silently ignore if embed API is restricted
+      }
+    }
+
     // Fire immediately and keep retrying for 30 seconds (every 2s).
     // YouTube can lazily load caption modules well after the player is "ready".
     disableYouTubeCaptions()
@@ -183,9 +209,29 @@ const initializePlayer = () => {
     }, 2000)
   })
 
-  player.on('playing', handlePlaying)
-  player.on('seeked', handleSeeked)
-  player.on('pause', handlePause)
+  player.on('play', () => {
+    isBuffering.value = true
+  })
+  player.on('waiting', () => {
+    isBuffering.value = true
+  })
+  player.on('seeking', () => {
+    isBuffering.value = true
+  })
+  player.on('seeked', () => {
+    if (!player?.playing) {
+      isBuffering.value = false
+    }
+    handleSeeked()
+  })
+  player.on('playing', () => {
+    isBuffering.value = false
+    handlePlaying()
+  })
+  player.on('pause', () => {
+    isBuffering.value = false
+    handlePause()
+  })
   player.on('ended', handleEnded)
 
   if (progressInterval) clearInterval(progressInterval)
@@ -296,6 +342,7 @@ const cleanup = () => {
   stopCountdown()
   isEnded.value = false
   isPaused.value = false
+  isBuffering.value = false
   if (progressInterval) {
     clearInterval(progressInterval)
     progressInterval = null
@@ -338,7 +385,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="video-player-wrapper">
+  <div class="video-player-wrapper" :class="{ 'is-buffering': isBuffering }">
     <!-- Loading state -->
     <div
       v-if="isLoadingToken"
@@ -365,6 +412,29 @@ onBeforeUnmount(() => {
         :data-plyr-provider="'youtube'"
         :data-plyr-embed-id="activeYoutubeId"
       ></div>
+
+      <!-- Startup / Buffering Overlay (Hides YouTube native title, spinner, and bottom-right logo) -->
+      <Transition
+        enter-active-class="transition-opacity duration-150 ease-out"
+        leave-active-class="transition-opacity duration-300 ease-in"
+        enter-from-class="opacity-0"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="isBuffering"
+          class="absolute inset-0 z-20 bg-black flex flex-col items-center justify-center pointer-events-none select-none"
+        >
+          <div class="flex flex-col items-center gap-3">
+            <PhSpinner class="h-9 w-9 text-primary animate-spin" />
+            <p
+              v-if="video?.title"
+              class="text-xs text-zinc-400 font-medium tracking-wide max-w-xs text-center truncate px-4"
+            >
+              {{ video.title }}
+            </p>
+          </div>
+        </div>
+      </Transition>
 
       <!-- Anti-Snipping / Window Blur shield (defends against Win+Shift+S, Snipping Tool, screen capture) -->
       <div
@@ -539,6 +609,13 @@ onBeforeUnmount(() => {
   transform: none !important;
 }
 
+/* Keep YouTube iframe hidden with opacity 0 until playback is actively streaming,
+   preventing the YouTube title, spinner, and watermark/logo from being visible */
+.video-player-wrapper.is-buffering :deep(.plyr__video-embed iframe),
+.video-player-wrapper :deep(.plyr--loading .plyr__video-embed iframe) {
+  opacity: 0 !important;
+}
+
 .video-player-wrapper :deep(.plyr__video-embed iframe) {
   /* Prevent pointer events from opening YouTube pages or showing info overlays on hover */
   pointer-events: none !important;
@@ -548,6 +625,51 @@ onBeforeUnmount(() => {
   width: 100% !important;
   height: 100% !important;
   transform: none !important;
+  transition: opacity 0.25s ease-in-out;
+}
+
+/* Custom platform loader inside Plyr wrapper (works across both normal and fullscreen modes) */
+.video-player-wrapper.is-buffering :deep(.plyr__video-wrapper::before),
+.video-player-wrapper :deep(.plyr--loading .plyr__video-wrapper::before) {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: #000000;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.video-player-wrapper.is-buffering :deep(.plyr__video-wrapper::after),
+.video-player-wrapper :deep(.plyr--loading .plyr__video-wrapper::after) {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--color-primary, #10b981);
+  border-radius: 50%;
+  animation: plyr-buffering-spin 0.8s linear infinite;
+  z-index: 3;
+  pointer-events: none;
+}
+
+@keyframes plyr-buffering-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Ensure controls bar background has clean, dark contrast across all resolutions */
+.video-player-wrapper :deep(.plyr--video .plyr__controls) {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.75) 50%,
+    rgba(0, 0, 0, 0) 100%
+  ) !important;
 }
 
 /* Hide YouTube captions / subtitles that may render over the embed */

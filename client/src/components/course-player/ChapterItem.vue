@@ -41,6 +41,30 @@ const getLevelColor = (level: string | null) => {
   return colors[level] || 'bg-muted text-muted-foreground'
 }
 
+interface ChapterTheme {
+  titleColor: string
+}
+
+const CHAPTER_THEMES: ChapterTheme[] = [
+  { titleColor: 'text-emerald-500 dark:text-emerald-400' },
+  { titleColor: 'text-cyan-500 dark:text-cyan-400' },
+  { titleColor: 'text-violet-500 dark:text-violet-400' },
+  { titleColor: 'text-amber-500 dark:text-amber-400' },
+  { titleColor: 'text-rose-500 dark:text-rose-400' },
+  { titleColor: 'text-indigo-500 dark:text-indigo-400' },
+  { titleColor: 'text-teal-500 dark:text-teal-400' },
+  { titleColor: 'text-fuchsia-500 dark:text-fuchsia-400' },
+]
+
+const chapterTheme = computed<ChapterTheme>(() => {
+  const index = Math.abs(props.chapterIndex) % CHAPTER_THEMES.length
+  return CHAPTER_THEMES[index] ?? CHAPTER_THEMES[0]!
+})
+
+const hasActiveVideo = computed(() => {
+  return props.chapter.videos.some((v) => v.uuid === props.activeVideoId)
+})
+
 const toggleExpanded = () => {
   if (props.isUnlocked) {
     isExpanded.value = !isExpanded.value
@@ -53,47 +77,63 @@ const handleSelectVideo = (videoUuid: string) => {
 </script>
 
 <template>
-  <div class="border border-border rounded-lg overflow-hidden">
+  <div
+    :class="[
+      'border border-border rounded-lg overflow-hidden transition-all',
+      hasActiveVideo && 'ring-1 ring-primary/30',
+    ]"
+  >
     <!-- Chapter Header -->
     <button
       @click="toggleExpanded"
       :disabled="!isUnlocked"
       :class="[
-        'w-full px-4 py-4 flex items-center gap-3 transition-colors',
-        'bg-muted/30 hover:bg-muted/50',
+        'w-full px-3.5 py-3 flex items-start gap-3 transition-colors',
+        hasActiveVideo ? 'bg-muted/50' : 'bg-muted/25 hover:bg-muted/45',
         !isUnlocked && 'opacity-50 cursor-not-allowed',
       ]"
     >
       <!-- Expand Icon -->
       <PhCaretDown
-        :size="20"
+        :size="18"
         :class="[
-          'flex-shrink-0 transition-transform text-muted-foreground',
+          'shrink-0 mt-0.5 transition-transform text-muted-foreground',
           isExpanded ? 'rotate-0' : '-rotate-90',
         ]"
       />
 
       <!-- Chapter Info -->
       <div class="flex-1 text-left min-w-0">
-        <div class="flex items-center gap-2 mb-1">
-          <h3 class="font-semibold text-foreground truncate">{{ chapter.title }}</h3>
+        <div class="flex items-start justify-between gap-2 mb-1">
+          <!-- Bold Chapter Title with distinct colors -->
+          <h3
+            :class="[
+              'font-bold text-sm leading-snug wrap-break-word',
+              isUnlocked ? chapterTheme.titleColor : 'text-muted-foreground',
+            ]"
+          >
+            {{ chapter.title }}
+          </h3>
+
           <span
             v-if="chapter.level"
             :class="[
-              'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize flex-shrink-0',
+              'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider shrink-0 mt-0.5',
               getLevelColor(chapter.level),
             ]"
           >
             {{ chapter.level }}
           </span>
         </div>
-        <p class="text-sm text-muted-foreground">
+
+        <!-- Completed progress -->
+        <p class="text-xs text-muted-foreground font-medium">
           {{ completedCount }} / {{ totalCount }} completed
         </p>
       </div>
 
       <!-- Lock Icon -->
-      <PhLock v-if="!isUnlocked" :size="20" class="flex-shrink-0 text-muted-foreground" />
+      <PhLock v-if="!isUnlocked" :size="18" class="shrink-0 mt-0.5 text-muted-foreground" />
     </button>
 
     <!-- Videos List -->

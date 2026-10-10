@@ -58,7 +58,7 @@ const handleClick = () => {
 
     <!-- Video Info -->
     <div class="flex-1 min-w-0">
-      <p :class="['font-medium truncate', isActive ? 'text-primary' : 'text-foreground']">
+      <p :class="['font-medium text-xs sm:text-sm leading-snug wrap-break-word', isActive ? 'text-primary' : 'text-foreground']">
         {{ video.title }}
       </p>
 
