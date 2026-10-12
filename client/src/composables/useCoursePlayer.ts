@@ -70,20 +70,25 @@ export function useCoursePlayer(courseUuid: string) {
 
   // Check if a video is in cooldown
   const isVideoInCooldown = (video: CoursePlayerVideo): boolean => {
+    // Completed videos are never in cooldown
+    if (video.progress?.is_completed) return false
     if (!video.progress?.cooldown_until) return false
     return new Date(video.progress.cooldown_until) > now.value
   }
 
   // Check if a video is unlocked
   const isVideoUnlocked = (chapterIndex: number, videoIndex: number): boolean => {
-    // First video of first chapter is always unlocked
-    if (chapterIndex === 0 && videoIndex === 0) return true
-
     const chapter = chapters.value[chapterIndex]
     if (!chapter) return false
 
     const video = chapter.videos[videoIndex]
     if (!video) return false
+
+    // Already completed videos are always unlocked
+    if (video.progress?.is_completed) return true
+
+    // First video of first chapter is always unlocked
+    if (chapterIndex === 0 && videoIndex === 0) return true
 
     // Locked by cooldown
     if (isVideoInCooldown(video)) return false
@@ -103,6 +108,7 @@ export function useCoursePlayer(courseUuid: string) {
 
   // Remaining cooldown time as a human readable string
   const getCooldownLabel = (video: CoursePlayerVideo): string => {
+    if (video.progress?.is_completed) return ''
     if (!video.progress?.cooldown_until) return ''
     const diff = new Date(video.progress.cooldown_until).getTime() - now.value.getTime()
     if (diff <= 0) return ''
@@ -115,6 +121,18 @@ export function useCoursePlayer(courseUuid: string) {
   const isChapterUnlocked = (chapterIndex: number): boolean => {
     // First chapter is always unlocked
     if (chapterIndex === 0) return true
+
+    const chapter = chapters.value[chapterIndex]
+    if (!chapter) return false
+
+    // If any video in this chapter is completed or in progress, chapter is unlocked
+    if (
+      chapter.videos.some(
+        (v) => v.progress?.is_completed || (v.progress?.watch_time_seconds ?? 0) > 0,
+      )
+    ) {
+      return true
+    }
 
     // Check if all videos in previous chapter are completed
     const previousChapter = chapters.value[chapterIndex - 1]

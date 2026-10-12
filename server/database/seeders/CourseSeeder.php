@@ -11,131 +11,6 @@ class CourseSeeder extends Seeder
     public function run(): void
     {
         $course = Course::create([
-            'title'            => 'The Complete Forex Trading Course',
-            'slug'             => Str::slug('The Complete Forex Trading Course'),
-            'description'      => 'A comprehensive course covering everything you need to know about Forex trading from the ground up.',
-            'level'            => 'beginner',
-            'price'            => 20.00,
-            'length_seconds'   => 96960,
-            'what_is_included' => [
-                'Lifetime access',
-                'Progress tracking',
-                'Certificate of completion',
-                'Downloadable resources',
-            ],
-            'is_published' => true,
-            'published_at' => now(),
-            'uuid'         => Str::uuid(),
-        ]);
-
-        $chapters = [
-            [
-                'title' => 'Introduction to Forex Trading',
-                'level' => 'beginner',
-                'videos' => [
-                    'What is Forex Trading',
-                    'History and Evolution of Forex Markets',
-                ],
-            ],
-            [
-                'title' => 'Forex Market Fundamentals',
-                'level' => 'beginner',
-                'videos' => [
-                    'Currency Pairs Explained',
-                    'Bid Price, Ask Price and Spread',
-                ],
-            ],
-            [
-                'title' => 'Understanding Market Participants',
-                'level' => 'beginner',
-                'videos' => [
-                    'Banks, Brokers and Retail Traders',
-                    'How Market Makers Operate',
-                ],
-            ],
-            [
-                'title' => 'Reading Forex Charts',
-                'level' => 'beginner',
-                'videos' => [
-                    'Candlestick Charts vs Line Charts',
-                    'Timeframes and When to Use Them',
-                ],
-            ],
-            [
-                'title' => 'Technical Analysis Basics',
-                'level' => 'intermediate',
-                'videos' => [
-                    'Support and Resistance Levels',
-                    'Trend Lines and Channels',
-                ],
-            ],
-            [
-                'title' => 'Popular Trading Indicators',
-                'level' => 'intermediate',
-                'videos' => [
-                    'Moving Averages — SMA and EMA',
-                    'RSI, MACD and Bollinger Bands',
-                ],
-            ],
-            [
-                'title' => 'Fundamental Analysis',
-                'level' => 'intermediate',
-                'videos' => [
-                    'Economic Indicators That Move Markets',
-                    'How to Trade News Events',
-                ],
-            ],
-            [
-                'title' => 'Risk Management',
-                'level' => 'intermediate',
-                'videos' => [
-                    'Position Sizing and Lot Sizes',
-                    'Setting Stop Loss and Take Profit',
-                ],
-            ],
-            [
-                'title' => 'Trading Psychology',
-                'level' => 'advanced',
-                'videos' => [
-                    'Managing Emotions While Trading',
-                    'Building a Consistent Trading Mindset',
-                ],
-            ],
-            [
-                'title' => 'Building Your Trading Plan',
-                'level' => 'advanced',
-                'videos' => [
-                    'Defining Your Strategy and Rules',
-                    'Backtesting and Journaling Your Trades',
-                ],
-            ],
-        ];
-
-        foreach ($chapters as $order => $chapterData) {
-            $chapter = $course->chapters()->create([
-                'title'          => $chapterData['title'],
-                'level'          => $chapterData['level'],
-                'order'          => $order + 1,
-                'length_seconds' => 0,
-                'uuid'           => Str::uuid(),
-            ]);
-
-            foreach ($chapterData['videos'] as $videoOrder => $videoTitle) {
-                $chapter->videos()->create([
-                    'title'            => $videoTitle,
-                    'youtube_video_id' => 'dQw4w9WgXcQ',
-                    'order'            => $videoOrder + 1,
-                    'level'            => $chapterData['level'],
-                    'duration_seconds' => 300,
-                    'is_published'     => true,
-                    'uuid'             => Str::uuid(),
-                    'is_preview'       => $videoOrder === 0,
-                    'is_big_five'      => false,
-                ]);
-            }
-        }
-
-        $secondCourse = Course::create([
             'title'            => 'The Big Five Strategy Forex Blueprint: Mastering S.R.S.F.T.R from Beginner to Advanced',
             'slug'             => Str::slug('Forex Trading: The Big Five Strategy'),
             'description'      => 'Designed for traders at every level, this blueprint provides a structured path from basic market concepts to advanced backtesting. Learn to manage risk, conquer trading psychology, and execute trades using a powerful 5-point confluence framework tailored for consistent profitability..',
@@ -153,7 +28,7 @@ class CourseSeeder extends Seeder
             'uuid'         => Str::uuid(),
         ]);
 
-        $secondCourseChapters = [
+        $chapters = [
             [
                 'title' => 'Introduction to Trading',
                 'level' => 'beginner',
@@ -181,10 +56,9 @@ class CourseSeeder extends Seeder
                 'title' => 'Account Metrics & Execution Orders',
                 'level' => 'beginner',
                 'videos' => [
-                    ['title' => 'Trading Account Metrics Part 1', 'youtube_video_id' => 'w7r-EeIvE4I'],
-                    ['title' => 'Trading Account Metrics Part 2', 'youtube_video_id' => 'ZY5hHSrbvJc'],
+                    ['title' => 'Trading Account Metrics', 'youtube_video_id' => 'w7r-EeIvE4I'],
                     ['title' => 'What is leverage', 'youtube_video_id' => 'FymcHw6vSFA'],
-                    ['title' => 'Bid, Ask Prices, Spreads, Profit and loss Calculations and Market Orders', 'youtube_video_id' => 'vMB8ChW39SU'],
+                    ['title' => 'Bid, Ask Prices, Spreads, Profit and loss Calculations and Market Orders', 'youtube_video_id' => '2xFcbACh8Eg'],
                 ],
             ],
             [
@@ -228,9 +102,9 @@ class CourseSeeder extends Seeder
                 'level' => 'intermediate',
                 'videos' => [
                     ['title' => 'Trading Tools and Indicators', 'youtube_video_id' => 'wgGdRwuTkzw'],
-                    ['title' => 'Market Structure and Price Action Basics', 'youtube_video_id' => 'Ar6BlgPtRuA'],
-                    ['title' => 'Market Structure Advanced', 'youtube_video_id' => '2HGVTdxJKYk'],
                     ['title' => 'Trading View Dashboard', 'youtube_video_id' => '_LRLx-Nqf68'],
+                    ['title' => 'Market Structure and Price Action Basics', 'youtube_video_id' => 'O2z3Jgvv31c'],
+                    ['title' => 'Market Structure Advanced', 'youtube_video_id' => '2HGVTdxJKYk'],
                 ],
             ],
             [
@@ -298,8 +172,8 @@ class CourseSeeder extends Seeder
             ],
         ];
 
-        foreach ($secondCourseChapters as $order => $chapterData) {
-            $chapter = $secondCourse->chapters()->create([
+        foreach ($chapters as $order => $chapterData) {
+            $chapter = $course->chapters()->create([
                 'title'          => $chapterData['title'],
                 'level'          => $chapterData['level'],
                 'order'          => $order + 1,

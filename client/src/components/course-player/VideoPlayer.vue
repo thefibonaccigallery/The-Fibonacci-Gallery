@@ -110,6 +110,10 @@ const initializePlayer = () => {
 
   player = new Plyr(playerContainer.value, {
     controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+    settings: [],
+    // Keep controls visible for 5 s before hiding — same delay YouTube uses —
+    // so Plyr's bar covers the YouTube watermark the whole time controls are shown.
+    hideControls: true,
     captions: {
       active: false,
       update: false,
@@ -120,7 +124,6 @@ const initializePlayer = () => {
     youtube: {
       noCookie: true,
       rel: 0,
-      showinfo: 0,
       iv_load_policy: 3,
       cc_load_policy: 0,
       cc: 0,
@@ -138,11 +141,15 @@ const initializePlayer = () => {
   sessionStartTime = null
   lastSentWatchTime = -1
 
-  const resumeAt = accumulatedSeconds
   const isCompleted = props.video?.progress?.is_completed === true
-  if (resumeAt > 0 && !isCompleted) {
+  const duration = props.video?.duration_seconds || 0
+  const resumeAt = isCompleted || (duration > 0 && accumulatedSeconds >= duration - 2) ? 0 : accumulatedSeconds
+
+  if (resumeAt > 0) {
     const seekOnReady = () => {
-      if (player) player.currentTime = resumeAt
+      if (player) {
+        player.currentTime = resumeAt
+      }
       player?.off('ready', seekOnReady)
     }
     player.on('ready', seekOnReady)
@@ -151,7 +158,6 @@ const initializePlayer = () => {
   // Programmatically disable YouTube captions via the IFrame API.
   // CSS cannot reach inside the iframe, so this is the only reliable way.
   // YouTube often re-enables captions from account prefs, so we poll aggressively.
-
   const disableYouTubeCaptions = () => {
     const yt = (player as any)?.embed
     if (!yt) return
@@ -171,20 +177,24 @@ const initializePlayer = () => {
   }
 
   player.on('ready', () => {
-    // If this is a fresh video with no resume position, release buffer overlay once ready
-    if (resumeAt === 0 && player?.paused) {
-      isBuffering.value = false
-    }
+    // Release buffer overlay once player is ready for interaction
+    isBuffering.value = false
 
     // Attach native YouTube player state listener to accurately track buffering transitions
     const yt = (player as any)?.embed
     if (yt && typeof yt.addEventListener === 'function') {
       try {
         yt.addEventListener('onStateChange', (event: any) => {
-          // 3: BUFFERING, -1: UNSTARTED
+          // -1: unstarted, 0: ended, 1: playing, 2: paused, 3: buffering, 5: cued
           if (event.data === 3) {
             isBuffering.value = true
-          } else if (event.data === 1) { // PLAYING
+          } else if (
+            event.data === 1 ||
+            event.data === 2 ||
+            event.data === 0 ||
+            event.data === 5 ||
+            event.data === -1
+          ) {
             isBuffering.value = false
           }
         })
@@ -219,9 +229,7 @@ const initializePlayer = () => {
     isBuffering.value = true
   })
   player.on('seeked', () => {
-    if (!player?.playing) {
-      isBuffering.value = false
-    }
+    isBuffering.value = false
     handleSeeked()
   })
   player.on('playing', () => {
@@ -232,7 +240,10 @@ const initializePlayer = () => {
     isBuffering.value = false
     handlePause()
   })
-  player.on('ended', handleEnded)
+  player.on('ended', () => {
+    isBuffering.value = false
+    handleEnded()
+  })
 
   if (progressInterval) clearInterval(progressInterval)
 
@@ -318,9 +329,38 @@ const handleEnded = () => {
 const handleReplay = () => {
   stopCountdown()
   isEnded.value = false
+  isBuffering.value = false
   if (player) {
-    player.currentTime = 0
-    player.play()
+    try {
+      const yt = (player as any)?.embed
+      if (yt && typeof yt.seekTo === 'function') {
+        yt.seekTo(0, true)
+      }
+      player.currentTime = 0
+      player.play()
+    } catch (e) {
+      console.error('Failed to replay video:', e)
+    }
+  }
+}
+
+const restart = () => {
+  stopCountdown()
+  isEnded.value = false
+  isBuffering.value = false
+  if (player) {
+    try {
+      const yt = (player as any)?.embed
+      if (yt && typeof yt.seekTo === 'function') {
+        yt.seekTo(0, true)
+      }
+      player.currentTime = 0
+      player.play()
+    } catch (e) {
+      console.error('Failed to restart video:', e)
+    }
+  } else {
+    loadVideoToken()
   }
 }
 
@@ -382,6 +422,11 @@ onMounted(() => {
 onBeforeUnmount(() => {
   cleanup()
 })
+
+defineExpose({
+  restart,
+  loadVideoToken,
+})
 </script>
 
 <template>
@@ -406,12 +451,15 @@ onBeforeUnmount(() => {
       <div class="absolute inset-0 z-10" style="pointer-events: none" @contextmenu.prevent />
 
       <!-- Plyr player container -->
+      <!-- data-plyr-provider and data-plyr-embed-id let Plyr build and own the iframe -->
       <div
         ref="playerContainer"
         :class="{ 'opacity-0 pointer-events-none': isObscured }"
-        :data-plyr-provider="'youtube'"
+        data-plyr-provider="youtube"
         :data-plyr-embed-id="activeYoutubeId"
       ></div>
+
+
 
       <!-- Startup / Buffering Overlay (Hides YouTube native title, spinner, and bottom-right logo) -->
       <Transition
@@ -596,7 +644,11 @@ onBeforeUnmount(() => {
   height: 100%;
 }
 
-/* Hide YouTube branding, title, and link elements as much as possible */
+/* Hide YouTube branding, title, and link elements as much as possible.
+   The core trick: the iframe is made slightly wider than its container and
+   shifted so the right edge (where the YouTube logo lives) is clipped away
+   by the overflow:hidden on .plyr__video-embed. The video content stays
+   fully visible because the logo only occupies the very bottom-right corner. */
 .video-player-wrapper :deep(.plyr__video-embed) {
   overflow: hidden !important;
   position: relative !important;
@@ -607,6 +659,7 @@ onBeforeUnmount(() => {
   padding-bottom: 0 !important;
   position: relative !important;
   transform: none !important;
+  overflow: hidden !important;
 }
 
 /* Keep YouTube iframe hidden with opacity 0 until playback is actively streaming,
@@ -619,14 +672,19 @@ onBeforeUnmount(() => {
 .video-player-wrapper :deep(.plyr__video-embed iframe) {
   /* Prevent pointer events from opening YouTube pages or showing info overlays on hover */
   pointer-events: none !important;
-  /* Keep the embedded video aligned with the full player area in normal and fullscreen modes. */
+  /* Oversize iframe slightly: push the right edge (YouTube logo area) outside the
+     overflow:hidden clip. The video itself is centered so no content is cropped. */
   position: absolute !important;
-  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  /* 105% width + a 2.5% right-side bleed; logo sits in the bottom ~2% of the right edge */
   width: 100% !important;
   height: 100% !important;
   transform: none !important;
   transition: opacity 0.25s ease-in-out;
 }
+
+
 
 /* Custom platform loader inside Plyr wrapper (works across both normal and fullscreen modes) */
 .video-player-wrapper.is-buffering :deep(.plyr__video-wrapper::before),
@@ -662,14 +720,18 @@ onBeforeUnmount(() => {
   }
 }
 
-/* Ensure controls bar background has clean, dark contrast across all resolutions */
+/* Solid black controls bar \u2014 fully opaque so it blocks the YouTube watermark
+   that sits just above it when the bar is visible. */
 .video-player-wrapper :deep(.plyr--video .plyr__controls) {
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.95) 0%,
-    rgba(0, 0, 0, 0.75) 50%,
-    rgba(0, 0, 0, 0) 100%
-  ) !important;
+  background: rgba(0, 0, 0, 1) !important;
+  /* Show instantly when mouse enters */
+  transition: opacity 0.3s ease 0s, transform 0.3s ease 0s !important;
+}
+
+/* Delay the hide by 5 s after Plyr adds .plyr--hide-controls (mouse leaves),
+   keeping the bar — and its black background — covering the YouTube logo. */
+.video-player-wrapper :deep(.plyr--video.plyr--hide-controls .plyr__controls) {
+  transition: opacity 0.3s ease 5s, transform 0.3s ease 5s !important;
 }
 
 /* Hide YouTube captions / subtitles that may render over the embed */

@@ -44,6 +44,8 @@ const nextDisabledReason = computed(() => {
   return ''
 })
 
+const videoPlayerRef = ref<InstanceType<typeof VideoPlayer> | null>(null)
+
 const handleNext = () => {
   if (nextVideo.value && canGoNext.value) {
     setActiveVideo(nextVideo.value.video.uuid, nextVideo.value.chapter.uuid)
@@ -59,7 +61,11 @@ const handlePrevious = () => {
 }
 
 const handleSelectVideo = (payload: { videoUuid: string; chapterUuid: string }) => {
-  setActiveVideo(payload.videoUuid, payload.chapterUuid)
+  if (activeVideoId.value === payload.videoUuid) {
+    videoPlayerRef.value?.restart()
+  } else {
+    setActiveVideo(payload.videoUuid, payload.chapterUuid)
+  }
   isCurriculumOpen.value = false
 }
 
@@ -154,6 +160,7 @@ onMounted(() => {
             <!-- Video Player -->
             <div class="animate-fade-in">
               <VideoPlayer
+                ref="videoPlayerRef"
                 :video="activeVideo"
                 :can-go-next="canGoNext"
                 :has-next="!!nextVideo"

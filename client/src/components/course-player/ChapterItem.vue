@@ -127,7 +127,7 @@ const handleSelectVideo = (videoUuid: string) => {
         </div>
 
         <!-- Completed progress -->
-        <p class="text-xs text-muted-foreground font-medium">
+        <p class="text-sm text-muted-foreground font-bold">
           {{ completedCount }} / {{ totalCount }} completed
         </p>
       </div>

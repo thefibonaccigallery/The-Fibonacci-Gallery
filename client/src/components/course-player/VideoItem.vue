@@ -27,7 +27,7 @@ const formatDuration = (seconds: number) => {
 }
 
 const handleClick = () => {
-  if (props.isUnlocked && !props.isInCooldown) {
+  if (isCompleted.value || (props.isUnlocked && !props.isInCooldown)) {
     emit('select')
   }
 }
@@ -36,15 +36,15 @@ const handleClick = () => {
 <template>
   <button
     @click="handleClick"
-    :disabled="!isUnlocked || isInCooldown"
+    :disabled="!isCompleted && (!isUnlocked || isInCooldown)"
     :class="[
       'w-full text-left px-4 py-3 rounded-lg transition-all',
       'flex items-center gap-3',
       isActive
         ? 'bg-primary/10 border-2 border-primary'
         : 'hover:bg-muted/50 border-2 border-transparent',
-      !isUnlocked && !isInCooldown && 'opacity-50 cursor-not-allowed',
-      isInCooldown && 'opacity-60 cursor-not-allowed',
+      !isCompleted && !isUnlocked && !isInCooldown && 'opacity-50 cursor-not-allowed',
+      !isCompleted && isInCooldown && 'opacity-60 cursor-not-allowed',
     ]"
   >
     <!-- Status Icon -->
