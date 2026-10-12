@@ -10,6 +10,8 @@ class CourseSeeder extends Seeder
 {
     public function run(): void
     {
+        Course::query()->delete();
+
         $course = Course::create([
             'title'            => 'The Big Five Strategy Forex Blueprint: Mastering S.R.S.F.T.R from Beginner to Advanced',
             'slug'             => Str::slug('Forex Trading: The Big Five Strategy'),
