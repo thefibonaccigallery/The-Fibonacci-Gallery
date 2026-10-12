@@ -17,7 +17,7 @@ class CourseSeeder extends Seeder
             'slug'             => Str::slug('Forex Trading: The Big Five Strategy'),
             'description'      => 'Designed for traders at every level, this blueprint provides a structured path from basic market concepts to advanced backtesting. Learn to manage risk, conquer trading psychology, and execute trades using a powerful 5-point confluence framework tailored for consistent profitability..',
             'level'            => 'intermediate',
-            'price'            => 20.00,
+            'price'            => 00.00,
             'length_seconds'   => 0,
             'what_is_included' => [
                 'Lifetime access',
