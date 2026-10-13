@@ -19,6 +19,7 @@ import {
   PhClock,
   PhPlay,
   PhCheckCircle,
+  PhLock,
 } from '@phosphor-icons/vue'
 
 const route = useRoute()
@@ -42,6 +43,17 @@ const handleEnrollClick = () => {
 const { data, isLoading, error } = useCourseDetail(courseUuid.value)
 
 const course = computed(() => data.value?.course)
+
+const displayedChapters = computed(() => {
+  if (!course.value?.chapters) return []
+  if (course.value.is_enrolled) return course.value.chapters
+  return course.value.chapters.slice(0, 10)
+})
+
+const hiddenChaptersCount = computed(() => {
+  if (!course.value?.chapters || course.value.is_enrolled) return 0
+  return Math.max(0, course.value.chapters.length - 10)
+})
 
 watch(
   course,
@@ -173,11 +185,19 @@ const getLevelColor = (level: string) => {
 
             <!-- Course Curriculum -->
             <div class="liquid-glass rounded-2xl p-8 border border-border/20">
-              <h2 class="text-2xl font-bold text-foreground mb-6">Course Curriculum</h2>
+              <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-foreground">Course Curriculum</h2>
+                <span
+                  v-if="!course.is_enrolled && hiddenChaptersCount > 0"
+                  class="text-xs text-muted-foreground font-medium bg-secondary/60 px-3 py-1 rounded-full border border-border/30"
+                >
+                  Showing 10 of {{ course.chapters.length }} chapters
+                </span>
+              </div>
 
               <Accordion type="multiple" class="space-y-4">
                 <AccordionItem
-                  v-for="(chapter, index) in course.chapters"
+                  v-for="(chapter, index) in displayedChapters"
                   :key="chapter.uuid"
                   :value="`chapter-${chapter.uuid}`"
                   class="border border-border/20 rounded-xl overflow-hidden bg-background/50"
@@ -210,6 +230,32 @@ const getLevelColor = (level: string) => {
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
+
+              <!-- Locked Chapters Callout -->
+              <div
+                v-if="!course.is_enrolled && hiddenChaptersCount > 0"
+                class="mt-6 p-6 rounded-xl border border-primary/20 bg-primary/5 text-center space-y-4 backdrop-blur-sm"
+              >
+                <div
+                  class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary"
+                >
+                  <PhLock :size="24" weight="bold" />
+                </div>
+                <div class="space-y-1">
+                  <h3 class="text-lg font-bold text-foreground">
+                    + {{ hiddenChaptersCount }} More Chapters Available
+                  </h3>
+                  <p class="text-sm text-muted-foreground max-w-md mx-auto">
+                    Enroll now to unlock the complete curriculum, advanced strategies, and all remaining lessons.
+                  </p>
+                </div>
+                <Button
+                  @click="handleEnrollClick"
+                  class="font-semibold px-6 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
+                >
+                  Enroll to explore more
+                </Button>
+              </div>
             </div>
           </div>
 

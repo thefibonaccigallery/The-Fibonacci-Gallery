@@ -85,13 +85,43 @@ const payoutsPagination = computed(() => ({
 }))
 
 // ── Referral Link & Clipboard ──
-const referralLink = computed(() => {
+const PROD_FRONTEND_URL =
+  (import.meta.env.VITE_FRONTEND_URL as string) || 'https://the-fibonacci-gallery.com'
+
+const isLocalHost = computed(() => {
+  if (typeof window === 'undefined') return false
   return (
-    summary.value?.referral_link ||
-    (summary.value?.referral_code && typeof window !== 'undefined'
-      ? `${window.location.origin}/register?ref=${summary.value.referral_code}`
-      : '')
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.endsWith('.localhost')
   )
+})
+
+const referralLink = computed(() => {
+  const code = summary.value?.referral_code
+  if (!code) return summary.value?.referral_link || ''
+
+  if (typeof window !== 'undefined') {
+    // In development or when running on localhost, use the current active origin (e.g. http://localhost:5173)
+    if (import.meta.env.DEV || isLocalHost.value) {
+      return `${window.location.origin}/register?ref=${code}`
+    }
+
+    // In production, use backend referral_link if available and not localhost
+    if (
+      summary.value?.referral_link &&
+      !summary.value.referral_link.includes('localhost') &&
+      !summary.value.referral_link.includes('127.0.0.1')
+    ) {
+      return summary.value.referral_link
+    }
+
+    // Fallback to active non-localhost window origin or configured production frontend URL
+    const prodOrigin = !isLocalHost.value ? window.location.origin : PROD_FRONTEND_URL
+    return `${prodOrigin.replace(/\/+$/, '')}/register?ref=${code}`
+  }
+
+  return summary.value?.referral_link || `${PROD_FRONTEND_URL}/register?ref=${code}`
 })
 
 const { copy, copied } = useClipboard()

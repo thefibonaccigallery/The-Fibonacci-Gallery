@@ -133,6 +133,7 @@ return [
     |
     */
 
-    'frontend_url' => env('FRONTEND_URL', 'http://localhost:5174'),
+    'frontend_url' => env('FRONTEND_URL', 'https://the-fibonacci-gallery.com'),
+    'frontend_dev_url' => env('FRONTEND_DEV_URL', 'http://localhost:5173'),
 
 ];

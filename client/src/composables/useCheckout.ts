@@ -99,18 +99,20 @@ export function useCheckout() {
         couponCode,
       }: {
         courseUuid: string
-        payCurrency: string
+        payCurrency?: string
         couponCode?: string
       }) => {
-        const response = await axiosInstance.post(`/payments/initiate/${courseUuid}`, {
-          pay_currency: payCurrency,
-          ...(couponCode ? { coupon_code: couponCode } : {}),
-        })
+        const payload: Record<string, any> = {}
+        if (payCurrency) payload.pay_currency = payCurrency
+        if (couponCode) payload.coupon_code = couponCode
+
+        const response = await axiosInstance.post(`/payments/initiate/${courseUuid}`, payload)
         return response.data
       },
       onSuccess: (data) => {
         // 100% coupon — enrolled directly, no payment step needed
         if (data.enrolled) {
+          toast.success(data.message || 'Enrolled successfully!')
           router.push(`/courses/${data.course_uuid}/player`)
           return
         }
@@ -119,7 +121,15 @@ export function useCheckout() {
         startCountdown(data.expiration_estimate_date)
         generateQr(data.pay_address)
       },
-      onError: (error: any) => {
+      onError: (error: any, variables) => {
+        if (error.response?.status === 409) {
+          toast.info(error.response?.data?.message || 'You are already enrolled in this course.')
+          const redirectUuid = error.response?.data?.course_uuid || variables?.courseUuid
+          if (redirectUuid) {
+            router.push(`/courses/${redirectUuid}/player`)
+          }
+          return
+        }
         toast.error(error.response?.data?.message || 'Failed to initiate payment')
       },
     })

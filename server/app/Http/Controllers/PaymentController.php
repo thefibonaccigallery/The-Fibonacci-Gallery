@@ -55,16 +55,20 @@ class PaymentController extends Controller
             }
         }
 
-        // 100% coupon — enroll directly without payment
-        if ($amount == 0 && $couponId) {
+        // 100% coupon or free course — enroll directly without payment
+        if ($amount == 0) {
             $enrollment = Enrollment::firstOrCreate(
                 ['user_id' => $user->id, 'course_id' => $course->id],
-                ['enrolled_at' => now(), 'type' => 'coupon', 'coupon_id' => $couponId]
+                [
+                    'enrolled_at' => now(),
+                    'type'        => $couponId ? 'coupon' : 'free',
+                    'coupon_id'   => $couponId,
+                ]
             );
 
             return response()->json([
-                'enrolled'   => true,
-                'message'    => 'Enrolled successfully with coupon.',
+                'enrolled'    => true,
+                'message'     => $couponId ? 'Enrolled successfully with coupon.' : 'Enrolled successfully.',
                 'course_uuid' => $course->uuid,
             ]);
         }

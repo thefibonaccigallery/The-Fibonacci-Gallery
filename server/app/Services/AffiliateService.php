@@ -75,23 +75,34 @@ class AffiliateService
             $user->save();
         }
 
-        $frontendUrl = config('app.frontend_url');
-
-        // If frontend_url is not configured or still defaults to localhost, attempt to resolve from request headers
-        if (empty($frontendUrl) || str_contains($frontendUrl, 'localhost') || str_contains($frontendUrl, '127.0.0.1')) {
-            $origin = request()?->header('Origin');
-            if (!empty($origin)) {
-                $frontendUrl = $origin;
-            } elseif ($referer = request()?->header('Referer')) {
-                $parsed = parse_url($referer);
-                if (!empty($parsed['scheme']) && !empty($parsed['host'])) {
-                    $port = !empty($parsed['port']) ? ':' . $parsed['port'] : '';
-                    $frontendUrl = "{$parsed['scheme']}://{$parsed['host']}{$port}";
-                }
+        // Dynamically resolve frontend URL:
+        // In development / local environment or when request originates from localhost, use localhost origin.
+        // In production, use the production frontend URL.
+        $origin = request()?->header('Origin');
+        if (empty($origin) && ($referer = request()?->header('Referer'))) {
+            $parsed = parse_url($referer);
+            if (!empty($parsed['scheme']) && !empty($parsed['host'])) {
+                $port = !empty($parsed['port']) ? ':' . $parsed['port'] : '';
+                $origin = "{$parsed['scheme']}://{$parsed['host']}{$port}";
             }
         }
 
-        $frontendUrl = rtrim($frontendUrl ?: env('FRONTEND_URL', 'http://localhost:5174'), '/');
+        $isLocalOrigin = !empty($origin) && (str_contains($origin, 'localhost') || str_contains($origin, '127.0.0.1'));
+        $isLocalEnv = app()->environment('local', 'testing');
+
+        if ($isLocalOrigin) {
+            $frontendUrl = $origin;
+        } elseif ($isLocalEnv) {
+            $frontendUrl = !empty($origin) ? $origin : env('FRONTEND_DEV_URL', env('FRONTEND_URL', 'http://localhost:5173'));
+            // If FRONTEND_URL was set to a remote domain in .env while in local env, prefer localhost
+            if (!str_contains($frontendUrl, 'localhost') && !str_contains($frontendUrl, '127.0.0.1')) {
+                $frontendUrl = env('FRONTEND_DEV_URL', 'http://localhost:5173');
+            }
+        } else {
+            $frontendUrl = config('app.frontend_url') ?: 'https://the-fibonacci-gallery.com';
+        }
+
+        $frontendUrl = rtrim($frontendUrl, '/');
         $referralLink = "{$frontendUrl}/register?ref={$user->referral_code}";
 
         return [

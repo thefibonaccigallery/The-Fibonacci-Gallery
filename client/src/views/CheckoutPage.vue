@@ -43,29 +43,31 @@ const handleNextToPayment = async (couponCode: string | null, isFree: boolean) =
   appliedCouponCode = couponCode
 
   if (isFree) {
-    isEnrollingFree.value = true
-    try {
-      if (!couponCode) {
+    if (!couponCode) {
+      isEnrollingFree.value = true
+      try {
         // Natively free course — use enroll endpoint directly
         const response = await axiosInstance.post(`/enroll/${courseUuid.value}`)
         toast.success('You have been enrolled successfully!')
         router.push(`/courses/${response.data.course_uuid || courseUuid.value}/player`)
-      } else {
-        // Coupon makes it free — call initiatePayment; backend detects $0 + coupon and enrolls directly
-        initiatePayment({
-          courseUuid: courseUuid.value,
-          payCurrency: 'usdttrc20', // default currency; backend skips payment when amount == 0
-          couponCode,
-        })
+      } catch (error: any) {
+        if (error.response?.status === 409) {
+          toast.info('You are already enrolled in this course.')
+          router.push(`/courses/${courseUuid.value}/player`)
+        } else {
+          toast.error(error.response?.data?.message || 'Enrollment failed. Please try again.')
+        }
+      } finally {
+        isEnrollingFree.value = false
       }
-    } catch (error: any) {
-      if (error.response?.status === 409) {
-        router.push(`/courses/${courseUuid.value}/player`)
-      } else {
-        toast.error(error.response?.data?.message || 'Enrollment failed. Please try again.')
-      }
-    } finally {
-      isEnrollingFree.value = false
+    } else {
+      // Coupon makes it free — call initiatePayment; backend detects $0 + coupon and enrolls directly
+      const defaultCurrency = currencies.value?.[0]?.id || 'usdtbsc'
+      initiatePayment({
+        courseUuid: courseUuid.value,
+        payCurrency: defaultCurrency,
+        couponCode,
+      })
     }
     return
   }
@@ -143,7 +145,7 @@ const handleCancel = async () => {
           <CourseSummaryCard
             v-if="currentStep === 1"
             :course="course"
-            :loading="isEnrollingFree"
+            :loading="isEnrollingFree || paymentInitiating"
             @next="handleNextToPayment"
           />
 
