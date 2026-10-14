@@ -41,6 +41,7 @@ const previousVideo = computed(() => getPreviousVideo())
 
 const nextDisabledReason = computed(() => {
   if (!nextVideo.value) return 'No more videos'
+  if (!canGoNext.value) return 'Watch at least 70% of current video to continue'
   return ''
 })
 

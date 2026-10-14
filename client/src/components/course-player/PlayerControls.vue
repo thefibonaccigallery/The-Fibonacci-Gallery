@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed } from 'vue'
 import { PhSkipBack, PhSkipForward } from '@phosphor-icons/vue'
 import { Button } from '@/components/ui/button'
@@ -91,9 +91,10 @@ const formatDuration = (seconds: number) => {
           :style="{ width: `${watchPercentage}%` }"
         ></div>
       </div>
-      <p v-if="video.progress?.is_completed || watchPercentage >= 100" class="text-xs text-primary">
-        ✓ Video completed!
+      <p v-if="watchPercentage < 70" class="text-xs text-muted-foreground">
+        Watch at least 70% to unlock the next video
       </p>
+      <p v-else class="text-xs text-primary">✔ Video completed! Next video unlocked</p>
     </div>
 
     <!-- Navigation Buttons -->
