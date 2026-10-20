@@ -5,6 +5,11 @@ import type { ProfileFormState, ProfileSchemaMessages } from '@/types/ProfileTyp
 const buildProfileSchema = (messages: ProfileSchemaMessages) =>
   z.object({
     name: z.string().min(1, messages.nameRequired).max(255),
+    email: z
+      .string()
+      .email(messages.emailInvalid || 'Please enter a valid email address')
+      .optional()
+      .or(z.literal('')),
     country: z.string().min(1, messages.countryRequired).max(255),
   })
 

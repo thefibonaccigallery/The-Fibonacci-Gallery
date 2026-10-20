@@ -42,7 +42,8 @@ const finalPrice = computed(() =>
 )
 const isFree = computed(() => couponResult.value?.valid === true && couponResult.value.is_free === true)
 
-const getLevelColor = (level: string) => {
+const getLevelColor = (level: string | null) => {
+  if (!level) return 'text-muted-foreground border-border/30 bg-secondary/50'
   switch (level.toLowerCase()) {
     case 'beginner':
       return 'text-green-500 border-green-500/30 bg-green-500/10'
@@ -135,6 +136,7 @@ const handlePay = () => {
         <div class="flex items-center justify-between">
           <h3 class="text-lg font-bold text-foreground">{{ course.title }}</h3>
           <div
+            v-if="course.level"
             :class="['px-3 py-1 rounded-lg text-xs font-bold border capitalize', getLevelColor(course.level)]"
           >
             {{ course.level }}

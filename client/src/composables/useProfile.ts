@@ -33,6 +33,7 @@ export function useProfile() {
   const profileForm = useForm({
     defaultValues: {
       name: '',
+      email: '',
       country: '',
     } as ProfileFormState,
     validators: {
@@ -73,6 +74,7 @@ export function useProfile() {
     (user) => {
       if (!user) return
       profileForm.state.values.name = user.name || ''
+      profileForm.state.values.email = user.email || ''
       profileForm.state.values.country = user.country || ''
     },
     { immediate: true },
@@ -167,6 +169,12 @@ export function useProfile() {
       .join(' '),
   )
 
+  const emailInputClass = computed(() =>
+    [baseInputClass, focusRingClass, profileErrors.value.email ? errorClass : '']
+      .filter(Boolean)
+      .join(' '),
+  )
+
   const countrySelectClass = computed(() =>
     [baseInputClass, focusRingClass, profileErrors.value.country ? errorClass : '']
       .filter(Boolean)
@@ -211,6 +219,7 @@ export function useProfile() {
     clearProfileError,
     clearPasswordError,
     nameInputClass,
+    emailInputClass,
     countrySelectClass,
     currentPasswordClass,
     newPasswordClass,

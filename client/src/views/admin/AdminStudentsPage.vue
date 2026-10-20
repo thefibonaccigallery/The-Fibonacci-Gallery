@@ -277,7 +277,7 @@ const progressBarColor = (pct: number) => {
               <div class="flex items-start justify-between gap-2">
                 <div>
                   <p class="font-medium text-foreground text-sm">{{ enrollment.course?.title }}</p>
-                  <p class="text-xs text-muted-foreground capitalize">{{ enrollment.course?.level }}</p>
+                  <p v-if="enrollment.course?.level" class="text-xs text-muted-foreground capitalize">{{ enrollment.course?.level }}</p>
                 </div>
                 <span
                   :class="[

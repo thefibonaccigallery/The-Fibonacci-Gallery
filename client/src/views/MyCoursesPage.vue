@@ -170,6 +170,7 @@ const formatDate = (dateString: string) => {
                   {{ getProgress(course.completedLessons, course.totalLessons) }}% Complete
                 </div>
                 <div
+                  v-if="course.level"
                   class="absolute top-3 right-3 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-xs font-medium text-muted-foreground border border-border/20 capitalize"
                 >
                   {{ course.level }}

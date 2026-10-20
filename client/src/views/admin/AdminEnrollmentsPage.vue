@@ -137,7 +137,7 @@ const progressBarColor = (pct: number) => {
               </td>
               <td class="px-4 py-3 max-w-[180px]">
                 <div class="line-clamp-2 text-foreground">{{ enrollment.course?.title }}</div>
-                <div class="text-xs text-muted-foreground capitalize">{{ enrollment.course?.level }}</div>
+                <div v-if="enrollment.course?.level" class="text-xs text-muted-foreground capitalize">{{ enrollment.course?.level }}</div>
               </td>
               <td class="px-4 py-3 min-w-[120px]">
                 <div class="flex items-center gap-2">

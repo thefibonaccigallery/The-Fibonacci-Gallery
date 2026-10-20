@@ -302,6 +302,15 @@ const navLinks = [
           >
             {{ link.label }}
           </RouterLink>
+          <a
+            href="https://t.me/thefibonaccigallerysupport"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
+            @click="mobileMenuOpen = false"
+          >
+            Contact Us
+          </a>
           <Button class="mt-2 w-full" size="sm" as-child>
             <RouterLink to="/register" @click="mobileMenuOpen = false">
               Get Started
@@ -592,7 +601,7 @@ of Trading"
                 </video>
                 <div class="absolute inset-0 bg-background/30 dark:bg-black/30" />
                 <!-- Level badge -->
-                <div class="absolute top-4 left-4 z-10">
+                <div v-if="item.level" class="absolute top-4 left-4 z-10">
                   <span
                     class="liquid-glass rounded-full px-3 py-1 text-xs font-medium border border-border/20"
                     :class="[

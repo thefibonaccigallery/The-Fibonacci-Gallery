@@ -35,7 +35,7 @@ const form = ref<CourseFormData>({
   title: '',
   slug: '',
   description: '',
-  level: 'beginner',
+  level: null,
   price: 0,
   what_is_included: [],
   is_published: false,
@@ -245,13 +245,14 @@ const isSaving = computed(() => isCreating.value || isUpdating.value || isUpload
         <!-- Level -->
         <div class="space-y-2">
           <label for="level" class="text-sm font-medium text-foreground">
-            Level <span class="text-destructive">*</span>
+            Level
           </label>
           <select
             id="level"
             v-model="form.level"
             class="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           >
+            <option :value="null">None</option>
             <option value="beginner">Beginner</option>
             <option value="intermediate">Intermediate</option>
             <option value="advanced">Advanced</option>

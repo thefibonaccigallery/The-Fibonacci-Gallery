@@ -6,6 +6,7 @@ use App\Http\Controllers\CouponController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserCourseController;
 use App\Http\Controllers\TypesController;
+use App\Http\Controllers\MarketDataController;
 use App\Http\Controllers\Admin\CouponController as AdminCouponController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\ChapterController;
@@ -34,6 +35,7 @@ Route::get('/courses/{uuid}', [UserCourseController::class, 'showCourse']);
 Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
 Route::get('/verify-reset-token', [PasswordResetController::class, 'verifyToken']);
 Route::post('/reset-password',  [PasswordResetController::class, 'resetPassword']);
+Route::get('/market-data', [MarketDataController::class, 'index']);
 
 
 // Protected routes

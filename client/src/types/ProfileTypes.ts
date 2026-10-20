@@ -2,6 +2,7 @@ import type { User } from '@/types/UserType'
 
 export interface ProfileFormState {
   name: string
+  email: string
   country: string
 }
 
@@ -28,6 +29,7 @@ export interface PasswordUpdateResponse {
 
 export interface ProfileSchemaMessages {
   nameRequired: string
+  emailInvalid?: string
   countryRequired: string
 }
 

@@ -1,16 +1,22 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import logo from '@/assets/images/white_final.webp'
 </script>
 
 <template>
   <footer class="border-t border-border/20 py-12 px-6 md:px-12 lg:px-16 bg-card mt-auto w-full">
     <div class="max-w-7xl mx-auto">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-8 mb-8">
         <!-- Brand -->
         <div class="md:col-span-1">
-          <p class="text-lg font-semibold tracking-tight text-foreground mb-3">
-            The Fibonacci Gallery
-          </p>
+          <RouterLink to="/" class="flex items-center gap-2.5 group mb-3 w-fit">
+            <div class="w-9 h-9 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30 group-hover:border-primary/50 transition-colors shrink-0">
+              <img :src="logo" alt="The Fibonacci Gallery" class="w-7 h-7 object-contain rounded-md" />
+            </div>
+            <p class="text-base font-semibold tracking-tight text-foreground group-hover:text-primary transition-colors">
+              The Fibonacci Gallery
+            </p>
+          </RouterLink>
           <p class="text-sm text-muted-foreground leading-relaxed">
             Where elite strategy meets artistic precision. Learn to trade with precision and
             confidence.
@@ -86,15 +92,41 @@ import { RouterLink } from 'vue-router'
             </li>
           </ul>
         </div>
+
+        <!-- Contact -->
+        <div>
+          <p class="text-sm font-medium text-foreground mb-3">Contact</p>
+          <ul class="space-y-2">
+            <li>
+              <a
+                href="https://t.me/thefibonaccigallerysupport"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >Telegram Support</a
+              >
+            </li>
+            <li>
+              <a
+                href="mailto:thefibonaccigallery@gmail.com"
+                class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >Email Us</a
+              >
+            </li>
+          </ul>
+        </div>
       </div>
 
       <!-- Bottom bar -->
       <div
         class="border-t border-border/20 pt-8 flex flex-col md:flex-row items-center justify-between gap-4"
       >
-        <p class="text-xs text-muted-foreground">
-          &copy; {{ new Date().getFullYear() }} The Fibonacci Gallery. All rights reserved.
-        </p>
+        <div class="flex items-center gap-2">
+          <img :src="logo" alt="Logo" class="w-5 h-5 object-contain opacity-60" />
+          <p class="text-xs text-muted-foreground">
+            &copy; {{ new Date().getFullYear() }} The Fibonacci Gallery. All rights reserved.
+          </p>
+        </div>
         <p class="text-xs text-muted-foreground">
           Trading involves risk. Past performance is not indicative of future results.
         </p>

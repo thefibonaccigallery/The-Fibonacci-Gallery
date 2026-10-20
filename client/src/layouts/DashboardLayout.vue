@@ -34,12 +34,17 @@ const mobileMenuOpen = ref(false)
           class="sticky top-0 z-50 w-full border-b border-border/20 bg-background py-3"
         >
           <div class="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 flex items-center justify-between">
-            <!-- Brand -->
+            <!-- Brand with Logo -->
             <RouterLink
               to="/"
-              class="text-xl font-semibold tracking-tight text-foreground hover:text-primary transition-colors"
+              class="flex items-center gap-2.5 group"
             >
-              The Fibonacci Gallery
+              <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30 group-hover:border-primary/60 transition-colors shrink-0">
+                <img :src="logo" alt="Logo" class="w-6 h-6 object-contain rounded-md" />
+              </div>
+              <span class="text-sm font-semibold tracking-tight text-foreground group-hover:text-primary transition-colors hidden sm:block">
+                The Fibonacci Gallery
+              </span>
             </RouterLink>
 
             <!-- Desktop Nav -->
@@ -126,6 +131,14 @@ const mobileMenuOpen = ref(false)
                 class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
                 @click="mobileMenuOpen = false"
                 >FAQ</a
+              >
+              <a
+                href="https://t.me/thefibonaccigallerysupport"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
+                @click="mobileMenuOpen = false"
+                >Contact Us</a
               >
               <Button class="mt-2 w-full" size="sm" as-child>
                 <RouterLink to="/login" @click="mobileMenuOpen = false">

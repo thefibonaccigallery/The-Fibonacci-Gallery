@@ -183,7 +183,7 @@ const formatDuration = (seconds: number) => {
 
           <!-- Meta Info -->
           <div class="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-            <span class="capitalize">{{ course.level }}</span>
+            <span v-if="course.level" class="capitalize">{{ course.level }}</span>
             <span>{{ course.chapters?.length || 0 }} chapters</span>
             <span>{{ formatDuration(course.length_seconds) }}</span>
           </div>

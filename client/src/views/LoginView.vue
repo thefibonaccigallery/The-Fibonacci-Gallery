@@ -9,6 +9,7 @@ import VideoBackground from '@/components/blocks/VideoBackground.vue'
 import ThemeToggle from '@/components/blocks/ThemeToggle.vue'
 import { PhArrowLeft, PhSignIn, PhEye, PhEyeSlash } from '@phosphor-icons/vue'
 import { useAuthStore } from '@/stores/auth'
+import logo from '@/assets/images/white_final.webp'
 
 const authStore = useAuthStore()
 const showPassword = ref(false)
@@ -39,6 +40,19 @@ const bgVideoUrl =
 
     <!-- Main Content -->
     <main class="flex-1 flex flex-col items-center justify-center p-6 relative z-10">
+      <!-- Logo -->
+      <div class="w-full max-w-md flex flex-col items-center mb-6">
+        <RouterLink to="/" class="flex items-center gap-3 group mb-4">
+          <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30 group-hover:border-primary/60 transition-colors shrink-0">
+            <img :src="logo" alt="The Fibonacci Gallery" class="w-9 h-9 object-contain rounded-lg" />
+          </div>
+          <div class="text-left">
+            <div class="font-bold text-sm text-foreground leading-tight">The Fibonacci</div>
+            <div class="text-xs text-muted-foreground leading-tight">Gallery</div>
+          </div>
+        </RouterLink>
+      </div>
+
       <div class="w-full max-w-md text-center mb-8">
         <AnimatedHeading
           text="Welcome Back"

@@ -192,8 +192,8 @@ onMounted(() => {
             Can't find the answer you are looking for? Contact our trading workspace support team.
           </p>
           <Button size="lg" as-child>
-            <a href="mailto:support@fibonaccigallery.com">
-              Contact Support <PhArrowRight class="ml-2 h-4 w-4" />
+            <a href="https://t.me/thefibonaccigallerysupport" target="_blank" rel="noopener noreferrer">
+              Contact Us on Telegram <PhArrowRight class="ml-2 h-4 w-4" />
             </a>
           </Button>
         </div>

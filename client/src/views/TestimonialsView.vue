@@ -64,8 +64,8 @@ const reviews = [
             Trusted by <span class="text-primary">Traders</span> Globally
           </h1>
           <p class="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            See how our students transformed their trading consistency and confidence using our
-            Fibonacci-based education and live trading community workspace.
+            See how our students transformed their trading consistency and confidence using our Big
+            five trading system and live trading community workspace.
           </p>
         </div>
 
@@ -76,8 +76,8 @@ const reviews = [
           <div class="flex gap-1">
             <PhStar v-for="n in 5" :key="n" class="h-6 w-6 text-primary" weight="fill" />
           </div>
-          <p class="text-lg font-semibold mt-1">4.9 out of 5 Stars</p>
-          <p class="text-xs text-muted-foreground">Based on 2,500+ student ratings worldwide</p>
+          <p class="text-lg font-semibold mt-1">4.4 out of 5 Stars</p>
+          <p class="text-xs text-muted-foreground">Based on 200+ student ratings worldwide</p>
         </div>
 
         <!-- Testimonial Grid -->

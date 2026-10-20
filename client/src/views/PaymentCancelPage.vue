@@ -97,7 +97,7 @@ const handleBackToDashboard = () => {
 
           <!-- Footer Note -->
           <p class="text-xs text-muted-foreground mt-8">
-            Need help? Contact our support team for assistance.
+            Need help? Contact us on <a href="https://t.me/thefibonaccigallerysupport" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Telegram</a> for assistance.
           </p>
         </div>
       </div>

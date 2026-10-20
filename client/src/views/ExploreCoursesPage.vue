@@ -232,6 +232,7 @@ const getLevelColor = (level: string) => {
                   />
                 </svg>
                 <div
+                  v-if="course.level"
                   :class="[
                     'absolute top-3 right-3 backdrop-blur-md px-2 py-1 rounded text-xs font-bold border capitalize',
                     getLevelColor(course.level),

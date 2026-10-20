@@ -1,4 +1,4 @@
-export type CourseLevel = 'beginner' | 'intermediate' | 'advanced'
+export type CourseLevel = 'beginner' | 'intermediate' | 'advanced' | null
 
 export interface Course {
   uuid: string

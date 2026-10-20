@@ -2,11 +2,14 @@
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useColorMode } from '@vueuse/core'
+import { useAuthStore } from '@/stores/auth'
 import { PhBell, PhMoon, PhSun, PhUser, PhSignOut, PhCaretRight, PhList } from '@phosphor-icons/vue'
+import logo from '@/assets/images/white_final.webp'
 
 const route = useRoute()
 const router = useRouter()
 const mode = useColorMode()
+const authStore = useAuthStore()
 const showDropdown = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
 
@@ -24,6 +27,7 @@ const pageTitle = computed(() => {
     '/admin/enrollments': 'Enrollments',
     '/admin/orders': 'Orders',
     '/admin/settings': 'Settings',
+    '/admin/profile': 'Admin Profile',
   }
   return titleMap[route.path] || 'Admin'
 })
@@ -43,12 +47,12 @@ const toggleTheme = () => {
 }
 
 const handleLogout = () => {
-  router.push('/login')
   showDropdown.value = false
+  authStore.logout()
 }
 
 const handleProfile = () => {
-  router.push('/admin/profile')
+  router.push('/admin/settings')
   showDropdown.value = false
 }
 
@@ -70,8 +74,8 @@ onBeforeUnmount(() => {
 <template>
   <header class="sticky top-0 z-30 liquid-glass border-b border-border/50">
     <div class="flex items-center justify-between px-4 lg:px-6 py-4">
-      <!-- Left: Mobile Menu + Title & Breadcrumb -->
-      <div class="flex items-center gap-4">
+      <!-- Left: Mobile Menu + Logo + Title & Breadcrumb -->
+      <div class="flex items-center gap-3">
         <!-- Mobile Menu Toggle -->
         <button
           @click="emit('toggleMobileSidebar')"
@@ -79,6 +83,13 @@ onBeforeUnmount(() => {
         >
           <PhList :size="24" />
         </button>
+
+        <!-- Logo (mobile only) -->
+        <RouterLink to="/admin/dashboard" class="lg:hidden flex items-center gap-2">
+          <div class="w-7 h-7 rounded-md bg-primary/20 flex items-center justify-center border border-primary/30 shrink-0">
+            <img :src="logo" alt="Logo" class="w-5 h-5 object-contain rounded-sm" />
+          </div>
+        </RouterLink>
 
         <div>
           <h1 class="text-xl lg:text-2xl font-bold text-foreground">{{ pageTitle }}</h1>
@@ -132,7 +143,9 @@ onBeforeUnmount(() => {
             >
               <PhUser :size="18" weight="bold" />
             </div>
-            <span class="hidden lg:block text-sm font-medium text-foreground">Admin</span>
+            <span class="hidden lg:block text-sm font-medium text-foreground">
+              {{ authStore.user?.name || 'Admin' }}
+            </span>
           </button>
 
           <!-- Dropdown Menu -->

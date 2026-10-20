@@ -19,7 +19,9 @@ import {
   PhSignOut,
   PhTicket,
   PhHandCoins,
+  PhUserCircle,
 } from '@phosphor-icons/vue'
+import logo from '@/assets/images/white_final.webp'
 
 const route = useRoute()
 const mode = useColorMode()
@@ -88,13 +90,14 @@ const handleLogout = () => {
   >
     <!-- Logo & Platform Name -->
     <div class="flex items-center gap-3 p-6 border-b border-border/50">
-      <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-        <PhBook :size="20" weight="bold" class="text-primary-foreground" />
+      <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30 shrink-0">
+        <img :src="logo" alt="The Fibonacci Gallery" class="w-6 h-6 object-contain rounded-md" />
       </div>
       <transition name="fade">
-        <span v-if="!isCollapsed" class="font-semibold text-lg text-foreground">
-          Trading Academy
-        </span>
+        <div v-if="!isCollapsed" class="flex flex-col">
+          <span class="font-semibold text-sm text-foreground leading-tight">The Fibonacci</span>
+          <span class="text-xs text-muted-foreground leading-tight">Gallery</span>
+        </div>
       </transition>
     </div>
 
@@ -134,10 +137,19 @@ const handleLogout = () => {
     <div class="p-4 border-t border-border/50 space-y-3">
       <!-- Admin Info -->
       <transition name="fade">
-        <div v-if="!isCollapsed" class="px-3 py-2">
-          <p class="text-sm font-medium text-foreground">Admin User</p>
-          <p class="text-xs text-muted-foreground">Administrator</p>
-        </div>
+        <RouterLink
+          v-if="!isCollapsed"
+          to="/admin/settings"
+          class="block px-3 py-2 rounded-lg hover:bg-accent/40 transition-colors group"
+          title="Settings & Profile"
+        >
+          <p class="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
+            {{ authStore.user?.name || 'Admin User' }}
+          </p>
+          <p class="text-xs text-muted-foreground truncate">
+            {{ authStore.user?.email || 'Administrator' }}
+          </p>
+        </RouterLink>
       </transition>
 
       <!-- Collapse Toggle (Desktop) -->

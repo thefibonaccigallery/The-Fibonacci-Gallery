@@ -354,7 +354,11 @@ const router = createRouter({
           path: 'settings',
           name: 'admin-settings',
           component: () => import('@/views/admin/AdminSettingsPage.vue'),
-          meta: { noIndex: true },
+          meta: { noIndex: true, title: 'Settings' },
+        },
+        {
+          path: 'profile',
+          redirect: '/admin/settings',
         },
       ],
     },

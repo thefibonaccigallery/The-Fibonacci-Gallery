@@ -144,6 +144,7 @@ const getLevelColor = (level: string) => {
             <div class="liquid-glass rounded-2xl p-8 border border-border/20">
               <div class="flex items-start gap-4 mb-4">
                 <div
+                  v-if="course.level"
                   :class="[
                     'px-3 py-1 rounded-lg text-sm font-bold border capitalize',
                     getLevelColor(course.level),

@@ -21,7 +21,7 @@ class UpdateCourseRequest extends FormRequest
             'title'              => ['sometimes', 'required', 'string', 'max:255'],
             'slug'               => ['sometimes', 'required', 'string', Rule::unique('courses', 'slug')->ignore($courseId)],
             'description'        => ['nullable', 'string'],
-            'level'              => ['sometimes', 'required', Rule::in(config('types_course.levels'))],
+            'level'              => ['nullable', Rule::in(config('types_course.levels'))],
             'price'              => ['sometimes', 'required', 'numeric', 'min:0'],
             'what_is_included'   => ['nullable', 'array'],
             'what_is_included.*' => ['string', 'max:255'],

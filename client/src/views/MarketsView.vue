@@ -1,9 +1,8 @@
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
-import { useAuthStore } from '@/stores/auth'
-import { RouterLink } from 'vue-router'
-import { Button } from '@/components/ui/button'
 import TraderviewWidget from '@/components/blocks/TraderviewWidget.vue'
+import axiosInstance from '@/api/axiosInstance'
 import {
   PhTrendUp,
   PhTrendDown,
@@ -11,36 +10,103 @@ import {
   PhCoins,
   PhChartBar,
   PhFlame,
+  PhArrowClockwise,
+  PhCircleNotch,
 } from '@phosphor-icons/vue'
 
-const authStore = useAuthStore()
+// ── Types ────────────────────────────────────────────────────────────────────
+interface MarketItem {
+  name: string
+  symbol: string
+  prefix: string
+  value: string
+  change: string
+  up: boolean
+  raw?: number
+}
 
-const markets = {
+interface MarketData {
+  indices: MarketItem[]
+  forex: MarketItem[]
+  crypto: MarketItem[]
+  commodities: MarketItem[]
+  fetched_at?: string
+}
+
+// ── Fallback static data (shown while loading or on error) ────────────────
+const STATIC: MarketData = {
   indices: [
-    { name: 'S&P 500', symbol: 'SPX', value: '5,137.08', change: '+0.80%', up: true },
-    { name: 'Nasdaq 100', symbol: 'NDX', value: '18,302.91', change: '+1.14%', up: true },
-    { name: 'Dow Jones', symbol: 'DJI', value: '39,087.38', change: '-0.18%', up: false },
-    { name: 'FTSE 100', symbol: 'FTSE', value: '7,682.50', change: '+0.69%', up: true },
+    { name: 'S&P 500',   symbol: 'SPX',    prefix: '', value: '—', change: '—', up: true },
+    { name: 'Nasdaq 100',symbol: 'NDX',    prefix: '', value: '—', change: '—', up: true },
+    { name: 'Dow Jones', symbol: 'DJI',    prefix: '', value: '—', change: '—', up: true },
+    { name: 'FTSE 100',  symbol: 'FTSE',   prefix: '', value: '—', change: '—', up: true },
   ],
   forex: [
-    { name: 'EUR / USD', symbol: 'EURUSD', value: '1.0841', change: '+0.12%', up: true },
-    { name: 'GBP / USD', symbol: 'GBPUSD', value: '1.2655', change: '+0.08%', up: true },
-    { name: 'USD / JPY', symbol: 'USDJPY', value: '150.12', change: '-0.24%', up: false },
-    { name: 'AUD / USD', symbol: 'AUDUSD', value: '0.6521', change: '+0.15%', up: true },
+    { name: 'EUR / USD', symbol: 'EURUSD', prefix: '', value: '—', change: '—', up: true },
+    { name: 'GBP / USD', symbol: 'GBPUSD', prefix: '', value: '—', change: '—', up: true },
+    { name: 'USD / JPY', symbol: 'USDJPY', prefix: '', value: '—', change: '—', up: true },
+    { name: 'AUD / USD', symbol: 'AUDUSD', prefix: '', value: '—', change: '—', up: true },
   ],
   crypto: [
-    { name: 'Bitcoin', symbol: 'BTCUSD', value: '62,450.00', change: '+4.82%', up: true },
-    { name: 'Ethereum', symbol: 'ETHUSD', value: '3,430.50', change: '+3.15%', up: true },
-    { name: 'Solana', symbol: 'SOLUSD', value: '131.25', change: '+8.44%', up: true },
-    { name: 'Cardano', symbol: 'ADAUSD', value: '0.6850', change: '-1.05%', up: false },
+    { name: 'Bitcoin',   symbol: 'BTCUSD', prefix: '$', value: '—', change: '—', up: true },
+    { name: 'Ethereum',  symbol: 'ETHUSD', prefix: '$', value: '—', change: '—', up: true },
+    { name: 'Solana',    symbol: 'SOLUSD', prefix: '$', value: '—', change: '—', up: true },
+    { name: 'Cardano',   symbol: 'ADAUSD', prefix: '$', value: '—', change: '—', up: true },
   ],
   commodities: [
-    { name: 'Gold', symbol: 'XAUUSD', value: '2,082.90', change: '+0.95%', up: true },
-    { name: 'Silver', symbol: 'XAGUSD', value: '23.12', change: '+1.40%', up: true },
-    { name: 'Crude Oil', symbol: 'USOIL', value: '78.26', change: '+2.10%', up: true },
-    { name: 'Natural Gas', symbol: 'NGAS', value: '1.835', change: '-3.20%', up: false },
+    { name: 'Gold',        symbol: 'XAUUSD', prefix: '$', value: '—', change: '—', up: true },
+    { name: 'Silver',      symbol: 'XAGUSD', prefix: '$', value: '—', change: '—', up: true },
+    { name: 'Crude Oil',   symbol: 'USOIL',  prefix: '$', value: '—', change: '—', up: true },
+    { name: 'Natural Gas', symbol: 'NGAS',   prefix: '$', value: '—', change: '—', up: true },
   ],
 }
+
+// ── State ─────────────────────────────────────────────────────────────────
+const markets = ref<MarketData>({ ...STATIC })
+const isLoading = ref(true)
+const hasError = ref(false)
+const lastUpdated = ref<string | null>(null)
+let pollInterval: ReturnType<typeof setInterval> | null = null
+
+// ── Data fetching ──────────────────────────────────────────────────────────
+async function fetchMarkets(showLoader = true) {
+  if (showLoader) isLoading.value = true
+  hasError.value = false
+  try {
+    const { data } = await axiosInstance.get<MarketData>('/market-data')
+
+    // Merge with static placeholders so rows with no live data still render
+    markets.value = {
+      indices:     data.indices?.length     ? data.indices     : STATIC.indices,
+      forex:       data.forex?.length       ? data.forex       : STATIC.forex,
+      crypto:      data.crypto?.length      ? data.crypto      : STATIC.crypto,
+      commodities: data.commodities?.length ? data.commodities : STATIC.commodities,
+      fetched_at:  data.fetched_at,
+    }
+
+    lastUpdated.value = data.fetched_at ?? new Date().toISOString()
+  } catch {
+    hasError.value = true
+    markets.value = { ...STATIC }
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const formattedLastUpdated = computed(() => {
+  if (!lastUpdated.value) return null
+  return new Date(lastUpdated.value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+})
+
+onMounted(() => {
+  fetchMarkets()
+  // Re-fetch every 60 seconds silently (no spinner)
+  pollInterval = setInterval(() => fetchMarkets(false), 60_000)
+})
+
+onUnmounted(() => {
+  if (pollInterval) clearInterval(pollInterval)
+})
 </script>
 
 <template>
@@ -67,8 +133,38 @@ const markets = {
           </div>
         </div>
 
+        <!-- Live Data Status Bar -->
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-2">
+            <span
+              :class="[
+                'w-2 h-2 rounded-full shrink-0',
+                hasError ? 'bg-red-500' : 'bg-green-500 animate-pulse',
+              ]"
+            />
+            <span class="text-xs text-muted-foreground">
+              {{ hasError ? 'Using cached data — refresh to retry' : 'Live prices · auto-refreshes every 60s' }}
+            </span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span v-if="formattedLastUpdated" class="text-xs text-muted-foreground">
+              Updated {{ formattedLastUpdated }}
+            </span>
+            <button
+              @click="fetchMarkets(true)"
+              :disabled="isLoading"
+              class="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
+              title="Refresh market data"
+            >
+              <PhArrowClockwise :class="['h-3.5 w-3.5', isLoading ? 'animate-spin' : '']" />
+              Refresh
+            </button>
+          </div>
+        </div>
+
         <!-- Asset Classes Grid -->
         <div class="grid md:grid-cols-2 gap-8">
+
           <!-- Indices -->
           <div class="border border-border/20 rounded-3xl p-6 md:p-8 liquid-glass space-y-6">
             <div class="flex items-center gap-3">
@@ -79,24 +175,27 @@ const markets = {
             </div>
             <div class="divide-y divide-border/10">
               <div
-                v-for="index in markets.indices"
-                :key="index.symbol"
+                v-for="item in markets.indices"
+                :key="item.symbol"
                 class="py-4 flex justify-between items-center first:pt-0 last:pb-0"
               >
                 <div>
-                  <p class="font-medium text-sm">{{ index.name }}</p>
-                  <p class="text-xs text-muted-foreground">{{ index.symbol }}</p>
+                  <p class="font-medium text-sm">{{ item.name }}</p>
+                  <p class="text-xs text-muted-foreground">{{ item.symbol }}</p>
                 </div>
                 <div class="text-right">
-                  <p class="font-semibold text-sm">{{ index.value }}</p>
+                  <p class="font-semibold text-sm tabular-nums">
+                    <PhCircleNotch v-if="isLoading && item.value === '—'" class="h-4 w-4 inline animate-spin text-muted-foreground" />
+                    <span v-else>{{ item.prefix }}{{ item.value }}</span>
+                  </p>
                   <span
                     :class="[
-                      'inline-flex items-center text-xs font-medium gap-1 mt-0.5',
-                      index.up ? 'text-green-500' : 'text-red-500',
+                      'inline-flex items-center text-xs font-medium gap-1 mt-0.5 tabular-nums',
+                      item.value === '—' ? 'text-muted-foreground' : item.up ? 'text-green-500' : 'text-red-500',
                     ]"
                   >
-                    <component :is="index.up ? PhTrendUp : PhTrendDown" class="h-3 w-3" />
-                    {{ index.change }}
+                    <component v-if="item.value !== '—'" :is="item.up ? PhTrendUp : PhTrendDown" class="h-3 w-3" />
+                    {{ item.change }}
                   </span>
                 </div>
               </div>
@@ -113,24 +212,27 @@ const markets = {
             </div>
             <div class="divide-y divide-border/10">
               <div
-                v-for="pair in markets.forex"
-                :key="pair.symbol"
+                v-for="item in markets.forex"
+                :key="item.symbol"
                 class="py-4 flex justify-between items-center first:pt-0 last:pb-0"
               >
                 <div>
-                  <p class="font-medium text-sm">{{ pair.name }}</p>
-                  <p class="text-xs text-muted-foreground">{{ pair.symbol }}</p>
+                  <p class="font-medium text-sm">{{ item.name }}</p>
+                  <p class="text-xs text-muted-foreground">{{ item.symbol }}</p>
                 </div>
                 <div class="text-right">
-                  <p class="font-semibold text-sm">{{ pair.value }}</p>
+                  <p class="font-semibold text-sm tabular-nums">
+                    <PhCircleNotch v-if="isLoading && item.value === '—'" class="h-4 w-4 inline animate-spin text-muted-foreground" />
+                    <span v-else>{{ item.prefix }}{{ item.value }}</span>
+                  </p>
                   <span
                     :class="[
-                      'inline-flex items-center text-xs font-medium gap-1 mt-0.5',
-                      pair.up ? 'text-green-500' : 'text-red-500',
+                      'inline-flex items-center text-xs font-medium gap-1 mt-0.5 tabular-nums',
+                      item.value === '—' ? 'text-muted-foreground' : item.up ? 'text-green-500' : 'text-red-500',
                     ]"
                   >
-                    <component :is="pair.up ? PhTrendUp : PhTrendDown" class="h-3 w-3" />
-                    {{ pair.change }}
+                    <component v-if="item.value !== '—'" :is="item.up ? PhTrendUp : PhTrendDown" class="h-3 w-3" />
+                    {{ item.change }}
                   </span>
                 </div>
               </div>
@@ -147,24 +249,27 @@ const markets = {
             </div>
             <div class="divide-y divide-border/10">
               <div
-                v-for="coin in markets.crypto"
-                :key="coin.symbol"
+                v-for="item in markets.crypto"
+                :key="item.symbol"
                 class="py-4 flex justify-between items-center first:pt-0 last:pb-0"
               >
                 <div>
-                  <p class="font-medium text-sm">{{ coin.name }}</p>
-                  <p class="text-xs text-muted-foreground">{{ coin.symbol }}</p>
+                  <p class="font-medium text-sm">{{ item.name }}</p>
+                  <p class="text-xs text-muted-foreground">{{ item.symbol }}</p>
                 </div>
                 <div class="text-right">
-                  <p class="font-semibold text-sm">${{ coin.value }}</p>
+                  <p class="font-semibold text-sm tabular-nums">
+                    <PhCircleNotch v-if="isLoading && item.value === '—'" class="h-4 w-4 inline animate-spin text-muted-foreground" />
+                    <span v-else>{{ item.prefix }}{{ item.value }}</span>
+                  </p>
                   <span
                     :class="[
-                      'inline-flex items-center text-xs font-medium gap-1 mt-0.5',
-                      coin.up ? 'text-green-500' : 'text-red-500',
+                      'inline-flex items-center text-xs font-medium gap-1 mt-0.5 tabular-nums',
+                      item.value === '—' ? 'text-muted-foreground' : item.up ? 'text-green-500' : 'text-red-500',
                     ]"
                   >
-                    <component :is="coin.up ? PhTrendUp : PhTrendDown" class="h-3 w-3" />
-                    {{ coin.change }}
+                    <component v-if="item.value !== '—'" :is="item.up ? PhTrendUp : PhTrendDown" class="h-3 w-3" />
+                    {{ item.change }}
                   </span>
                 </div>
               </div>
@@ -181,29 +286,33 @@ const markets = {
             </div>
             <div class="divide-y divide-border/10">
               <div
-                v-for="comm in markets.commodities"
-                :key="comm.symbol"
+                v-for="item in markets.commodities"
+                :key="item.symbol"
                 class="py-4 flex justify-between items-center first:pt-0 last:pb-0"
               >
                 <div>
-                  <p class="font-medium text-sm">{{ comm.name }}</p>
-                  <p class="text-xs text-muted-foreground">{{ comm.symbol }}</p>
+                  <p class="font-medium text-sm">{{ item.name }}</p>
+                  <p class="text-xs text-muted-foreground">{{ item.symbol }}</p>
                 </div>
                 <div class="text-right">
-                  <p class="font-semibold text-sm">${{ comm.value }}</p>
+                  <p class="font-semibold text-sm tabular-nums">
+                    <PhCircleNotch v-if="isLoading && item.value === '—'" class="h-4 w-4 inline animate-spin text-muted-foreground" />
+                    <span v-else>{{ item.prefix }}{{ item.value }}</span>
+                  </p>
                   <span
                     :class="[
-                      'inline-flex items-center text-xs font-medium gap-1 mt-0.5',
-                      comm.up ? 'text-green-500' : 'text-red-500',
+                      'inline-flex items-center text-xs font-medium gap-1 mt-0.5 tabular-nums',
+                      item.value === '—' ? 'text-muted-foreground' : item.up ? 'text-green-500' : 'text-red-500',
                     ]"
                   >
-                    <component :is="comm.up ? PhTrendUp : PhTrendDown" class="h-3 w-3" />
-                    {{ comm.change }}
+                    <component v-if="item.value !== '—'" :is="item.up ? PhTrendUp : PhTrendDown" class="h-3 w-3" />
+                    {{ item.change }}
                   </span>
                 </div>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>
