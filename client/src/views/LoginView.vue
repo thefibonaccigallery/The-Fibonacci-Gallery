@@ -43,12 +43,11 @@ const bgVideoUrl =
       <!-- Logo -->
       <div class="w-full max-w-md flex flex-col items-center mb-6">
         <RouterLink to="/" class="flex items-center gap-3 group mb-4">
-          <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30 group-hover:border-primary/60 transition-colors shrink-0">
-            <img :src="logo" alt="The Fibonacci Gallery" class="w-9 h-9 object-contain rounded-lg" />
+          <div class="w-16 h-16 flex items-center justify-center shrink-0">
+            <img :src="logo" alt="The Fibonacci Gallery" class="w-16 h-16 object-contain" />
           </div>
           <div class="text-left">
-            <div class="font-bold text-sm text-foreground leading-tight">The Fibonacci</div>
-            <div class="text-xs text-muted-foreground leading-tight">Gallery</div>
+            <div class="font-bold text-lg text-foreground leading-tight">The Fibonacci Gallery</div>
           </div>
         </RouterLink>
       </div>

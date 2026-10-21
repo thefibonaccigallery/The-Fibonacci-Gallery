@@ -10,10 +10,10 @@ import logo from '@/assets/images/white_final.webp'
         <!-- Brand -->
         <div class="md:col-span-1">
           <RouterLink to="/" class="flex items-center gap-2.5 group mb-3 w-fit">
-            <div class="w-9 h-9 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30 group-hover:border-primary/50 transition-colors shrink-0">
-              <img :src="logo" alt="The Fibonacci Gallery" class="w-7 h-7 object-contain rounded-md" />
+            <div class="w-12 h-12 flex items-center justify-center shrink-0">
+              <img :src="logo" alt="The Fibonacci Gallery" class="w-12 h-12 object-contain" />
             </div>
-            <p class="text-base font-semibold tracking-tight text-foreground group-hover:text-primary transition-colors">
+            <p class="text-base font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
               The Fibonacci Gallery
             </p>
           </RouterLink>

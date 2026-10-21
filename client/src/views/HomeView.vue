@@ -10,6 +10,7 @@ import VideoBackground from '@/components/blocks/VideoBackground.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import TraderviewWidget from '@/components/blocks/TraderviewWidget.vue'
 import axiosInstance from '@/api/axiosInstance'
+import logo from '@/assets/images/white_final.webp'
 import {
   PhChartLineUp,
   PhShieldCheck,
@@ -235,6 +236,7 @@ const navLinks = [
   { label: 'Markets', href: '/markets' },
   { label: 'Testimonials', href: '/testimonials' },
   { label: 'FAQ', href: '/faq' },
+  { label: 'Contact Us', href: 'https://t.me/thefibonaccigallerysupport', external: true },
 ]
 </script>
 
@@ -247,24 +249,39 @@ const navLinks = [
       :class="[scrolled ? 'bg-background border-b border-border/20 py-3' : 'bg-background py-5']"
     >
       <div class="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 flex items-center justify-between">
-        <!-- Brand -->
+        <!-- Brand with Logo -->
         <RouterLink
           to="/"
-          class="text-xl font-semibold tracking-tight text-foreground hover:text-primary transition-colors"
+          class="flex items-center gap-3 group"
         >
-          The Fibonacci Gallery
+          <div class="w-16 h-16 flex items-center justify-center shrink-0">
+            <img :src="logo" alt="The Fibonacci Gallery" class="w-16 h-16 object-contain" />
+          </div>
+          <span class="text-lg md:text-xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
+            The Fibonacci Gallery
+          </span>
         </RouterLink>
 
         <!-- Desktop Nav -->
         <div class="hidden md:flex items-center gap-8">
-          <RouterLink
-            v-for="link in navLinks"
-            :key="link.label"
-            :to="link.href"
-            class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {{ link.label }}
-          </RouterLink>
+          <template v-for="link in navLinks" :key="link.label">
+            <a
+              v-if="link.external"
+              :href="link.href"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {{ link.label }}
+            </a>
+            <RouterLink
+              v-else
+              :to="link.href"
+              class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {{ link.label }}
+            </RouterLink>
+          </template>
         </div>
 
         <!-- Right Side -->
@@ -293,24 +310,26 @@ const navLinks = [
       <!-- Mobile Menu -->
       <div v-if="mobileMenuOpen" class="md:hidden bg-background border-t border-border/20 mt-2">
         <div class="px-6 py-4 flex flex-col gap-3">
-          <RouterLink
-            v-for="link in navLinks"
-            :key="link.label"
-            :to="link.href"
-            class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
-            @click="mobileMenuOpen = false"
-          >
-            {{ link.label }}
-          </RouterLink>
-          <a
-            href="https://t.me/thefibonaccigallerysupport"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
-            @click="mobileMenuOpen = false"
-          >
-            Contact Us
-          </a>
+          <template v-for="link in navLinks" :key="link.label">
+            <a
+              v-if="link.external"
+              :href="link.href"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
+              @click="mobileMenuOpen = false"
+            >
+              {{ link.label }}
+            </a>
+            <RouterLink
+              v-else
+              :to="link.href"
+              class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
+              @click="mobileMenuOpen = false"
+            >
+              {{ link.label }}
+            </RouterLink>
+          </template>
           <Button class="mt-2 w-full" size="sm" as-child>
             <RouterLink to="/register" @click="mobileMenuOpen = false">
               Get Started

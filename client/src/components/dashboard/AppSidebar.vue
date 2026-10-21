@@ -62,13 +62,12 @@ const isActive = (item: (typeof navItems)[0]) => {
     <!-- Header -->
     <div class="flex items-center gap-3 mb-10">
       <div
-        class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30"
+        class="w-12 h-12 flex items-center justify-center"
       >
-        <img :src="logo" alt="Logo" class="w-6 h-6 rounded-lg" />
+        <img :src="logo" alt="Logo" class="w-12 h-12 object-contain" />
       </div>
-      <div class="font-semibold text-sm tracking-tight text-foreground">
-        <h1 class="">The Fibonacci</h1>
-        <p class="">Gallery</p>
+      <div class="font-bold text-base tracking-tight text-foreground">
+        The Fibonacci Gallery
       </div>
     </div>
 

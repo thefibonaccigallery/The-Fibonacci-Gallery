@@ -39,10 +39,10 @@ const mobileMenuOpen = ref(false)
               to="/"
               class="flex items-center gap-2.5 group"
             >
-              <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30 group-hover:border-primary/60 transition-colors shrink-0">
-                <img :src="logo" alt="Logo" class="w-6 h-6 object-contain rounded-md" />
+              <div class="w-12 h-12 flex items-center justify-center shrink-0">
+                <img :src="logo" alt="Logo" class="w-12 h-12 object-contain" />
               </div>
-              <span class="text-sm font-semibold tracking-tight text-foreground group-hover:text-primary transition-colors hidden sm:block">
+              <span class="text-sm font-bold tracking-tight text-foreground group-hover:text-primary transition-colors hidden sm:block">
                 The Fibonacci Gallery
               </span>
             </RouterLink>
@@ -157,13 +157,12 @@ const mobileMenuOpen = ref(false)
         >
           <div class="flex items-center gap-2.5">
             <div
-              class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30 shrink-0"
+              class="w-12 h-12 flex items-center justify-center shrink-0"
             >
-              <img :src="logo" alt="Logo" class="w-5 h-5 rounded-lg" />
+              <img :src="logo" alt="Logo" class="w-12 h-12 object-contain" />
             </div>
-            <div class="font-semibold text-xs tracking-tight text-foreground">
-              <span class="block leading-tight">The Fibonacci</span>
-              <span class="block text-[10px] text-muted-foreground leading-tight">Gallery</span>
+            <div class="font-bold text-sm tracking-tight text-foreground">
+              The Fibonacci Gallery
             </div>
           </div>
 

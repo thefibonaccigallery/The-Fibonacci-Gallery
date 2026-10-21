@@ -87,12 +87,11 @@ const toggleMobileSidebar = () => {
       >
         <!-- Logo & Platform Name -->
         <div class="flex items-center gap-3 p-6 border-b border-border/50">
-          <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30 shrink-0">
-            <img :src="logo" alt="The Fibonacci Gallery" class="w-6 h-6 object-contain rounded-md" />
+          <div class="w-12 h-12 flex items-center justify-center shrink-0">
+            <img :src="logo" alt="The Fibonacci Gallery" class="w-12 h-12 object-contain" />
           </div>
           <div class="flex flex-col">
-            <span class="font-semibold text-sm text-foreground leading-tight">The Fibonacci</span>
-            <span class="text-xs text-muted-foreground leading-tight">Gallery</span>
+            <span class="font-bold text-base text-foreground">The Fibonacci Gallery</span>
           </div>
         </div>
 

@@ -86,8 +86,8 @@ onBeforeUnmount(() => {
 
         <!-- Logo (mobile only) -->
         <RouterLink to="/admin/dashboard" class="lg:hidden flex items-center gap-2">
-          <div class="w-7 h-7 rounded-md bg-primary/20 flex items-center justify-center border border-primary/30 shrink-0">
-            <img :src="logo" alt="Logo" class="w-5 h-5 object-contain rounded-sm" />
+          <div class="w-10 h-10 flex items-center justify-center shrink-0">
+            <img :src="logo" alt="Logo" class="w-10 h-10 object-contain" />
           </div>
         </RouterLink>
 
