@@ -23,7 +23,7 @@ const viewAllCourses = () => {
 </script>
 
 <template>
-  <div class="animate-fade-in-up mb-10 pb-20 md:pb-6" style="animation-delay: 750ms">
+  <div class="animate-fade-in-up  mb-10 pb-20 md:pb-6" style="animation-delay: 750ms">
     <div class="flex items-center justify-between mb-4">
       <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
         Explore More Courses

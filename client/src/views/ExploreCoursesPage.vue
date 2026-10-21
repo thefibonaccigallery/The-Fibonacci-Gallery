@@ -89,9 +89,9 @@ const getLevelColor = (level: string) => {
 
 <template>
   <DashboardLayout>
-    <div class="min-h-screen bg-background">
+    <div class="min-h-screen bg-background pt-24">
       <!-- Header -->
-      <div class="border-b border-border/40 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+      <div class="border-b border-border/40 bg-card/50 backdrop-blur-sm sticky top-20 z-10">
         <div class="container mx-auto px-4 py-6">
           <div class="flex items-center justify-between mb-4">
             <div>

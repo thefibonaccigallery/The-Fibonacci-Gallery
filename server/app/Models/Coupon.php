@@ -17,6 +17,7 @@ class Coupon extends Model
         'max_uses',
         'expires_at',
         'is_active',
+        'show_on_homepage',
     ];
 
     protected function casts(): array
@@ -27,6 +28,7 @@ class Coupon extends Model
             'max_uses'            => 'integer',
             'expires_at'          => 'datetime',
             'is_active'           => 'boolean',
+            'show_on_homepage'    => 'boolean',
         ];
     }
 

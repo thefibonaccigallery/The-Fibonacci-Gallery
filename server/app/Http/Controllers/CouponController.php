@@ -8,6 +8,38 @@ use App\Models\Course;
 
 class CouponController extends Controller
 {
+    public function homepage()
+    {
+        // Get the first active coupon that should be shown on homepage
+        // and hasn't expired
+        $coupon = Coupon::with('course')
+            ->where('is_active', true)
+            ->where('show_on_homepage', true)
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            })
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if (!$coupon) {
+            return response()->json(['coupon' => null]);
+        }
+
+        return response()->json([
+            'coupon' => [
+                'uuid'                => $coupon->uuid,
+                'code'                => $coupon->code,
+                'discount_percentage' => (float) $coupon->discount_percentage,
+                'expires_at'          => $coupon->expires_at?->toIso8601String(),
+                'course'              => [
+                    'uuid'  => $coupon->course->uuid,
+                    'title' => $coupon->course->title,
+                ],
+            ],
+        ]);
+    }
+
     public function validate(ValidateCouponRequest $request)
     {
         $course = Course::where('uuid', $request->course_uuid)

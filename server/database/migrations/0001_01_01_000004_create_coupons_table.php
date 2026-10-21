@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedInteger('max_uses')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->boolean('show_on_homepage')->default(false);
             $table->timestamps();
             $table->index('course_id');
             $table->index('code');

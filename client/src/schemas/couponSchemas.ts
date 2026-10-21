@@ -18,6 +18,7 @@ export const couponSchema = z.object({
     .optional(),
   expires_at: z.string().nullable().optional(),
   is_active: z.boolean().default(true),
+  show_on_homepage: z.boolean().default(false).optional(),
 })
 
 export type CouponFormState = z.infer<typeof couponSchema>

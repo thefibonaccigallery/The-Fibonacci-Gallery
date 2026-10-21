@@ -16,6 +16,7 @@ class CouponResource extends JsonResource
             'max_uses'            => $this->max_uses,
             'expires_at'          => $this->expires_at?->toIso8601String(),
             'is_active'           => $this->is_active,
+            'show_on_homepage'    => $this->show_on_homepage,
             'enrollments_count'   => $this->whenCounted('enrollments'),
             'created_at'          => $this->created_at?->toIso8601String(),
             'updated_at'          => $this->updated_at?->toIso8601String(),

@@ -33,6 +33,11 @@ class CouponController extends Controller
     {
         $course = Course::where('uuid', $request->course_uuid)->firstOrFail();
 
+        // If show_on_homepage is true, unset it for all other coupons
+        if ($request->boolean('show_on_homepage', false)) {
+            Coupon::where('show_on_homepage', true)->update(['show_on_homepage' => false]);
+        }
+
         $coupon = Coupon::create([
             'course_id'           => $course->id,
             'code'                => strtoupper(trim($request->code)),
@@ -40,6 +45,7 @@ class CouponController extends Controller
             'max_uses'            => $request->max_uses,
             'expires_at'          => $request->expires_at,
             'is_active'           => $request->boolean('is_active', true),
+            'show_on_homepage'    => $request->boolean('show_on_homepage', false),
         ]);
 
         return response()->json([
@@ -62,6 +68,13 @@ class CouponController extends Controller
     {
         $coupon = Coupon::where('uuid', $uuid)->firstOrFail();
 
+        // If show_on_homepage is true, unset it for all other coupons
+        if ($request->has('show_on_homepage') && $request->boolean('show_on_homepage', false)) {
+            Coupon::where('uuid', '!=', $uuid)
+                ->where('show_on_homepage', true)
+                ->update(['show_on_homepage' => false]);
+        }
+
         if ($request->filled('course_uuid')) {
             $course            = Course::where('uuid', $request->course_uuid)->firstOrFail();
             $coupon->course_id = $course->id;
@@ -72,7 +85,7 @@ class CouponController extends Controller
         }
 
         $coupon->fill($request->only([
-            'discount_percentage', 'max_uses', 'expires_at', 'is_active',
+            'discount_percentage', 'max_uses', 'expires_at', 'is_active', 'show_on_homepage',
         ]));
 
         $coupon->save();

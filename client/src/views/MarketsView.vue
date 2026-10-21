@@ -111,7 +111,7 @@ onUnmounted(() => {
 
 <template>
   <DashboardLayout>
-    <div class="min-h-screen bg-background text-foreground flex flex-col justify-between font-primary">
+    <div class="min-h-screen bg-background text-foreground flex flex-col justify-between font-primary pt-24">
       <div class="container mx-auto px-6 py-16 md:py-24 max-w-6xl">
         <!-- Hero Section -->
         <div class="text-center mb-16">

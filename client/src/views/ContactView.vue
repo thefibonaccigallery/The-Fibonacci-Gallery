@@ -1,45 +1,18 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import { useSeoMeta } from '@/composables/useSeoMeta'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import {
   PhPaperPlaneTilt,
   PhEnvelopeSimple,
   PhTelegramLogo,
-  PhCheckCircle,
   PhClock,
   PhGlobe,
 } from '@phosphor-icons/vue'
 
 const { setSeoMeta } = useSeoMeta()
-
-const form = ref({
-  name: '',
-  email: '',
-  subject: '',
-  message: '',
-})
-
-const isSubmitting = ref(false)
-const submitSuccess = ref(false)
-
-const handleSubmit = async () => {
-  isSubmitting.value = true
-  // Simulate submission delay
-  await new Promise((resolve) => setTimeout(resolve, 1500))
-  isSubmitting.value = false
-  submitSuccess.value = true
-  
-  // Reset form after success
-  setTimeout(() => {
-    form.value = { name: '', email: '', subject: '', message: '' }
-    submitSuccess.value = false
-  }, 3000)
-}
 
 const contactMethods = [
   {
@@ -98,7 +71,7 @@ onMounted(() => {
           </p>
         </div>
 
-        <div class="grid md:grid-cols-2 gap-8 mb-16">
+        <div class="max-w-2xl mx-auto mb-16">
           <!-- Contact Methods -->
           <div class="space-y-6">
             <h2 class="text-2xl font-semibold mb-6">Quick Contact</h2>
@@ -144,74 +117,6 @@ onMounted(() => {
                 <span>Available worldwide for global traders</span>
               </div>
             </div>
-          </div>
-
-          <!-- Contact Form -->
-          <div class="border border-border/20 rounded-2xl p-6 md:p-8 liquid-glass">
-            <h2 class="text-2xl font-semibold mb-6">Send Us a Message</h2>
-            
-            <form @submit.prevent="handleSubmit" class="space-y-5">
-              <div class="space-y-2">
-                <label for="name" class="text-sm font-medium text-foreground">Your Name</label>
-                <Input
-                  id="name"
-                  v-model="form.name"
-                  placeholder="John Doe"
-                  required
-                  class="bg-background/50 border-border/40"
-                />
-              </div>
-
-              <div class="space-y-2">
-                <label for="email" class="text-sm font-medium text-foreground">Email Address</label>
-                <Input
-                  id="email"
-                  v-model="form.email"
-                  type="email"
-                  placeholder="john@example.com"
-                  required
-                  class="bg-background/50 border-border/40"
-                />
-              </div>
-
-              <div class="space-y-2">
-                <label for="subject" class="text-sm font-medium text-foreground">Subject</label>
-                <Input
-                  id="subject"
-                  v-model="form.subject"
-                  placeholder="How can we help you?"
-                  required
-                  class="bg-background/50 border-border/40"
-                />
-              </div>
-
-              <div class="space-y-2">
-                <label for="message" class="text-sm font-medium text-foreground">Message</label>
-                <Textarea
-                  id="message"
-                  v-model="form.message"
-                  placeholder="Tell us more about your question or concern..."
-                  rows="5"
-                  required
-                  class="bg-background/50 border-border/40 resize-none"
-                />
-              </div>
-
-              <Button
-                type="submit"
-                size="lg"
-                class="w-full"
-                :disabled="isSubmitting || submitSuccess"
-              >
-                <PhCheckCircle v-if="submitSuccess" class="mr-2 h-5 w-5" />
-                <PhPaperPlaneTilt v-else class="mr-2 h-5 w-5" />
-                {{ submitSuccess ? 'Message Sent!' : isSubmitting ? 'Sending...' : 'Send Message' }}
-              </Button>
-
-              <p class="text-xs text-muted-foreground text-center">
-                By submitting this form, you agree to our privacy policy and terms of service.
-              </p>
-            </form>
           </div>
         </div>
 

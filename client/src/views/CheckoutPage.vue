@@ -120,9 +120,9 @@ const handleCancel = async () => {
 
 <template>
   <DashboardLayout>
-    <div class="min-h-screen bg-background pb-24 md:pb-8">
+    <div class="min-h-screen bg-background pb-24 md:pb-8 pt-24">
       <!-- Header -->
-      <div class="border-b border-border/40 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+      <div class="border-b border-border/40 bg-card/50 backdrop-blur-sm sticky top-20 z-10">
         <div class="container mx-auto px-4 py-6">
           <h1 class="text-3xl font-bold text-foreground">Checkout</h1>
           <p class="text-sm text-muted-foreground mt-1">Complete your purchase securely</p>

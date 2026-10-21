@@ -3,14 +3,14 @@ import { ref, computed, onMounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import Cookies from 'js-cookie'
 import { Button } from '@/components/ui/button'
-import ThemeToggle from '@/components/blocks/ThemeToggle.vue'
 import AnimatedHeading from '@/components/blocks/AnimatedHeading.vue'
 import FadeIn from '@/components/blocks/FadeIn.vue'
 import VideoBackground from '@/components/blocks/VideoBackground.vue'
+import CouponBanner from '@/components/blocks/CouponBanner.vue'
+import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import TraderviewWidget from '@/components/blocks/TraderviewWidget.vue'
 import axiosInstance from '@/api/axiosInstance'
-import logo from '@/assets/images/logo.png'
 import {
   PhChartLineUp,
   PhShieldCheck,
@@ -23,8 +23,6 @@ import {
   PhTrendUp,
   PhArrowRight,
   PhStar,
-  PhList,
-  PhX,
   PhCaretDown,
 } from '@phosphor-icons/vue'
 import {
@@ -34,15 +32,22 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 
-// Mobile menu state
+// Mobile menu state (kept for potential future use, but now handled in AppHeader)
 const mobileMenuOpen = ref(false)
 
-// Scroll-based navbar background
-const scrolled = ref(false)
-onMounted(() => {
-  window.addEventListener('scroll', () => {
-    scrolled.value = window.scrollY > 50
-  })
+// Homepage coupon
+const homepageCoupon = ref<any>(null)
+
+onMounted(async () => {
+  // Fetch homepage coupon
+  try {
+    const { data } = await axiosInstance.get('/coupons/homepage')
+    if (data.coupon) {
+      homepageCoupon.value = data.coupon
+    }
+  } catch (error) {
+    console.error('Failed to fetch homepage coupon:', error)
+  }
 })
 
 // Stats counter animation
@@ -230,94 +235,12 @@ const faqs = [
       'We combine cinematic-quality educational content with real-time market analysis. Our unique approach blends technical artistry with mathematical and structural precision, helping you see the markets as living, breathing patterns of opportunity',
   },
 ]
-
-const navLinks = [
-  { label: 'Courses', href: '/explore' },
-  { label: 'Markets', href: '/markets' },
-  { label: 'Testimonials', href: '/testimonials' },
-  { label: 'FAQ', href: '/faq' },
-  { label: 'Contact Us', href: '/contact' },
-]
 </script>
 
 <template>
   <div class="min-h-screen bg-background text-foreground overflow-x-hidden">
     <!-- ═══════ NAVBAR ═══════ -->
-    <nav
-      id="navbar"
-      class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
-      :class="[scrolled ? 'bg-background border-b border-border/20 py-3' : 'bg-background py-5']"
-    >
-      <div class="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 flex items-center justify-between">
-        <!-- Brand with Logo -->
-        <RouterLink
-          to="/"
-          class="flex items-center gap-3 group"
-        >
-          <div class="w-16 h-16 flex items-center justify-center shrink-0">
-            <img :src="logo" alt="The Fibonacci Gallery" class="w-16 h-16 object-contain" />
-          </div>
-          <span class="text-lg md:text-xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
-            The Fibonacci Gallery
-          </span>
-        </RouterLink>
-
-        <!-- Desktop Nav -->
-        <div class="hidden md:flex items-center gap-8">
-          <RouterLink
-            v-for="link in navLinks"
-            :key="link.label"
-            :to="link.href"
-            class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {{ link.label }}
-          </RouterLink>
-        </div>
-
-        <!-- Right Side -->
-        <div class="flex items-center gap-3">
-          <!-- <ThemeToggle /> -->
-          <Button class="hidden md:inline-flex" size="sm" as-child>
-            <RouterLink to="/login">
-              Get Started
-              <PhArrowRight class="ml-1 h-4 w-4" />
-            </RouterLink>
-          </Button>
-          <!-- Mobile Menu Toggle -->
-          <Button
-            variant="ghost"
-            size="icon"
-            class="md:hidden"
-            @click="mobileMenuOpen = !mobileMenuOpen"
-            aria-label="Toggle menu"
-          >
-            <PhList v-if="!mobileMenuOpen" class="h-5 w-5" />
-            <PhX v-else class="h-5 w-5" />
-          </Button>
-        </div>
-      </div>
-
-      <!-- Mobile Menu -->
-      <div v-if="mobileMenuOpen" class="md:hidden bg-background border-t border-border/20 mt-2">
-        <div class="px-6 py-4 flex flex-col gap-3">
-          <RouterLink
-            v-for="link in navLinks"
-            :key="link.label"
-            :to="link.href"
-            class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
-            @click="mobileMenuOpen = false"
-          >
-            {{ link.label }}
-          </RouterLink>
-          <Button class="mt-2 w-full" size="sm" as-child>
-            <RouterLink to="/register" @click="mobileMenuOpen = false">
-              Get Started
-              <PhArrowRight class="ml-1 h-4 w-4" />
-            </RouterLink>
-          </Button>
-        </div>
-      </div>
-    </nav>
+    <AppHeader />
 
     <!-- ═══════ HERO SECTION ═══════ -->
     <section
@@ -968,5 +891,8 @@ of Trading"
 
     <!-- ═══════ FOOTER ═══════ -->
     <AppFooter />
+
+    <!-- ═══════ COUPON BANNER ═══════ -->
+    <CouponBanner v-if="homepageCoupon" :coupon="homepageCoupon" />
   </div>
 </template>

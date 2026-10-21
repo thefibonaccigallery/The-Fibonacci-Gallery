@@ -39,8 +39,8 @@ const {
 
 <template>
   <DashboardLayout>
-    <div class="min-h-screen bg-background">
-      <div class="border-b border-border/40 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+    <div class="min-h-screen bg-background pt-24">
+      <div class="border-b border-border/40 bg-card/50 backdrop-blur-sm sticky top-20 z-10">
         <div class="container mx-auto px-4 py-6">
           <h1 class="text-3xl font-bold text-foreground">{{ lang.profile.title }}</h1>
           <p class="text-sm text-muted-foreground mt-1">{{ lang.profile.subtitle }}</p>

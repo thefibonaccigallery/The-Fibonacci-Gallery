@@ -51,6 +51,7 @@ const form = ref<CouponFormState>({
   max_uses: null,
   expires_at: null,
   is_active: true,
+  show_on_homepage: false,
 })
 
 const errors = ref<NormalizedErrors<CouponFormField>>({})
@@ -80,6 +81,7 @@ watch(couponData, (data) => {
       max_uses: c.max_uses ?? null,
       expires_at: c.expires_at ? c.expires_at.substring(0, 10) : null,
       is_active: c.is_active,
+      show_on_homepage: c.show_on_homepage || false,
     }
   }
 })
@@ -237,6 +239,17 @@ async function handleSubmit() {
           </p>
         </div>
         <Switch v-model:checked="form.is_active" />
+      </div>
+
+      <!-- Show on Homepage -->
+      <div class="flex items-center justify-between py-2">
+        <div class="space-y-1">
+          <Label>Show on Homepage</Label>
+          <p class="text-xs text-muted-foreground">
+            Display this coupon as a floating banner on the homepage. Only one active coupon can be shown at a time.
+          </p>
+        </div>
+        <Switch v-model:checked="form.show_on_homepage" />
       </div>
 
       <!-- Submit -->
