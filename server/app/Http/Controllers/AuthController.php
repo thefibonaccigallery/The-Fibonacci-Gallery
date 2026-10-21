@@ -34,6 +34,8 @@ class AuthController extends Controller
             'email'         => $request->email,
             'password'      => Hash::make($request->password),
             'country'       => $request->country,
+            'country_code'  => $request->country_code,
+            'phone_number'  => $request->phone_number,
             'referred_by'   => $referredBy,
             'referred_at'   => $referredAt,
         ]);

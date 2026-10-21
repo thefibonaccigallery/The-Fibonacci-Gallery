@@ -11,6 +11,8 @@ const buildProfileSchema = (messages: ProfileSchemaMessages) =>
       .optional()
       .or(z.literal('')),
     country: z.string().min(1, messages.countryRequired).max(255),
+    country_code: z.string().optional(),
+    phone_number: z.string().optional(),
   })
 
 export const useProfileSchema = (messages: ProfileSchemaMessages) =>

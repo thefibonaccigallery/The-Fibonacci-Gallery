@@ -4,6 +4,8 @@ export interface User {
   name: string
   email: string
   country: string
+  country_code?: string
+  phone_number?: string
   role: string
   referral_code?: string
 }
@@ -26,5 +28,7 @@ export interface RegisterData {
   password: string
   password_confirmation: string
   country: string
+  country_code?: string
+  phone_number?: string
   referral_code?: string
 }

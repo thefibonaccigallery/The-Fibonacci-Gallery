@@ -7,6 +7,7 @@ import AnimatedHeading from '@/components/blocks/AnimatedHeading.vue'
 import FadeIn from '@/components/blocks/FadeIn.vue'
 import VideoBackground from '@/components/blocks/VideoBackground.vue'
 import ThemeToggle from '@/components/blocks/ThemeToggle.vue'
+import CountryCodeSelector from '@/components/ui/CountryCodeSelector.vue'
 import { PhArrowLeft, PhUserPlus, PhEye, PhEyeSlash, PhUserCheck } from '@phosphor-icons/vue'
 import { useAuthStore } from '@/stores/auth'
 import logo from '@/assets/images/white_final.webp'
@@ -136,6 +137,35 @@ const bgVideoUrl =
                 </div>
                 <p v-if="authStore.errors.country" class="text-xs text-destructive mt-1">
                   {{ authStore.errors.country }}
+                </p>
+              </div>
+
+              <div class="space-y-2">
+                <label for="register-phone" class="text-sm font-medium text-foreground"
+                  >Phone Number </label
+                >
+                <div class="grid grid-cols-[120px_1fr] gap-2">
+                  <CountryCodeSelector
+                    v-model="authStore.registerForm.state.values.country_code"
+                    :country-codes="authStore.countryCodes"
+                    :error="!!authStore.errors.country_code"
+                    @update:model-value="authStore.clearError('country_code')"
+                  />
+                  <Input
+                    id="register-phone"
+                    type="tel"
+                    v-model="authStore.registerForm.state.values.phone_number"
+                    placeholder="123-456-7890"
+                    :class="{ 'border-destructive': authStore.errors.phone_number }"
+                    class="bg-background/50 border-border/40 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
+                    @input="authStore.clearError('phone_number')"
+                  />
+                </div>
+                <p v-if="authStore.errors.country_code" class="text-xs text-destructive mt-1">
+                  {{ authStore.errors.country_code }}
+                </p>
+                <p v-if="authStore.errors.phone_number" class="text-xs text-destructive mt-1">
+                  {{ authStore.errors.phone_number }}
                 </p>
               </div>
 

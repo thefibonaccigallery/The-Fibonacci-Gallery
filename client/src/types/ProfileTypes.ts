@@ -4,6 +4,8 @@ export interface ProfileFormState {
   name: string
   email: string
   country: string
+  country_code?: string
+  phone_number?: string
 }
 
 export type ProfileFormField = keyof ProfileFormState

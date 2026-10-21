@@ -35,6 +35,8 @@ export function useProfile() {
       name: '',
       email: '',
       country: '',
+      country_code: '',
+      phone_number: '',
     } as ProfileFormState,
     validators: {
       onChange: profileSchema.value,
@@ -76,6 +78,8 @@ export function useProfile() {
       profileForm.state.values.name = user.name || ''
       profileForm.state.values.email = user.email || ''
       profileForm.state.values.country = user.country || ''
+      profileForm.state.values.country_code = user.country_code || ''
+      profileForm.state.values.phone_number = user.phone_number || ''
     },
     { immediate: true },
   )
@@ -207,6 +211,7 @@ export function useProfile() {
     lang,
     profile,
     countries: authStore.countries,
+    countryCodes: authStore.countryCodes,
     profileForm,
     passwordForm,
     profileErrors,
