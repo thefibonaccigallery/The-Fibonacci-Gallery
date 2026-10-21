@@ -10,7 +10,7 @@ import ThemeToggle from '@/components/blocks/ThemeToggle.vue'
 import CountryCodeSelector from '@/components/ui/CountryCodeSelector.vue'
 import { PhArrowLeft, PhUserPlus, PhEye, PhEyeSlash, PhUserCheck } from '@phosphor-icons/vue'
 import { useAuthStore } from '@/stores/auth'
-import logo from '@/assets/images/white_final.webp'
+import logo from '@/assets/images/logo.png'
 
 const authStore = useAuthStore()
 const showPassword = ref(false)

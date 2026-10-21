@@ -12,7 +12,7 @@ import {
   PhSignOut,
   PhHandCoins,
 } from '@phosphor-icons/vue'
-import logo from '@/assets/images/white_final.webp'
+import logo from '@/assets/images/logo.png'
 
 const props = defineProps<{
   activeTab: DashboardTab

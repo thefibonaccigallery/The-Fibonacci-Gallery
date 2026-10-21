@@ -10,7 +10,7 @@ import VideoBackground from '@/components/blocks/VideoBackground.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import TraderviewWidget from '@/components/blocks/TraderviewWidget.vue'
 import axiosInstance from '@/api/axiosInstance'
-import logo from '@/assets/images/white_final.webp'
+import logo from '@/assets/images/logo.png'
 import {
   PhChartLineUp,
   PhShieldCheck,
@@ -236,7 +236,7 @@ const navLinks = [
   { label: 'Markets', href: '/markets' },
   { label: 'Testimonials', href: '/testimonials' },
   { label: 'FAQ', href: '/faq' },
-  { label: 'Contact Us', href: 'https://t.me/thefibonaccigallerysupport', external: true },
+  { label: 'Contact Us', href: '/contact' },
 ]
 </script>
 
@@ -264,24 +264,14 @@ const navLinks = [
 
         <!-- Desktop Nav -->
         <div class="hidden md:flex items-center gap-8">
-          <template v-for="link in navLinks" :key="link.label">
-            <a
-              v-if="link.external"
-              :href="link.href"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {{ link.label }}
-            </a>
-            <RouterLink
-              v-else
-              :to="link.href"
-              class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {{ link.label }}
-            </RouterLink>
-          </template>
+          <RouterLink
+            v-for="link in navLinks"
+            :key="link.label"
+            :to="link.href"
+            class="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {{ link.label }}
+          </RouterLink>
         </div>
 
         <!-- Right Side -->
@@ -310,26 +300,15 @@ const navLinks = [
       <!-- Mobile Menu -->
       <div v-if="mobileMenuOpen" class="md:hidden bg-background border-t border-border/20 mt-2">
         <div class="px-6 py-4 flex flex-col gap-3">
-          <template v-for="link in navLinks" :key="link.label">
-            <a
-              v-if="link.external"
-              :href="link.href"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
-              @click="mobileMenuOpen = false"
-            >
-              {{ link.label }}
-            </a>
-            <RouterLink
-              v-else
-              :to="link.href"
-              class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
-              @click="mobileMenuOpen = false"
-            >
-              {{ link.label }}
-            </RouterLink>
-          </template>
+          <RouterLink
+            v-for="link in navLinks"
+            :key="link.label"
+            :to="link.href"
+            class="text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
+            @click="mobileMenuOpen = false"
+          >
+            {{ link.label }}
+          </RouterLink>
           <Button class="mt-2 w-full" size="sm" as-child>
             <RouterLink to="/register" @click="mobileMenuOpen = false">
               Get Started

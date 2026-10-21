@@ -155,6 +155,22 @@ const router = createRouter({
       },
     },
     {
+      path: '/contact',
+      name: 'contact',
+      component: () => import('@/views/ContactView.vue'),
+      meta: {
+        title: 'Contact Us',
+        description:
+          'Get in touch with The Fibonacci Gallery support team. We are here to help you with any questions about our trading academy.',
+        keywords: [
+          'contact fibonacci gallery',
+          'trading academy support',
+          'telegram trading support',
+          'customer service',
+        ],
+      },
+    },
+    {
       path: '/privacy',
       name: 'privacy',
       component: () => import('@/views/PrivacyView.vue'),

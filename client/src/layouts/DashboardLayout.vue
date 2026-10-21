@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import ThemeToggle from '@/components/blocks/ThemeToggle.vue'
 import { RouterLink } from 'vue-router'
 import { ref } from 'vue'
-import logo from '@/assets/images/white_final.webp'
+import logo from '@/assets/images/logo.png'
 import { PhArrowRight, PhList, PhX, PhSignOut } from '@phosphor-icons/vue'
 
 const { activeTab, setActiveTab } = useDashboard()

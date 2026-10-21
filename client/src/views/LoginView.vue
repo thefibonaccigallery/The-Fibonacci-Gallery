@@ -9,7 +9,7 @@ import VideoBackground from '@/components/blocks/VideoBackground.vue'
 import ThemeToggle from '@/components/blocks/ThemeToggle.vue'
 import { PhArrowLeft, PhSignIn, PhEye, PhEyeSlash } from '@phosphor-icons/vue'
 import { useAuthStore } from '@/stores/auth'
-import logo from '@/assets/images/white_final.webp'
+import logo from '@/assets/images/logo.png'
 
 const authStore = useAuthStore()
 const showPassword = ref(false)

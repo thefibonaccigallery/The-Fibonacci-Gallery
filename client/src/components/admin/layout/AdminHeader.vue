@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useColorMode } from '@vueuse/core'
 import { useAuthStore } from '@/stores/auth'
 import { PhBell, PhMoon, PhSun, PhUser, PhSignOut, PhCaretRight, PhList } from '@phosphor-icons/vue'
-import logo from '@/assets/images/white_final.webp'
+import logo from '@/assets/images/logo.png'
 
 const route = useRoute()
 const router = useRouter()

@@ -18,7 +18,7 @@ import {
   PhHandCoins,
   PhUserCircle,
 } from '@phosphor-icons/vue'
-import logo from '@/assets/images/white_final.webp'
+import logo from '@/assets/images/logo.png'
 
 import AppFooter from '@/components/layout/AppFooter.vue'
 
