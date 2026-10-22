@@ -13,6 +13,7 @@ class Enrollment extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'uuid',
         'user_id',
         'course_id',
         'enrolled_at',
@@ -47,5 +48,10 @@ class Enrollment extends Model
     public function coupon()
     {
         return $this->belongsTo(Coupon::class);
+    }
+
+    public function certificate()
+    {
+        return $this->hasOne(Certificate::class);
     }
 }

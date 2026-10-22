@@ -13,6 +13,12 @@ export interface EnrolledCourse {
   completedLessons: number
   progress_percentage: number
   enrolled_at: string
+  completed_at?: string | null
+  certificate?: {
+    uuid: string
+    certificate_number: string
+    issued_at?: string
+  } | null
   last_watched_video: {
     uuid: string
     title: string

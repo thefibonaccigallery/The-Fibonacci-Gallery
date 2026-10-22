@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { PhArrowLeft, PhList, PhX } from '@phosphor-icons/vue'
+import { PhArrowLeft, PhList, PhX, PhCertificate } from '@phosphor-icons/vue'
 import { Button } from '@/components/ui/button'
 import { useCoursePlayer } from '@/composables/useCoursePlayer'
 import VideoPlayer from '@/components/course-player/VideoPlayer.vue'
@@ -17,6 +17,8 @@ const isCurriculumOpen = ref(false)
 const {
   course,
   chapters,
+  certificate,
+  isCourseCompleted,
   activeVideo,
   activeChapter,
   activeVideoId,
@@ -45,7 +47,7 @@ const nextDisabledReason = computed(() => {
   return ''
 })
 
-const videoPlayerRef = ref<InstanceType<typeof VideoPlayer> | null>(null)
+const videoPlayerRef = ref<{ restart: () => void } | null>(null)
 
 const handleNext = () => {
   if (nextVideo.value && canGoNext.value) {
@@ -143,16 +145,30 @@ onMounted(() => {
             </div>
           </div>
 
-          <!-- Mobile Menu Toggle -->
-          <Button
-            @click="isCurriculumOpen = !isCurriculumOpen"
-            variant="outline"
-            size="sm"
-            class="lg:hidden gap-2"
-          >
-            <PhList :size="20" />
-            Curriculum
-          </Button>
+          <div class="flex items-center gap-2">
+            <!-- View Certificate Button if Course Completed -->
+            <Button
+              v-if="certificate || isCourseCompleted"
+              @click="router.push('/certificates')"
+              variant="outline"
+              size="sm"
+              class="gap-1.5 border-amber-500/50 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 text-xs font-semibold cursor-pointer shadow-sm"
+            >
+              <PhCertificate :size="16" weight="fill" />
+              <span>Certificate</span>
+            </Button>
+
+            <!-- Mobile Menu Toggle -->
+            <Button
+              @click="isCurriculumOpen = !isCurriculumOpen"
+              variant="outline"
+              size="sm"
+              class="lg:hidden gap-2"
+            >
+              <PhList :size="20" />
+              Curriculum
+            </Button>
+          </div>
         </header>
 
         <!-- Video Player and Controls -->
@@ -165,6 +181,8 @@ onMounted(() => {
                 :video="activeVideo"
                 :can-go-next="canGoNext"
                 :has-next="!!nextVideo"
+                :is-course-completed="isCourseCompleted"
+                :certificate="certificate"
                 @progress="handleProgress"
                 @ended="handleVideoEnded"
                 @next="handleNext"

@@ -20,9 +20,12 @@ class UserCourseController extends Controller
         $user = Auth::user();
 
         $enrollments = Enrollment::where('user_id', $user->id)
-            ->with(['course.chapters.videos' => function ($query) {
-                $query->where('is_published', true)->orderBy('order');
-            }])
+            ->with([
+                'certificate',
+                'course.chapters.videos' => function ($query) {
+                    $query->where('is_published', true)->orderBy('order');
+                },
+            ])
             ->orderBy('enrolled_at', 'desc')
             ->get();
 
@@ -41,6 +44,17 @@ class UserCourseController extends Controller
                 ->count();
 
             $totalVideos = $videoIds->count();
+            $isCompleted = $totalVideos > 0 && $completedVideos >= $totalVideos;
+
+            $certificate = $enrollment->certificate;
+            if ($isCompleted && !$certificate) {
+                try {
+                    $certService = app(\App\Services\CertificateService::class);
+                    $certificate = $certService->issueCertificate($user, $course, $enrollment);
+                } catch (\Throwable $e) {
+                    // Log and proceed
+                }
+            }
 
             // Find the last watched video
             $lastProgress = VideoProgress::where('user_id', $user->id)
@@ -65,6 +79,12 @@ class UserCourseController extends Controller
                 'completedLessons' => $completedVideos,
                 'progress_percentage' => $totalVideos > 0 ? round(($completedVideos / $totalVideos) * 100, 2) : 0,
                 'enrolled_at' => $enrollment->enrolled_at,
+                'completed_at' => $enrollment->completed_at,
+                'certificate' => $certificate ? [
+                    'uuid'               => $certificate->uuid,
+                    'certificate_number' => $certificate->certificate_number,
+                    'issued_at'          => $certificate->issued_at,
+                ] : null,
                 'last_watched_video' => $lastWatchedVideo ? [
                     'uuid'  => $lastWatchedVideo->uuid,
                     'title' => $lastWatchedVideo->title,

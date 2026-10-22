@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 import Plyr from 'plyr'
 import 'plyr/dist/plyr.css'
 import type { CoursePlayerVideo } from '@/types/CoursePlayerTypes'
@@ -10,6 +11,7 @@ import {
   PhArrowRight,
   PhWarning,
   PhCheckCircle,
+  PhCertificate,
 } from '@phosphor-icons/vue'
 import { Button } from '@/components/ui/button'
 import { useVideoSecurity } from '@/composables/useVideoSecurity'
@@ -19,6 +21,15 @@ interface Props {
   video: CoursePlayerVideo | null
   canGoNext?: boolean
   hasNext?: boolean
+  isCourseCompleted?: boolean
+  certificate?: {
+    uuid: string
+    certificate_number: string
+    course_title?: string
+    recipient_name?: string
+    issued_at?: string
+    verify_url?: string
+  } | null
 }
 
 interface Emits {
@@ -30,8 +41,11 @@ interface Emits {
 const props = withDefaults(defineProps<Props>(), {
   canGoNext: false,
   hasNext: false,
+  isCourseCompleted: false,
+  certificate: null,
 })
 const emit = defineEmits<Emits>()
+const router = useRouter()
 
 const playerContainer = ref<HTMLDivElement | null>(null)
 const playerWrapper = ref<HTMLDivElement | null>(null)
@@ -549,6 +563,29 @@ defineExpose({
               </div>
             </template>
 
+            <!-- Course Completed & Certificate Variant -->
+            <template v-else-if="!hasNext && (isCourseCompleted || certificate)">
+              <div
+                class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-amber-500/20 border-2 border-amber-500/50 flex items-center justify-center text-amber-400 shadow-[0_0_30px_rgba(245,158,11,0.3)] animate-pulse"
+              >
+                <PhCertificate :size="28" weight="fill" />
+              </div>
+              <div class="space-y-1.5 max-w-md">
+                <h3 class="text-base sm:text-xl font-bold text-foreground">
+                  🎓 Masterclass Completed!
+                </h3>
+                <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+                  Congratulations! You have completed all lessons. Your official Certificate of Completion has been generated and emailed to you.
+                </p>
+                <div
+                  v-if="certificate?.certificate_number"
+                  class="text-[11px] font-mono text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-md py-1 px-3 inline-block mt-1"
+                >
+                  Credential ID: {{ certificate.certificate_number }}
+                </div>
+              </div>
+            </template>
+
             <!-- Standard video completion Variant -->
             <template v-else>
               <div
@@ -600,6 +637,16 @@ defineExpose({
               >
                 <span>Next Video</span>
                 <PhArrowRight :size="15" weight="bold" />
+              </Button>
+
+              <Button
+                v-if="certificate || (!hasNext && isCourseCompleted)"
+                @click="router.push('/certificates')"
+                class="gap-1.5 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4 font-bold bg-amber-500 hover:bg-amber-600 text-black shadow-md cursor-pointer"
+                size="sm"
+              >
+                <PhCertificate :size="15" weight="bold" />
+                <span>View Certificate</span>
               </Button>
 
               <Button

@@ -29,10 +29,16 @@ export function useCoursePlayer(courseUuid: string) {
 
   const course = computed(() => playerData.value?.course)
   const chapters = computed(() => playerData.value?.chapters || [])
+  const certificate = computed(() => playerData.value?.certificate || null)
 
   // Get all videos in a flat array
   const allVideos = computed(() => {
     return chapters.value.flatMap((chapter) => chapter.videos)
+  })
+
+  // Whether all published course videos are completed
+  const isCourseCompleted = computed(() => {
+    return allVideos.value.length > 0 && allVideos.value.every((v) => v.progress?.is_completed === true)
   })
 
   // Get active video
@@ -288,6 +294,8 @@ export function useCoursePlayer(courseUuid: string) {
     course,
     chapters,
     allVideos,
+    certificate,
+    isCourseCompleted,
     activeVideo,
     activeChapter,
     activeVideoId,

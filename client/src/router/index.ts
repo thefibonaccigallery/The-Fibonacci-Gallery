@@ -89,6 +89,24 @@ const router = createRouter({
       },
     },
     {
+      path: '/certificates',
+      name: 'certificates',
+      component: () => import('@/views/CertificatesPage.vue'),
+      meta: {
+        title: 'My Certificates',
+        noIndex: true,
+      },
+    },
+    {
+      path: '/certificates/verify/:certificateNumber',
+      name: 'certificate-verify',
+      component: () => import('@/views/CertificateVerifyPage.vue'),
+      meta: {
+        title: 'Verify Certificate of Completion',
+        description: 'Verify the authenticity of an official certificate of completion issued by The Fibonacci Gallery.',
+      },
+    },
+    {
       path: '/explore',
       name: 'explore-courses',
       component: () => import('@/views/ExploreCoursesPage.vue'),

@@ -37,6 +37,14 @@ export interface CoursePlayerData {
     thumbnail_url: string | null
   }
   chapters: CoursePlayerChapter[]
+  certificate?: {
+    uuid: string
+    certificate_number: string
+    course_title: string
+    recipient_name: string
+    issued_at: string
+    verify_url: string
+  } | null
 }
 
 export interface UpdateProgressPayload {

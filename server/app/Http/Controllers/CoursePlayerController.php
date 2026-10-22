@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateProgressRequest;
+use App\Models\Certificate;
 use App\Models\Chapter;
 use App\Models\Course;
 use App\Models\CourseVideo;
+use App\Models\Enrollment;
 use App\Models\VideoProgress;
+use App\Services\CertificateService;
 use Illuminate\Support\Facades\Auth;
 
 class CoursePlayerController extends Controller
@@ -35,7 +38,25 @@ class CoursePlayerController extends Controller
             }
         }
 
+        $certificate = Certificate::where('user_id', $user->id)
+            ->where('course_id', $course->id)
+            ->first();
+
+        $certificateData = null;
+        if ($certificate) {
+            $certificateService = app(CertificateService::class);
+            $certificateData = [
+                'uuid'               => $certificate->uuid,
+                'certificate_number' => $certificate->certificate_number,
+                'course_title'       => $certificate->course_title,
+                'recipient_name'     => $certificate->recipient_name,
+                'issued_at'          => $certificate->issued_at,
+                'verify_url'         => $certificateService->getVerificationUrl($certificate),
+            ];
+        }
+
         return response()->json([
+            'certificate' => $certificateData,
             'course' => [
                 'uuid'          => $course->uuid,
                 'title'         => $course->title,
@@ -137,8 +158,50 @@ class CoursePlayerController extends Controller
             }
         }
 
+        $course = $video->chapter->course;
+
+        // Check overall course completion across all published videos
+        $allPublishedVideoIds = CourseVideo::whereHas('chapter', function ($q) use ($course) {
+            $q->where('course_id', $course->id);
+        })->where('is_published', true)->pluck('id');
+
+        $totalCourseVideos = $allPublishedVideoIds->count();
+        $completedVideosCount = VideoProgress::where('user_id', $user->id)
+            ->whereIn('course_video_id', $allPublishedVideoIds)
+            ->where('is_completed', true)
+            ->count();
+
+        $isCourseCompleted = ($totalCourseVideos > 0) && ($completedVideosCount >= $totalCourseVideos);
+        $certificateData = null;
+
+        if ($isCourseCompleted) {
+            $enrollment = Enrollment::where('user_id', $user->id)
+                ->where('course_id', $course->id)
+                ->first();
+
+            if ($enrollment) {
+                $enrollment->update([
+                    'progress_percentage' => 100.0,
+                    'completed_at'        => $enrollment->completed_at ?? now(),
+                ]);
+
+                $certificateService = app(CertificateService::class);
+                $certificate = $certificateService->issueCertificate($user, $course, $enrollment);
+                $certificateData = [
+                    'uuid'               => $certificate->uuid,
+                    'certificate_number' => $certificate->certificate_number,
+                    'course_title'       => $certificate->course_title,
+                    'recipient_name'     => $certificate->recipient_name,
+                    'issued_at'          => $certificate->issued_at,
+                    'verify_url'         => $certificateService->getVerificationUrl($certificate),
+                ];
+            }
+        }
+
         return response()->json([
-            'success'  => true,
+            'success'          => true,
+            'course_completed' => $isCourseCompleted,
+            'certificate'      => $certificateData,
             'progress' => [
                 'watch_time_seconds' => $progress->watch_time_seconds,
                 'watch_percentage'   => (float) $progress->watch_percentage,

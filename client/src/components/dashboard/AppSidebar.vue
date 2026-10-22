@@ -11,6 +11,7 @@ import {
   PhUser,
   PhSignOut,
   PhHandCoins,
+  PhCertificate,
 } from '@phosphor-icons/vue'
 import logo from '@/assets/images/logo.png'
 
@@ -33,6 +34,12 @@ const navItems = [
     label: 'My Courses',
     icon: PhGraduationCap,
     route: '/my-courses',
+  },
+  {
+    id: 'certificates' as DashboardTab,
+    label: 'Certificates',
+    icon: PhCertificate,
+    route: '/certificates',
   },
   { id: 'explore' as DashboardTab, label: 'Explore', icon: PhCompass, route: '/explore' },
   { id: 'affiliate' as DashboardTab, label: 'Affiliate', icon: PhHandCoins, route: '/affiliate' },

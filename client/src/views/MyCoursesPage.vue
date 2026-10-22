@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useUserCourses } from '@/composables/useUserCourses'
 import DashboardLayout from '@/layouts/DashboardLayout.vue'
 import { Button } from '@/components/ui/button'
-import { PhPlay, PhSpinner, PhBookOpen } from '@phosphor-icons/vue'
+import { PhPlay, PhSpinner, PhBookOpen, PhCertificate } from '@phosphor-icons/vue'
 
 const router = useRouter()
 const { useMyEnrolledCourses } = useUserCourses()
@@ -38,13 +38,23 @@ const formatDate = (dateString: string) => {
               <h1 class="text-3xl font-bold text-foreground">My Courses</h1>
               <p class="text-sm text-muted-foreground mt-1">Continue your learning journey</p>
             </div>
-            <Button
-              @click="router.push('/explore')"
-              class="bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              <PhBookOpen class="h-4 w-4 mr-2" />
-              Explore Courses
-            </Button>
+            <div class="flex items-center gap-2.5">
+              <Button
+                @click="router.push('/certificates')"
+                variant="outline"
+                class="border-amber-500/50 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+              >
+                <PhCertificate class="h-4 w-4 mr-2" weight="fill" />
+                My Certificates
+              </Button>
+              <Button
+                @click="router.push('/explore')"
+                class="bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                <PhBookOpen class="h-4 w-4 mr-2" />
+                Explore Courses
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -175,6 +185,13 @@ const formatDate = (dateString: string) => {
                 >
                   {{ course.level }}
                 </div>
+                <div
+                  v-if="course.completedLessons === course.totalLessons || course.certificate"
+                  class="absolute bottom-3 left-3 bg-amber-500 text-black font-bold px-2 py-0.5 rounded text-[10.5px] flex items-center gap-1 shadow-md"
+                >
+                  <PhCertificate class="w-3.5 h-3.5" weight="fill" />
+                  <span>Certificate Ready</span>
+                </div>
               </div>
 
               <!-- Course Info -->
@@ -203,18 +220,35 @@ const formatDate = (dateString: string) => {
                 />
               </div>
 
+              <!-- Action buttons -->
+              <div
+                v-if="course.completedLessons === course.totalLessons || course.certificate"
+                class="flex items-center gap-2"
+              >
+                <Button
+                  @click="goToCoursePlayer(course.uuid)"
+                  class="flex-1 text-sm font-semibold rounded-xl flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
+                  <PhPlay class="h-4 w-4" weight="fill" />
+                  <span>Review</span>
+                </Button>
+                <Button
+                  @click="router.push('/certificates')"
+                  variant="outline"
+                  class="text-sm font-semibold rounded-xl flex items-center justify-center gap-1.5 border-amber-500/50 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+                >
+                  <PhCertificate class="h-4 w-4" weight="fill" />
+                  <span>Certificate</span>
+                </Button>
+              </div>
+
               <Button
+                v-else
                 @click="goToCoursePlayer(course.uuid)"
                 class="w-full text-sm font-semibold rounded-xl flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 <PhPlay class="h-4 w-4" weight="fill" />
-                {{
-                  course.completedLessons === 0
-                    ? 'Start Course'
-                    : course.completedLessons === course.totalLessons
-                      ? 'Review Course'
-                      : 'Continue Learning'
-                }}
+                {{ course.completedLessons === 0 ? 'Start Course' : 'Continue Learning' }}
               </Button>
 
               <div

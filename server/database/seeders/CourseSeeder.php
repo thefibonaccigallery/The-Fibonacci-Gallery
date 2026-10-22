@@ -2,8 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\Certificate;
 use App\Models\Course;
+use App\Models\Enrollment;
+use App\Models\User;
+use App\Models\VideoProgress;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 class CourseSeeder extends Seeder
@@ -201,5 +205,56 @@ class CourseSeeder extends Seeder
         }
 
         $course->updateLengthSeconds();
+
+        // Auto-complete course and generate certificate for test@example.com
+        $testUser = User::where('email', 'test@example.com')->first();
+        if ($testUser) {
+            $enrollment = Enrollment::firstOrNew([
+                'user_id'   => $testUser->id,
+                'course_id' => $course->id,
+            ]);
+            if (empty($enrollment->uuid)) {
+                $enrollment->uuid = (string) Str::uuid();
+            }
+            $enrollment->enrolled_at         = $enrollment->enrolled_at ?? now()->subDays(7);
+            $enrollment->completed_at        = now();
+            $enrollment->progress_percentage = 100.00;
+            $enrollment->type                = 'free';
+            $enrollment->save();
+
+            // Mark all course videos as completed
+            $videos = $course->chapters()->with('videos')->get()->flatMap->videos;
+            foreach ($videos as $video) {
+                $vp = VideoProgress::firstOrNew([
+                    'user_id'         => $testUser->id,
+                    'course_video_id' => $video->id,
+                ]);
+                if (empty($vp->uuid)) {
+                    $vp->uuid = (string) Str::uuid();
+                }
+                $vp->watch_time_seconds = $video->duration_seconds;
+                $vp->watch_percentage   = 100.00;
+                $vp->is_completed       = true;
+                $vp->completed_at       = now();
+                $vp->last_watched_at    = now();
+                $vp->save();
+            }
+
+            // Issue Certificate
+            $cert = Certificate::firstOrNew([
+                'user_id'   => $testUser->id,
+                'course_id' => $course->id,
+            ]);
+            if (!$cert->exists) {
+                $cert->uuid               = (string) Str::uuid();
+                $cert->certificate_number = Certificate::generateCertificateNumber();
+                $cert->enrollment_id      = $enrollment->id;
+                $cert->recipient_name     = $testUser->name;
+                $cert->course_title       = $course->title;
+                $cert->issued_at          = now();
+                $cert->email_sent_at      = now();
+                $cert->save();
+            }
+        }
     }
 }

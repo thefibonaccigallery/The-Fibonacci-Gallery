@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { PhX, PhClock, PhArrowRight, PhCopy, PhCheck, PhSparkle } from '@phosphor-icons/vue'
@@ -22,6 +22,7 @@ const props = defineProps<{
 const router = useRouter()
 const isVisible = ref(true)
 const copied = ref(false)
+let autoCloseTimer: ReturnType<typeof setTimeout> | null = null
 
 const expiryDate = computed(() => {
   if (!props.coupon.expires_at) return null
@@ -30,6 +31,10 @@ const expiryDate = computed(() => {
 })
 
 const closeBanner = () => {
+  if (autoCloseTimer) {
+    clearTimeout(autoCloseTimer)
+    autoCloseTimer = null
+  }
   isVisible.value = false
 }
 
@@ -48,6 +53,19 @@ const copyCode = async () => {
     console.error('Failed to copy code:', err)
   }
 }
+
+onMounted(() => {
+  autoCloseTimer = setTimeout(() => {
+    closeBanner()
+  }, 10000)
+})
+
+onBeforeUnmount(() => {
+  if (autoCloseTimer) {
+    clearTimeout(autoCloseTimer)
+    autoCloseTimer = null
+  }
+})
 </script>
 
 <template>

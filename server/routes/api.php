@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\AffiliateController;
 use App\Http\Controllers\Admin\AffiliatePayoutController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\CertificateController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -36,6 +37,7 @@ Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword
 Route::get('/verify-reset-token', [PasswordResetController::class, 'verifyToken']);
 Route::post('/reset-password',  [PasswordResetController::class, 'resetPassword']);
 Route::get('/market-data', [MarketDataController::class, 'index']);
+Route::get('/certificates/verify/{certificateNumber}', [CertificateController::class, 'verify']);
 
 
 // Protected routes
@@ -69,6 +71,12 @@ Route::middleware('auth:api')->group(function () {
 
     // Coupon validation (user-facing)
     Route::post('/coupons/validate', [CouponController::class, 'validate']);
+
+    // Certificate routes
+    Route::get('/certificates', [CertificateController::class, 'index']);
+    Route::get('/certificates/{uuid}', [CertificateController::class, 'show']);
+    Route::get('/certificates/{uuid}/download', [CertificateController::class, 'download']);
+    Route::post('/certificates/{uuid}/resend-email', [CertificateController::class, 'resendEmail']);
 });
 
 // Public coupon endpoint (no auth required)
