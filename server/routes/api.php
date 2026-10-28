@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\AffiliateController;
 use App\Http\Controllers\Admin\AffiliatePayoutController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Api\Admin\AnalyticsController;
 use App\Http\Controllers\CertificateController;
 use Illuminate\Support\Facades\Route;
 
@@ -94,6 +95,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:api', 'role:admin|super_admin'])->prefix('admin')->group(function () {
     // Dashboard stats & recent data
     Route::get('/dashboard', [AdminDashboardController::class, 'index']);
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->middleware('throttle:60,1');
 
     // Course routes
     Route::get('/courses', [CourseController::class, 'index']);

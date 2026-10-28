@@ -180,6 +180,10 @@ export function useSeoMeta() {
             'Institutional Market Structure',
             'Trading Psychology',
           ],
+          sameAs: [
+            'https://www.instagram.com/fibotrendcanvas/',
+            'https://t.me/thefibonaccigallerysupport',
+          ],
         },
         {
           '@type': 'WebSite',

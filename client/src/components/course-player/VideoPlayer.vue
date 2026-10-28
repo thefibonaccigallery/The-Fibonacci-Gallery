@@ -586,7 +586,23 @@ defineExpose({
               </div>
             </template>
 
-            <!-- Standard video completion Variant -->
+            <!-- Video completion or watch requirement -->
+            <template v-else-if="!canGoNext">
+              <div
+                class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-500"
+              >
+                <PhWarning :size="24" class="sm:hidden" weight="fill" />
+                <PhWarning :size="28" class="hidden sm:block" weight="fill" />
+              </div>
+              <div class="space-y-1">
+                <h3 class="text-sm sm:text-base md:text-lg font-bold text-foreground">
+                  Watch 70% to Unlock Next Lesson
+                </h3>
+                <p class="text-xs sm:text-sm text-muted-foreground">
+                  You need to watch at least 70% of this video to complete it and proceed.
+                </p>
+              </div>
+            </template>
             <template v-else>
               <div
                 class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-primary"

@@ -74,10 +74,20 @@ export function useCoursePlayer(courseUuid: string) {
     onUnmounted(() => clearInterval(interval))
   })
 
+  // Check if a video has satisfied completion (either marked on server or local watch percentage >= 70)
+  const isVideoCompleted = (video: CoursePlayerVideo): boolean => {
+    if (video.progress?.is_completed && (video.progress?.watch_percentage ?? 0) >= 70) return true
+    if (video.uuid === activeVideoId.value) {
+      const serverPct = video.progress?.watch_percentage || 0
+      return Math.max(currentWatchPercentage.value, serverPct) >= 70
+    }
+    return (video.progress?.watch_percentage ?? 0) >= 70
+  }
+
   // Check if a video is in cooldown
   const isVideoInCooldown = (video: CoursePlayerVideo): boolean => {
     // Completed videos are never in cooldown
-    if (video.progress?.is_completed) return false
+    if (isVideoCompleted(video)) return false
     if (!video.progress?.cooldown_until) return false
     return new Date(video.progress.cooldown_until) > now.value
   }
@@ -91,7 +101,7 @@ export function useCoursePlayer(courseUuid: string) {
     if (!video) return false
 
     // Already completed videos are always unlocked
-    if (video.progress?.is_completed) return true
+    if (isVideoCompleted(video)) return true
 
     // First video of first chapter is always unlocked
     if (chapterIndex === 0 && videoIndex === 0) return true
@@ -102,19 +112,19 @@ export function useCoursePlayer(courseUuid: string) {
     // If it's not the first video in the chapter, check previous video
     if (videoIndex > 0) {
       const previousVideo = chapter.videos[videoIndex - 1]
-      return previousVideo?.progress?.is_completed === true
+      return previousVideo ? isVideoCompleted(previousVideo) : false
     }
 
     // First video of a new chapter - check if all videos in previous chapter are completed
     const previousChapter = chapters.value[chapterIndex - 1]
     if (!previousChapter) return false
 
-    return previousChapter.videos.every((v) => v.progress?.is_completed === true)
+    return previousChapter.videos.every((v) => isVideoCompleted(v))
   }
 
   // Remaining cooldown time as a human readable string
   const getCooldownLabel = (video: CoursePlayerVideo): string => {
-    if (video.progress?.is_completed) return ''
+    if (isVideoCompleted(video)) return ''
     if (!video.progress?.cooldown_until) return ''
     const diff = new Date(video.progress.cooldown_until).getTime() - now.value.getTime()
     if (diff <= 0) return ''
@@ -134,7 +144,7 @@ export function useCoursePlayer(courseUuid: string) {
     // If any video in this chapter is completed or in progress, chapter is unlocked
     if (
       chapter.videos.some(
-        (v) => v.progress?.is_completed || (v.progress?.watch_time_seconds ?? 0) > 0,
+        (v) => isVideoCompleted(v) || (v.progress?.watch_time_seconds ?? 0) > 0,
       )
     ) {
       return true
@@ -144,13 +154,13 @@ export function useCoursePlayer(courseUuid: string) {
     const previousChapter = chapters.value[chapterIndex - 1]
     if (!previousChapter) return false
 
-    return previousChapter.videos.every((v) => v.progress?.is_completed === true)
+    return previousChapter.videos.every((v) => isVideoCompleted(v))
   }
 
   // Get chapter completion stats
   const getChapterStats = (chapter: CoursePlayerChapter) => {
     const total = chapter.videos.length
-    const completed = chapter.videos.filter((v) => v.progress?.is_completed === true).length
+    const completed = chapter.videos.filter((v) => isVideoCompleted(v)).length
     return { completed, total }
   }
 
@@ -270,7 +280,7 @@ export function useCoursePlayer(courseUuid: string) {
         if (!video) continue
 
         // Set to first incomplete unlocked video
-        if (!video.progress?.is_completed && isVideoUnlocked(chapterIndex, videoIndex)) {
+        if (!isVideoCompleted(video) && isVideoUnlocked(chapterIndex, videoIndex)) {
           setActiveVideo(video.uuid, chapter.uuid)
           foundVideo = true
           break
@@ -313,6 +323,7 @@ export function useCoursePlayer(courseUuid: string) {
 
     // Methods
     setActiveVideo,
+    isVideoCompleted,
     isVideoUnlocked,
     isChapterUnlocked,
     getChapterStats,

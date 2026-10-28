@@ -18,7 +18,11 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-const isCompleted = computed(() => props.video.progress?.is_completed === true)
+const isCompleted = computed(
+  () =>
+    props.video.progress?.is_completed === true &&
+    (props.video.progress?.watch_percentage ?? 0) >= 70,
+)
 
 const formatDuration = (seconds: number) => {
   const minutes = Math.floor(seconds / 60)

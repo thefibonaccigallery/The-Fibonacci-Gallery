@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import logo from '@/assets/images/logo.png'
+import { PhInstagramLogo, PhTelegramLogo, PhEnvelopeSimple } from '@phosphor-icons/vue'
 </script>
 
 <template>
@@ -17,10 +18,40 @@ import logo from '@/assets/images/logo.png'
               The Fibonacci Gallery
             </p>
           </RouterLink>
-          <p class="text-sm text-muted-foreground leading-relaxed">
+          <p class="text-sm text-muted-foreground leading-relaxed mb-4">
             Where elite strategy meets artistic precision. Learn to trade with precision and
             confidence.
           </p>
+          <div class="flex items-center gap-2.5">
+            <a
+              href="https://www.instagram.com/fibotrendcanvas/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              title="Instagram: @fibotrendcanvas"
+              class="w-9 h-9 rounded-lg border border-border/20 bg-muted/40 hover:bg-muted hover:border-pink-500/40 hover:text-pink-500 flex items-center justify-center text-muted-foreground transition-all duration-200"
+            >
+              <PhInstagramLogo class="w-4 h-4" />
+            </a>
+            <a
+              href="https://t.me/thefibonaccigallerysupport"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Telegram Support"
+              title="Telegram Support"
+              class="w-9 h-9 rounded-lg border border-border/20 bg-muted/40 hover:bg-muted hover:border-blue-500/40 hover:text-blue-500 flex items-center justify-center text-muted-foreground transition-all duration-200"
+            >
+              <PhTelegramLogo class="w-4 h-4" />
+            </a>
+            <a
+              href="mailto:thefibonaccigallery@gmail.com"
+              aria-label="Email Us"
+              title="Email Us"
+              class="w-9 h-9 rounded-lg border border-border/20 bg-muted/40 hover:bg-muted hover:border-primary/40 hover:text-primary flex items-center justify-center text-muted-foreground transition-all duration-200"
+            >
+              <PhEnvelopeSimple class="w-4 h-4" />
+            </a>
+          </div>
         </div>
 
         <!-- Quick Links -->
@@ -99,19 +130,34 @@ import logo from '@/assets/images/logo.png'
           <ul class="space-y-2">
             <li>
               <a
+                href="https://www.instagram.com/fibotrendcanvas/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-2"
+              >
+                <PhInstagramLogo class="w-4 h-4 text-pink-500" />
+                <span>Instagram</span>
+              </a>
+            </li>
+            <li>
+              <a
                 href="https://t.me/thefibonaccigallerysupport"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >Telegram Support</a
+                class="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-2"
               >
+                <PhTelegramLogo class="w-4 h-4 text-blue-500" />
+                <span>Telegram Support</span>
+              </a>
             </li>
             <li>
               <a
                 href="mailto:thefibonaccigallery@gmail.com"
-                class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >Email Us</a
+                class="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-2"
               >
+                <PhEnvelopeSimple class="w-4 h-4 text-primary" />
+                <span>Email Us</span>
+              </a>
             </li>
           </ul>
         </div>

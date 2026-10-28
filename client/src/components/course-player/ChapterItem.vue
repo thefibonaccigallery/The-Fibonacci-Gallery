@@ -24,7 +24,9 @@ const emit = defineEmits<Emits>()
 const isExpanded = ref(true)
 
 const completedCount = computed(() => {
-  return props.chapter.videos.filter((v) => v.progress?.is_completed === true).length
+  return props.chapter.videos.filter(
+    (v) => v.progress?.is_completed === true && (v.progress?.watch_percentage ?? 0) >= 70,
+  ).length
 })
 
 const totalCount = computed(() => {

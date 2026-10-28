@@ -3,3 +3,5 @@
 claude.md
 .claude/
 skills-lock.json
+/server/storage/app/analytics/
+storage/app/analytics/

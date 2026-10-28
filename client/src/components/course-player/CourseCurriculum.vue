@@ -26,7 +26,12 @@ const totalVideos = computed(() => {
 
 const completedVideos = computed(() => {
   return props.chapters.reduce((sum, chapter) => {
-    return sum + chapter.videos.filter((v) => v.progress?.is_completed === true).length
+    return (
+      sum +
+      chapter.videos.filter(
+        (v) => v.progress?.is_completed === true && (v.progress?.watch_percentage ?? 0) >= 70,
+      ).length
+    )
   }, 0)
 })
 

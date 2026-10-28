@@ -6,6 +6,7 @@ import AdminLayout from '@/layouts/AdminLayout.vue'
 import AdminDashboardPage from '@/views/admin/AdminDashboardPage.vue'
 import Cookies from 'js-cookie'
 import { useSeoMeta } from '@/composables/useSeoMeta'
+import '@/types/gtagType'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -434,6 +435,16 @@ router.afterEach((to) => {
     canonicalUrl: to.path,
     jsonLd: to.path === '/' ? generateOrganizationSchema() : undefined,
   })
+
+  // Track page_view in GA4 for non-admin routes
+  const isAdminRoute = to.path.startsWith('/admin')
+  if (!isAdminRoute && typeof window !== 'undefined' && typeof window.gtag === 'function') {
+    window.gtag('event', 'page_view', {
+      page_title: document.title,
+      page_location: window.location.href,
+      page_path: to.fullPath,
+    })
+  }
 })
 
 export default router

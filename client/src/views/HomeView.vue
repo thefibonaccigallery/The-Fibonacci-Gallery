@@ -281,8 +281,8 @@ of Trading"
             Spot hidden market patterns with our Big Five (S.R.S.F.T.R) trading system. It was built
             by an expert who spent 5+ years studying, backtesting, and developing it. This course
             offers a detailed breakdown for beginners, intermediates, and pros. It covers The Big
-            Five strategy, each part individually and combined, with backtesting on 3 months of data
-            from the most common market movements: trending and ranging structures each. Plus,
+            Five strategy, each part, individually and combined, with backtesting on 3 months of
+            data from the most common market movements: trending and ranging structures each. Plus,
             you'll join 200+ traders who've already changed how they trade.
           </p>
         </FadeIn>

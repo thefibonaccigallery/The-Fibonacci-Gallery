@@ -297,6 +297,75 @@ export const useLanguageStore = defineStore('language', () => {
         empty: 'No payout requests found',
       },
     },
+    adminAnalytics: {
+      sectionTitle: 'Website Traffic',
+      sectionSubtitle: 'Audience insights and platform metrics from Google Analytics 4',
+      openGaDashboard: 'Open GA4 Dashboard',
+      range: {
+        label: 'Date Range',
+        today: 'Today',
+        sevenDays: '7 days',
+        thirtyDays: '30 days',
+        ninetyDays: '90 days',
+      },
+      stats: {
+        visitors: 'Total Visitors',
+        visitorsTrend: 'Active users in selected period',
+        pageViews: 'Total Page Views',
+        pageViewsTrend: 'Total screen views recorded',
+        avgViewsPerVisitor: 'Pages / Visitor',
+        activeDevices: 'Device Distribution',
+      },
+      chart: {
+        title: 'Visitors Over Time',
+        subtitle: 'Daily unique visitors and page views across the selected period',
+        visitorsLegend: 'Visitors',
+        viewsLegend: 'Page Views',
+        noData: 'No daily activity recorded for this period yet',
+      },
+      topPages: {
+        title: 'Top Pages',
+        subtitle: 'Most visited URLs across the platform',
+        columns: {
+          path: 'Page',
+          views: 'Views',
+        },
+        empty: 'No page views recorded yet',
+      },
+      topCountries: {
+        title: 'Top Countries',
+        subtitle: 'Geographic distribution of your audience',
+        columns: {
+          country: 'Country',
+          visitors: 'Visitors',
+        },
+        empty: 'No country data available yet',
+      },
+      topSources: {
+        title: 'Traffic Sources',
+        subtitle: 'Where your audience is coming from',
+        columns: {
+          source: 'Source',
+          visitors: 'Visitors',
+        },
+        empty: 'No referral sources recorded yet',
+      },
+      deviceSplit: {
+        title: 'Device Split',
+        desktop: 'Desktop',
+        mobile: 'Mobile',
+        tablet: 'Tablet',
+        other: 'Other',
+      },
+      emptyState: {
+        title: 'No Analytics Data Yet',
+        description: 'Google Analytics 4 reports typically take 24 to 48 hours to process and display historical data after initial setup. Real-time traffic will appear shortly.',
+        actionCheckRealtime: 'View Realtime in GA4',
+      },
+      toasts: {
+        fetchFailed: 'Failed to load analytics data',
+      },
+    },
   }
 
   return {

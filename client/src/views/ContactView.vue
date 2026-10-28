@@ -8,6 +8,7 @@ import {
   PhPaperPlaneTilt,
   PhEnvelopeSimple,
   PhTelegramLogo,
+  PhInstagramLogo,
   PhClock,
   PhGlobe,
 } from '@phosphor-icons/vue'
@@ -15,6 +16,15 @@ import {
 const { setSeoMeta } = useSeoMeta()
 
 const contactMethods = [
+  {
+    icon: PhInstagramLogo,
+    title: "Instagram",
+    description: "Follow our official IG for market breakdowns & updates",
+    action: "@fibotrendcanvas",
+    link: "https://www.instagram.com/fibotrendcanvas/",
+    color: "text-pink-500",
+    bgColor: "bg-pink-500/10",
+  },
   {
     icon: PhTelegramLogo,
     title: 'Telegram Support',
@@ -84,7 +94,7 @@ onMounted(() => {
               <div class="flex items-start gap-4">
                 <div
                   class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                  :class="`bg-${method.color.split('-')[1]}-500/10`"
+                  :class="method.bgColor || `bg-${method.color.split('-')[1]}-500/10`"
                 >
                   <component :is="method.icon" :class="method.color" class="w-6 h-6" />
                 </div>

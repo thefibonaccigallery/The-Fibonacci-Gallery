@@ -8,6 +8,7 @@ use App\Models\Chapter;
 use App\Models\Course;
 use App\Models\CourseVideo;
 use App\Models\Enrollment;
+use App\Models\User;
 use App\Models\VideoProgress;
 use App\Services\CertificateService;
 use Illuminate\Support\Facades\Auth;
@@ -26,6 +27,18 @@ class CoursePlayerController extends Controller
         $this->authorize('access', $course);
 
         $videoIds = $course->chapters->flatMap(fn($chapter) => $chapter->videos->pluck('id'));
+
+        $threshold = (float) config('types.course.completion_threshold', 70);
+
+        // Auto-heal any records where is_completed was erroneously set below 70% threshold
+        VideoProgress::where('user_id', $user->id)
+            ->whereIn('course_video_id', $videoIds)
+            ->where('is_completed', true)
+            ->where('watch_percentage', '<', $threshold)
+            ->update([
+                'is_completed' => false,
+                'completed_at' => null,
+            ]);
 
         $progressData = VideoProgress::where('user_id', $user->id)
             ->whereIn('course_video_id', $videoIds)
@@ -81,7 +94,7 @@ class CoursePlayerController extends Controller
                     'progress'         => $video->progress ? [
                         'watch_time_seconds' => $video->progress->watch_time_seconds,
                         'watch_percentage'   => (float) $video->progress->watch_percentage,
-                        'is_completed'       => $video->progress->is_completed,
+                        'is_completed'       => (bool) ($video->progress->is_completed && ((float) $video->progress->watch_percentage >= $threshold)),
                         'last_watched_at'    => $video->progress->last_watched_at,
                         'cooldown_until'     => $video->progress->cooldown_until,
                         'is_in_cooldown'     => $video->progress->cooldown_until && now()->lt($video->progress->cooldown_until),
@@ -95,6 +108,13 @@ class CoursePlayerController extends Controller
     {
         $video = CourseVideo::where('uuid', $uuid)->with('chapter.course')->firstOrFail();
         $this->authorize('access', $video->chapter->course);
+
+        $user = Auth::user();
+        if ($user && !$this->isVideoUnlockedForUser($user, $video)) {
+            return response()->json([
+                'message' => 'Video is locked. You must watch at least 70% of the previous video to unlock.',
+            ], 403);
+        }
 
         if (!$video->youtube_video_id) {
             return response()->json(['stream_token' => null]);
@@ -125,8 +145,8 @@ class CoursePlayerController extends Controller
             ? min(round(($watchTimeSeconds / $video->duration_seconds) * 100, 2), 100.0)
             : 0;
 
-        $threshold        = config('types.course.completion_threshold', config('types_course.completion_threshold', 0));
-        $alreadyCompleted = $existing?->is_completed ?? false;
+        $threshold        = (float) config('types.course.completion_threshold', 70);
+        $alreadyCompleted = ($existing?->is_completed ?? false) && (((float) ($existing?->watch_percentage ?? 0)) >= $threshold);
         $isNowCompleted   = $alreadyCompleted || ($watchPercentage >= $threshold);
         $isNewlyCompleted = !$alreadyCompleted && $isNowCompleted;
 
@@ -228,5 +248,65 @@ class CoursePlayerController extends Controller
             ->first();
 
         return $nextChapter?->videos()->orderBy('order')->first();
+    }
+
+    private function isVideoUnlockedForUser(User $user, CourseVideo $video): bool
+    {
+        $threshold = (float) config('types.course.completion_threshold', 70);
+
+        // If user already completed or reached threshold on this video, allow access
+        $currentProgress = VideoProgress::where('user_id', $user->id)
+            ->where('course_video_id', $video->id)
+            ->first();
+
+        if ($currentProgress && ($currentProgress->is_completed || (float) $currentProgress->watch_percentage >= $threshold)) {
+            return true;
+        }
+
+        // If video is in active cooldown, lock it
+        if ($currentProgress && $currentProgress->cooldown_until && now()->lt($currentProgress->cooldown_until)) {
+            return false;
+        }
+
+        // Find previous video in the current chapter
+        $previousVideo = CourseVideo::where('chapter_id', $video->chapter_id)
+            ->where('is_published', true)
+            ->where('order', '<', $video->order)
+            ->orderBy('order', 'desc')
+            ->first();
+
+        if ($previousVideo) {
+            $prevProgress = VideoProgress::where('user_id', $user->id)
+                ->where('course_video_id', $previousVideo->id)
+                ->first();
+
+            return (bool) ($prevProgress && $prevProgress->is_completed && ((float) $prevProgress->watch_percentage >= $threshold));
+        }
+
+        // It is the first video of this chapter. Check previous chapter
+        $currentChapter = $video->chapter;
+        $previousChapter = Chapter::where('course_id', $currentChapter->course_id)
+            ->where('order', '<', $currentChapter->order)
+            ->orderBy('order', 'desc')
+            ->first();
+
+        // If there is no previous chapter, this is the very first video of the course -> Unlocked
+        if (!$previousChapter) {
+            return true;
+        }
+
+        // All published videos in the previous chapter must be completed (>= threshold)
+        $prevChapterVideoIds = $previousChapter->videos()->where('is_published', true)->pluck('id');
+        if ($prevChapterVideoIds->isEmpty()) {
+            return true;
+        }
+
+        $completedCount = VideoProgress::where('user_id', $user->id)
+            ->whereIn('course_video_id', $prevChapterVideoIds)
+            ->where('is_completed', true)
+            ->where('watch_percentage', '>=', $threshold)
+            ->count();
+
+        return $completedCount >= $prevChapterVideoIds->count();
     }
 }
