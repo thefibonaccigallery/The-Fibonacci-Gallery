@@ -301,7 +301,9 @@
         $displayHost = $parsedUrl['host'] ?? 'the-fibonacci-gallery.com';
         $displayPath = $parsedUrl['path'] ?? '/certificates/verify/' . $certificate_number;
 
-        $logoPath = public_path('images/logo.png');
+        $logoPath = file_exists(public_path('images/logo-cert.png'))
+            ? public_path('images/logo-cert.png')
+            : public_path('images/logo.png');
         $logoBase64 = file_exists($logoPath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath)) : null;
     @endphp
 
