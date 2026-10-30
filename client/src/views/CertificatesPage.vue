@@ -22,7 +22,7 @@ const router = useRouter()
 const {
   useUserCertificates,
   downloadPdf,
-  resendCertificateEmail,
+  resendCertificateEmailAsync,
   isResendingEmail,
   isDownloading,
 } = useCertificates()
@@ -33,18 +33,24 @@ const downloadingUuid = ref<string | null>(null)
 const resendingUuid = ref<string | null>(null)
 
 const handleDownload = async (cert: CertificateItem) => {
+  if (downloadingUuid.value || resendingUuid.value) return
   downloadingUuid.value = cert.uuid
   try {
     await downloadPdf(cert.uuid, cert.certificate_number)
+  } catch (err) {
+    // Already handled in downloadPdf
   } finally {
     downloadingUuid.value = null
   }
 }
 
 const handleResend = async (cert: CertificateItem) => {
+  if (resendingUuid.value || downloadingUuid.value) return
   resendingUuid.value = cert.uuid
   try {
-    await resendCertificateEmail(cert.uuid)
+    await resendCertificateEmailAsync(cert.uuid)
+  } catch (err) {
+    // Handled in mutation onError
   } finally {
     resendingUuid.value = null
   }
@@ -256,9 +262,9 @@ const formatDate = (dateString: string) => {
                 <!-- Download PDF Button -->
                 <Button
                   @click="handleDownload(cert)"
-                  :disabled="downloadingUuid === cert.uuid"
+                  :disabled="downloadingUuid === cert.uuid || resendingUuid === cert.uuid"
                   size="sm"
-                  class="gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs h-8 px-3"
+                  class="gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs h-8 px-3 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <PhSpinner v-if="downloadingUuid === cert.uuid" class="w-3.5 h-3.5 animate-spin" />
                   <PhDownloadSimple v-else class="w-3.5 h-3.5" weight="bold" />
@@ -268,10 +274,10 @@ const formatDate = (dateString: string) => {
                 <!-- Resend Email Button -->
                 <Button
                   @click="handleResend(cert)"
-                  :disabled="resendingUuid === cert.uuid"
+                  :disabled="resendingUuid === cert.uuid || downloadingUuid === cert.uuid"
                   variant="outline"
                   size="sm"
-                  class="gap-1.5 text-xs h-8 px-3 border-border/60 hover:bg-card"
+                  class="gap-1.5 text-xs h-8 px-3 border-border/60 hover:bg-card cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                   title="Send certificate again to your registered email"
                 >
                   <PhSpinner v-if="resendingUuid === cert.uuid" class="w-3.5 h-3.5 animate-spin" />

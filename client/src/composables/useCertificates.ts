@@ -92,7 +92,11 @@ export function useCertificates() {
   }
 
   // Re-send certificate email
-  const { mutate: resendCertificateEmail, isPending: isResendingEmail } = useMutation({
+  const {
+    mutate: resendCertificateEmail,
+    mutateAsync: resendCertificateEmailAsync,
+    isPending: isResendingEmail,
+  } = useMutation({
     mutationFn: async (uuid: string) => {
       const { data } = await axiosInstance.post(`/certificates/${uuid}/resend-email`)
       return data
@@ -125,6 +129,7 @@ export function useCertificates() {
     useSingleCertificate,
     downloadPdf,
     resendCertificateEmail,
+    resendCertificateEmailAsync,
     isResendingEmail,
     isDownloading,
     verifyCertificate,
