@@ -35,15 +35,29 @@ jobs:
           mkdir -p ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host cpanel
+            HostName ${{ secrets.SSH_HOST }}
+            User ${{ secrets.SSH_USER }}
+            Port ${{ secrets.SSH_PORT }}
+            IdentityFile ~/.ssh/deploy_key
+            IdentitiesOnly yes
+            StrictHostKeyChecking accept-new
+            ConnectTimeout 30
+            ServerAliveInterval 30
+            ControlMaster auto
+            ControlPath ~/.ssh/cm-%C
+            ControlPersist 10m
+          EOF
+          sed -i 's/^          //' ~/.ssh/config
+          chmod 600 ~/.ssh/config
 
       - name: Upload frontend build
         run: |
           rsync -avz --delete \
             --exclude='.htaccess' \
-            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }}" \
             client/dist/ \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.FRONTEND_PATH }}/
+            cpanel:${{ secrets.FRONTEND_PATH }}/
 
       - name: Upload backend files
         run: |
@@ -53,12 +67,9 @@ jobs:
             --exclude='vendor' \
             --exclude='node_modules' \
             --exclude='.git' \
-            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }}" \
             server/ \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.BACKEND_PATH }}/
+            cpanel:${{ secrets.BACKEND_PATH }}/
 
       - name: Update backend
         run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "cd ${{ secrets.BACKEND_PATH }} && php ~/composer.phar install --no-dev --optimize-autoloader --no-interaction && php artisan migrate --force && php artisan optimize:clear"
+          ssh cpanel "cd ${{ secrets.BACKEND_PATH }} && php ~/composer.phar install --no-dev --optimize-autoloader --no-interaction && php artisan migrate --force && php artisan optimize:clear"
