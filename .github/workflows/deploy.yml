@@ -1,4 +1,3 @@
-
 name: Deploy to cPanel
 
 on:
@@ -24,6 +23,7 @@ jobs:
         working-directory: client
         env:
           VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_GA_MEASUREMENT_ID: ${{ vars.VITE_GA_MEASUREMENT_ID }}
         run: |
           npm ci
           npm run build
