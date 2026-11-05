@@ -1,3 +1,4 @@
+``
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import logo from '@/assets/images/logo.png'
@@ -14,7 +15,9 @@ import { PhInstagramLogo, PhTelegramLogo, PhEnvelopeSimple } from '@phosphor-ico
             <div class="w-12 h-12 flex items-center justify-center shrink-0">
               <img :src="logo" alt="The Fibonacci Gallery" class="w-12 h-12 object-contain" />
             </div>
-            <p class="text-base font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
+            <p
+              class="text-base font-bold tracking-tight text-foreground group-hover:text-primary transition-colors"
+            >
               The Fibonacci Gallery
             </p>
           </RouterLink>
@@ -177,7 +180,7 @@ import { PhInstagramLogo, PhTelegramLogo, PhEnvelopeSimple } from '@phosphor-ico
           Trading involves risk. Past performance is not indicative of future results.
         </p>
       </div>
-      <!-- <div class="w-full flex justify-around mt-6">
+      <div class="w-full flex justify-around mt-6">
         <p class="mx-auto text-sm">
           Made By
           <a
@@ -188,7 +191,7 @@ import { PhInstagramLogo, PhTelegramLogo, PhEnvelopeSimple } from '@phosphor-ico
           >
           with ❤️
         </p>
-      </div> -->
+      </div>
     </div>
   </footer>
 </template>
