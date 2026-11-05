@@ -6,3 +6,4 @@ skills-lock.json
 /server/storage/app/analytics/
 storage/app/analytics/
 .DEVELOPER_DOCUMENTATION.md
+client/.env
