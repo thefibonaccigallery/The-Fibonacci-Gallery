@@ -43,8 +43,18 @@ const drawerNavItems = [
     icon: PhCertificate,
     route: '/certificates',
   },
-  { id: 'explore' as DashboardTab, label: 'Explore Masterclasses', icon: PhCompass, route: '/explore' },
-  { id: 'affiliate' as DashboardTab, label: 'Affiliate Program', icon: PhHandCoins, route: '/affiliate' },
+  {
+    id: 'explore' as DashboardTab,
+    label: 'Explore Masterclasses',
+    icon: PhCompass,
+    route: '/explore',
+  },
+  {
+    id: 'affiliate' as DashboardTab,
+    label: 'Affiliate Program',
+    icon: PhHandCoins,
+    route: '/affiliate',
+  },
   { id: 'profile' as DashboardTab, label: 'Profile Settings', icon: PhUser, route: '/profile' },
 ]
 
@@ -99,9 +109,7 @@ const isItemActive = (item: (typeof drawerNavItems)[0]) => {
               <span class="font-bold text-sm tracking-tight text-foreground">
                 The Fibonacci Gallery
               </span>
-              <span class="text-[11px] text-muted-foreground font-mono">
-                Trading Academy
-              </span>
+              <span class="text-[11px] text-muted-foreground font-mono"> Trading Academy </span>
             </div>
           </div>
 
@@ -157,7 +165,12 @@ const isItemActive = (item: (typeof drawerNavItems)[0]) => {
             variant="ghost"
             size="sm"
             class="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 rounded-xl font-medium"
-            @click="() => { showMobileDrawer = false; authStore.logout(); }"
+            @click="
+              () => {
+                showMobileDrawer = false
+                authStore.logout()
+              }
+            "
             :disabled="authStore.isLoading"
           >
             <PhSignOut class="mr-2 h-4 w-4" />
@@ -218,7 +231,7 @@ const isItemActive = (item: (typeof drawerNavItems)[0]) => {
           </div>
         </header>
 
-        <div :class="[authStore.isAuthenticated ? 'px-3 sm:px-6' : '']">
+        <div :class="[authStore.isAuthenticated ? '' : '']">
           <slot />
         </div>
       </div>

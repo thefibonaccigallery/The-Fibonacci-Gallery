@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { PhX, PhClock, PhArrowRight, PhCopy, PhCheck, PhSparkle } from '@phosphor-icons/vue'
@@ -22,7 +22,6 @@ const props = defineProps<{
 const router = useRouter()
 const isVisible = ref(true)
 const copied = ref(false)
-let autoCloseTimer: ReturnType<typeof setTimeout> | null = null
 
 const expiryDate = computed(() => {
   if (!props.coupon.expires_at) return null
@@ -31,10 +30,6 @@ const expiryDate = computed(() => {
 })
 
 const closeBanner = () => {
-  if (autoCloseTimer) {
-    clearTimeout(autoCloseTimer)
-    autoCloseTimer = null
-  }
   isVisible.value = false
 }
 
@@ -53,19 +48,6 @@ const copyCode = async () => {
     console.error('Failed to copy code:', err)
   }
 }
-
-onMounted(() => {
-  autoCloseTimer = setTimeout(() => {
-    closeBanner()
-  }, 10000)
-})
-
-onBeforeUnmount(() => {
-  if (autoCloseTimer) {
-    clearTimeout(autoCloseTimer)
-    autoCloseTimer = null
-  }
-})
 </script>
 
 <template>
@@ -99,15 +81,25 @@ onBeforeUnmount(() => {
           stroke-width="1.2"
         >
           <!-- Crescent Moon -->
-          <path d="M 60 15 A 18 18 0 1 1 45 42 A 14 14 0 0 0 60 15 Z" fill="currentColor" fill-opacity="0.08" />
+          <path
+            d="M 60 15 A 18 18 0 1 1 45 42 A 14 14 0 0 0 60 15 Z"
+            fill="currentColor"
+            fill-opacity="0.08"
+          />
           <!-- Candlestick chart & wicks -->
           <line x1="28" y1="35" x2="28" y2="75" />
           <rect x="24" y="42" width="8" height="20" fill="currentColor" fill-opacity="0.15" />
           <line x1="42" y1="25" x2="42" y2="70" />
           <rect x="38" y="32" width="8" height="26" fill="currentColor" fill-opacity="0.15" />
           <!-- Stars -->
-          <path d="M 72 20 L 73 23 L 76 24 L 73 25 L 72 28 L 71 25 L 68 24 L 71 23 Z" fill="currentColor" />
-          <path d="M 22 28 L 23 30 L 25 31 L 23 32 L 22 34 L 21 32 L 19 31 L 21 30 Z" fill="currentColor" />
+          <path
+            d="M 72 20 L 73 23 L 76 24 L 73 25 L 72 28 L 71 25 L 68 24 L 71 23 Z"
+            fill="currentColor"
+          />
+          <path
+            d="M 22 28 L 23 30 L 25 31 L 23 32 L 22 34 L 21 32 L 19 31 L 21 30 Z"
+            fill="currentColor"
+          />
         </svg>
 
         <!-- Right Watermark: Fibonacci Golden Ratio Spiral & Sparkles -->
@@ -119,26 +111,25 @@ onBeforeUnmount(() => {
           stroke-width="1.2"
         >
           <!-- Golden Spiral Curve -->
-          <path d="M 15 105 A 90 90 0 0 1 105 15 A 56 56 0 0 1 49 71 A 34 34 0 0 1 83 105 A 21 21 0 0 1 62 84" />
+          <path
+            d="M 15 105 A 90 90 0 0 1 105 15 A 56 56 0 0 1 49 71 A 34 34 0 0 1 83 105 A 21 21 0 0 1 62 84"
+          />
           <!-- Grid Lines -->
           <line x1="15" y1="71" x2="105" y2="71" stroke-dasharray="2 3" opacity="0.3" />
           <line x1="71" y1="15" x2="71" y2="105" stroke-dasharray="2 3" opacity="0.3" />
           <!-- Sparkles -->
-          <path d="M 88 28 L 89 31 L 92 32 L 89 33 L 88 36 L 87 33 L 84 32 L 87 31 Z" fill="currentColor" />
+          <path
+            d="M 88 28 L 89 31 L 92 32 L 89 33 L 88 36 L 87 33 L 84 32 L 87 31 Z"
+            fill="currentColor"
+          />
         </svg>
 
         <!-- ═════════ TICKET NOTCHES & PERFORATED TEETH ═════════ -->
         <!-- Center-Left Semicircle Notch -->
-        <div
-          class="ticket-notch -left-3.5 top-1/2 -translate-y-1/2"
-          aria-hidden="true"
-        ></div>
+        <div class="ticket-notch -left-3.5 top-1/2 -translate-y-1/2" aria-hidden="true"></div>
 
         <!-- Center-Right Semicircle Notch -->
-        <div
-          class="ticket-notch -right-3.5 top-1/2 -translate-y-1/2"
-          aria-hidden="true"
-        ></div>
+        <div class="ticket-notch -right-3.5 top-1/2 -translate-y-1/2" aria-hidden="true"></div>
 
         <!-- Perforation Top Tear Notch -->
         <div
@@ -179,10 +170,10 @@ onBeforeUnmount(() => {
         <!-- Close Button -->
         <button
           @click="closeBanner"
-          class="absolute top-2 right-2 p-1 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-colors z-30"
+          class="absolute top-2 right-2 p-1.5 sm:p-2 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800/90 transition-colors z-30 cursor-pointer"
           aria-label="Close banner"
         >
-          <PhX class="w-3.5 h-3.5" />
+          <PhX class="w-5 h-5 sm:w-5.5 sm:h-5.5" weight="bold" />
         </button>
 
         <!-- ═════════ TICKET CONTENT ═════════ -->
@@ -217,11 +208,7 @@ onBeforeUnmount(() => {
               class="flex flex-col justify-between h-16 sm:h-20 w-3.5 sm:w-4.5 py-0.5 opacity-80 hover:opacity-100 transition-opacity"
               title="Official Fibonacci Voucher"
             >
-              <svg
-                class="w-full h-full text-zinc-200"
-                viewBox="0 0 20 100"
-                fill="currentColor"
-              >
+              <svg class="w-full h-full text-zinc-200" viewBox="0 0 20 100" fill="currentColor">
                 <rect y="0" width="20" height="3" />
                 <rect y="5" width="20" height="1.5" />
                 <rect y="8" width="20" height="4" />
@@ -250,9 +237,7 @@ onBeforeUnmount(() => {
 
           <!-- ─── PERFORATION DIVIDER ─── -->
           <div class="relative flex items-center shrink-0">
-            <div
-              class="w-px h-full border-r-2 border-dashed border-zinc-700/80 my-1"
-            ></div>
+            <div class="w-px h-full border-r-2 border-dashed border-zinc-700/80 my-1"></div>
           </div>
 
           <!-- ─── RIGHT MAIN VOUCHER BODY ─── -->
@@ -274,7 +259,7 @@ onBeforeUnmount(() => {
               <h2
                 class="font-playfair font-black text-lg sm:text-2xl md:text-3xl text-white uppercase tracking-[0.16em] sm:tracking-[0.2em] leading-tight"
               >
-                GIFT COUPON
+                DISCOUNT COUPON
               </h2>
               <div
                 class="font-script text-base sm:text-xl text-primary font-normal tracking-wide -mt-0.5 sm:-mt-1"

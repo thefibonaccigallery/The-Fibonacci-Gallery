@@ -77,18 +77,18 @@ const formatDate = (dateString: string) => {
 
 <template>
   <DashboardLayout>
-    <div class="min-h-screen bg-background pt-24 pb-20">
+    <div class="min-h-screen bg-background pb-20">
       <!-- Header -->
-      <div class="border-b border-border/40 bg-card/50 backdrop-blur-sm sticky top-20 z-10">
-        <div class="container mx-auto px-4 py-6">
+      <div class="border-b border-border/40 bg-card/50 backdrop-blur-sm">
+        <div class="container mx-auto px-4 py-5 sm:py-6">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-2">
                 <PhSealCheck :size="14" weight="fill" />
                 <span>Verified Credentials</span>
               </div>
-              <h1 class="text-3xl font-bold text-foreground tracking-tight">My Certificates</h1>
-              <p class="text-sm text-muted-foreground mt-1">
+              <h1 class="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">My Certificates</h1>
+              <p class="text-xs sm:text-sm text-muted-foreground mt-1">
                 Official accreditation credentials earned across your Fibonacci masterclasses
               </p>
             </div>
@@ -97,7 +97,7 @@ const formatDate = (dateString: string) => {
                 @click="router.push('/my-courses')"
                 variant="outline"
                 size="sm"
-                class="border-border/60 hover:bg-card"
+                class="border-border/60 hover:bg-card text-xs sm:text-sm"
               >
                 <PhBookOpen class="h-4 w-4 mr-2" />
                 My Courses
