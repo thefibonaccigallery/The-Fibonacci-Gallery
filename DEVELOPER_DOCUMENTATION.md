@@ -25,7 +25,21 @@
    - 8.5 [Affiliate & Referral System](#85-affiliate--referral-system)
    - 8.6 [Admin Management Portal](#86-admin-management-portal)
 9. [Frontend Design & Development Conventions](#9-frontend-design--development-conventions)
-10. [Maintenance, Troubleshooting & Runbook](#10-maintenance-troubleshooting--runbook)
+10. [CI/CD Workflow & Deployment Manual](#10-cicd-workflow--deployment-manual)
+   - 10.1 [Overview & High-Level Pipeline](#101-overview--high-level-pipeline)
+   - 10.2 [Branch Protection Rules](#102-branch-protection-rules)
+   - 10.3 [Workflows Architecture (`ci.yml` & `deploy.yml`)](#103-workflows-architecture-ciyml--deployyml)
+   - 10.4 [Repository Secrets & Variables](#104-repository-secrets--variables)
+   - 10.5 [What the Deploy Does and Does Not Touch](#105-what-the-deploy-does-and-does-not-touch)
+   - 10.6 [Daily Developer Workflow](#106-daily-developer-workflow)
+   - 10.7 [Database Migrations in Production](#107-database-migrations-in-production)
+   - 10.8 [First-Time Setup & Disaster Recovery](#108-first-time-setup--disaster-recovery)
+   - 10.9 [Post-Deploy Verification Checklist](#109-post-deploy-verification-checklist)
+   - 10.10 [Rollback Procedures](#1010-rollback-procedures)
+   - 10.11 [CI/CD Troubleshooting Runbook](#1011-cicd-troubleshooting-runbook)
+   - 10.12 [Known Limitations & Hardening Recommendations](#1012-known-limitations--hardening-recommendations)
+   - 10.13 [Infrastructure Security Invariants](#1013-infrastructure-security-invariants)
+11. [Maintenance, Troubleshooting & Runbook](#11-maintenance-troubleshooting--runbook)
 
 ---
 
@@ -485,4 +499,309 @@ All future frontend modifications must strictly adhere to the following architec
    - All UI layouts must be designed **mobile-first** and scaled up using `sm:`, `md:`, `lg:`.
 7. **Modals & Dialogs:**  
    - Never use browser native popups (`window.alert`, `window.confirm`). Always use Shadcn Vue `AlertDialog` or `Dialog`.
+
+---
+
+## 10. CI/CD Workflow & Deployment Manual
+
+> **Developer Documentation.** Last updated 5 November 2026.
+
+### 10.1 Overview & High-Level Pipeline
+
+Every change reaches production through a pull request. Merging into `main` triggers a deploy that builds the Vue frontend on a GitHub runner, uploads the frontend and the Laravel backend to cPanel over **one single SSH connection**, then executes Composer, database migrations, and a cache clear on the server.
+
+```
+feature branch ──► pull request ──► CI build check ──► merge to main ──► Deploy workflow ──► cPanel
+```
+
+| Component | Detail |
+|---|---|
+| **Repository** | One private monorepo on GitHub |
+| **Frontend** | `client/` (Vue 3 + TypeScript, built with Vite) |
+| **Backend** | `server/` (Laravel 12 REST API) |
+| **Hosting** | cPanel shared hosting, frontend and backend on the same account |
+| **Workflows** | `.github/workflows/ci.yml` and `.github/workflows/deploy.yml` |
+
+---
+
+### 10.2 Branch Protection Rules
+
+The ruleset named **Protect main** (`Settings` -> `Rules` -> `Rulesets`) targets the default branch:
+- **Require a pull request before merging:** Required approvals are `0` while one person works on the project. Raise it to `1` when a second reviewer exists.
+- **Require status checks to pass before merging:** The `build` status check (produced by the CI workflow) must pass before merging.
+- **The bypass list is empty:** Nobody, including repository administrators, can push straight to `main`.
+
+> [!NOTE]
+> This was verified by attempting a direct push, which GitHub rejected with:  
+> `GH013: Repository rule violations found` — *Changes must be made through a pull request.*
+
+- If the **Merge** button is available while the CI check is still running, the `build` status check is missing from the ruleset. Add it back.
+- For an emergency fix, open a pull request that reverts the problematic change. **Do not add a bypass.**
+
+---
+
+### 10.3 Workflows Architecture (`ci.yml` & `deploy.yml`)
+
+#### 1. Continuous Integration (`ci.yml`)
+- **Trigger:** `pull_request` targeting `main`.
+- **Job:** `build` runs on `ubuntu-latest`:
+  1. Checks out repository.
+  2. Sets up Node.js 20 with `npm` caching from `client/package-lock.json`.
+  3. Executes `npm ci` and `npm run build` inside `client/`.
+- Reads `VITE_API_URL` and `VITE_GA_MEASUREMENT_ID` from repository variables.
+- Uses **no secrets, no SSH, and uploads nothing** — an invalid or broken pull request cannot touch the server.
+- Proves that the frontend compiles cleanly. (Backend testing can be added as a subsequent check).
+
+#### 2. Automated Deployment (`deploy.yml`)
+- **Triggers:** `push` to `main` and `workflow_dispatch` (manual run).
+- **Branch Guard:** Has the guard `if: github.ref == 'refs/heads/main'`, ensuring the manual *Run workflow* button cannot deploy an unmerged branch.
+- **Single Job:** All deployment steps execute sequentially inside one job so that every step shares a single multiplexed SSH connection.
+
+| Step | Action | Description |
+|---|---|---|
+| **1** | **Checkout** | Fetches the repository source code. |
+| **2** | **Set up Node** | Sets up Node.js 20 with npm caching from `client/package-lock.json`. |
+| **3** | **Build frontend** | Runs `npm ci` then `npm run build` in `client/` using production `VITE_` variables. |
+| **4** | **Set up SSH** | Writes the deploy key to `~/.ssh/deploy_key` and creates `~/.ssh/config` with host alias `cpanel`. |
+| **5** | **Upload frontend build** | Executes `rsync -avz --delete`, excluding `.htaccess`, from `client/dist/` to `$FRONTEND_PATH`. |
+| **6** | **Upload backend files** | Executes `rsync -avz` (without delete), excluding `.env`, `storage`, `vendor`, `node_modules`, and `.git`, from `server/` to `$BACKEND_PATH`. |
+| **7** | **Update backend** | Over SSH inside the backend directory: runs `php ~/composer.phar install --no-dev --optimize-autoloader --no-interaction`, then `php artisan migrate --force`, and `php artisan optimize:clear`. |
+
+#### Why There is Only One SSH Connection
+The host firewall strictly limits how many new SSH handshakes it accepts in a short time frame. Opening multiple concurrent connections triggers rate limits and timeouts. The workflow configures SSH with:
+```ssh-config
+ControlMaster auto
+ControlPath ~/.ssh/control-%C
+ControlPersist 10m
+```
+Every subsequent `rsync` and `ssh` call reuses the existing socket via the `cpanel` alias. **Any new step added in the future must use `cpanel` and must not open a separate connection.**
+
+---
+
+### 10.4 Repository Secrets & Variables
+
+Configured at repository level under **Settings -> Secrets and variables -> Actions**.
+
+| Name | Type | Purpose |
+|---|---|---|
+| `SSH_HOST` | Secret | Server hostname or IP address |
+| `SSH_USER` | Secret | cPanel account username |
+| `SSH_PORT` | Secret | SSH port (usually `22`) |
+| `SSH_PRIVATE_KEY` | Secret | Full private deploy key (including `BEGIN` and `END` headers) |
+| `BACKEND_PATH` | Secret | Absolute server path to the Laravel root folder |
+| `FRONTEND_PATH` | Secret | Absolute server path to the frontend public document root |
+| `VITE_API_URL` | Variable | Backend API base URL baked into the client bundle at build time |
+| `VITE_GA_MEASUREMENT_ID` | Variable | Google Analytics 4 Measurement ID baked into client bundle |
+
+> [!IMPORTANT]
+> **Configuration Rules:**
+> - Path secrets must be **absolute** and contain **no trailing whitespace or newlines**. A stray newline once broke the rsync target directory.
+> - `VITE_` variables end up in the client-side JavaScript bundle. **Never store secret keys or tokens in `VITE_` variables.**
+> - Vite bakes these values at build time. Changing a repository variable has no effect until a new deploy workflow runs.
+
+---
+
+### 10.5 What the Deploy Does and Does Not Touch
+
+| Item | Deployment Behavior |
+|---|---|
+| **Server `.env`** | **Never overwritten.** Maintained independently on the server. |
+| **`storage/`** | **Never touched.** User uploads, logs, and analytics credentials are preserved. |
+| **`vendor/`** | **Not uploaded.** Built and optimized directly on the server by Composer. |
+| **Deleted Backend Files** | **Not deleted automatically.** The backend rsync runs without `--delete`. Remove obsolete files manually in cPanel. |
+| **Frontend Assets** | **Mirrored with `--delete`.** Old hashed JavaScript/CSS chunks are automatically cleaned up. |
+| **Frontend `.htaccess`** | **Preserved on server.** Excluded from rsync so routing rules are never overwritten. Edit by hand. |
+| **Database** | **Migrations run automatically.** Executed via `php artisan migrate --force`. |
+
+> [!NOTE]
+> Backend exclude patterns have no leading slash (e.g. `storage`, `vendor`), meaning they match at any directory depth. Any folder named `vendor` or `storage` anywhere under `server/` is automatically skipped.
+
+---
+
+### 10.6 Daily Developer Workflow
+
+```bash
+# 1. Start from up-to-date main
+git checkout main
+git pull
+
+# 2. Create a feature branch
+git checkout -b feature/short-description
+
+# 3. Implement code changes following conventions
+git add .
+git commit -m "Describe the change"
+git push -u origin feature/short-description
+```
+
+1. Open a **Pull Request** into `main` on GitHub.
+2. Wait for the **`CI / build`** check to turn green.
+3. Merge the pull request.
+4. Navigate to the **Actions** tab and monitor the **Deploy to cPanel** workflow run.
+5. Perform post-deploy verification (Section 10.9), then delete the feature branch.
+
+> [!WARNING]
+> Never attempt to commit directly to `main`. Pushes will be rejected by GitHub branch protection rules.
+
+---
+
+### 10.7 Database Migrations in Production
+
+- **New Migration Files Only:** Every schema modification must be a new timestamped migration file (`php artisan make:migration ...`). Never edit an existing migration that has already run in production.
+- **Never run destructive commands:** Running `migrate:fresh` or `migrate:refresh` on production is strictly forbidden as it wipes all live data.
+- **Take a backup first:** Always take a database snapshot in cPanel before running migrations that drop, rename, or transform existing columns.
+- **Deployment Execution Order:** Backend files are uploaded *before* migrations execute. Ensure migrations are backward-compatible (e.g. add new nullable columns first, then clean up deprecated columns in a subsequent deployment).
+- **Reverting Code vs Database:** Reverting code via Git does not revert database schema changes. Write a corrective rollback migration or restore from backup.
+
+---
+
+### 10.8 First-Time Setup & Disaster Recovery
+
+If deploying to a fresh server or restoring from disaster:
+
+1. **Generate SSH Keypair:**
+   ```bash
+   ssh-keygen -t ed25519 -C "github-actions-deploy" -f deploy_key
+   ```
+2. **Authorize in cPanel:**  
+   Go to **Security -> SSH Access -> Import Key**. Paste the public key (`deploy_key.pub`), then click **Manage** and **Authorize**.
+3. **Verify Connectivity:**
+   ```bash
+   ssh -i deploy_key -p PORT USER@HOST
+   ```
+4. **Configure GitHub Secrets & Variables:**  
+   Add the 6 secrets and 2 variables defined in Section 10.4. Paste the complete private key into `SSH_PRIVATE_KEY`.
+5. **Secure Local Keys:** Delete the local key files from your machine and never commit them to version control.
+6. **Ensure Composer is available:** Install Composer on the server home path as `~/composer.phar`.
+7. **Configure Branch Ruleset:** Enable the *Protect main* ruleset with required CI status checks.
+
+---
+
+### 10.9 Post-Deploy Verification Checklist
+
+- [ ] GitHub Actions workflow completed with a green checkmark.
+- [ ] Hard refresh the browser (`Ctrl + Shift + R` or `Cmd + Shift + R`) to bypass browser cache.
+- [ ] Test a deep route (e.g., `/explore` or `/courses/{uuid}`) to verify SPA rewrite rules in `.htaccess`.
+- [ ] Check API data fetching on public and student dashboard pages.
+- [ ] Log in as administrator and confirm admin panel loads correctly.
+- [ ] Inspect `server/storage/logs/laravel.log` on the server for any unhandled exceptions.
+
+---
+
+### 10.10 Rollback Procedures
+
+- **Application Code Rollback:**  
+  Open a pull request reverting the problematic merge commit, merge it into `main`. The deploy pipeline will automatically build and restore the previous codebase.
+- **Manual Pipeline Trigger:**  
+  Go to **Actions -> Deploy to cPanel -> Run workflow** on `main`.
+- **Database Rollback:**  
+  Database state is not rolled back automatically. Either restore from your cPanel database backup or apply a targeted corrective migration.
+
+---
+
+### 10.11 CI/CD Troubleshooting Runbook
+
+| Symptom | Likely Cause | Solution |
+|---|---|---|
+| **Connection timed out during rsync or ssh** | Host firewall rate-limiting or blocking GitHub runner IP addresses | Ensure the single multiplexed SSH connection config is intact. Request hosting support to allow GitHub Actions CIDR blocks or whitelist in firewall (CSF, Imunify360, cPHulk). |
+| **Permission denied (`publickey`)** | Key not authorized or private key secret malformed | Authorize the public key in cPanel SSH Access. Re-paste the entire private key including `-----BEGIN...` and `-----END...` lines. |
+| **rsync fails with bad remote path** | Spaces or stray newlines in `BACKEND_PATH` or `FRONTEND_PATH` | Edit the secret in GitHub Settings and remove any trailing newline or spaces. |
+| **npm ci fails on peer dependency error** | Zod peer version conflict with TanStack form adapter | Ensure `.npmrc` with `legacy-peer-deps=true` is present in the repository root or client directory. |
+| **`composer: command not found`** | Composer binary is not in server system `$PATH` | The deploy script expects `php ~/composer.phar`. Install or link Composer in the user home directory. |
+| **404 error when reloading deep SPA URLs** | Missing or corrupted `.htaccess` in frontend document root | Verify `.htaccess` exists on server with proper rewrite rules to `index.html`. |
+| **Old assets / Old API URL after deploy** | Browser cache, or `VITE_` variable updated after build | Perform a hard browser refresh. Re-trigger the deployment workflow after modifying any `VITE_` variable. |
+| **Merge button clickable while CI is running** | `build` job is not set as a required check | Add the `build` status check under Ruleset settings. |
+| **Direct push rejected with `GH013`** | Branch protection working as designed | Expected behavior. Open a pull request from a feature branch. |
+
+---
+
+### 10.12 Known Limitations & Hardening Recommendations
+
+1. **Frontend Rsync Excludes:**  
+   The frontend `--delete` flag removes unrecognized files. Ensure `.well-known` (AutoSSL certificate renewals) and `cgi-bin` are excluded:
+   ```bash
+   rsync -avz --delete --exclude='.htaccess' --exclude='.well-known' --exclude='cgi-bin' client/dist/ cpanel:$FRONTEND_PATH/
+   ```
+2. **Concurrency Control:**  
+   Prevent overlapping deploys from rapid consecutive merges by adding concurrency management to `deploy.yml`:
+   ```yaml
+   concurrency:
+     group: deploy-production
+     cancel-in-progress: false
+   ```
+3. **Backend CI Test Suite:**  
+   Expand `ci.yml` to include a backend verification job running `composer install` and `php artisan test` / `pest`.
+4. **Maintenance Mode Window:**  
+   For heavy migrations, wrap Step 7 with `php artisan down` and `php artisan up` to prevent end-user traffic during database schema updates.
+5. **Orphaned Backend Files:**  
+   Because backend rsync runs without `--delete`, deleting a file from Git will leave the old file on the server until manually removed.
+
+---
+
+### 10.13 Infrastructure Security Invariants
+
+- **Never commit `.env` files, GA4 service account credentials (`storage/app/analytics/`), or private SSH keys.**
+- The deploy SSH key has shell access to the cPanel user account. Ensure mandatory 2FA on all GitHub administrator accounts.
+- Carefully audit changes to `.github/workflows/` — merged workflows execute with full access to repository secrets.
+- **Key Compromise Response:** If the deploy key is ever leaked or suspected compromised, immediately delete it from cPanel SSH Access, generate a new keypair, update `SSH_PRIVATE_KEY` in GitHub Secrets, and authorize the new public key.
+- Periodically rotate database, application, and mail credentials.
+
+---
+
+## 11. Maintenance, Troubleshooting & Runbook
+
+### Common Issues & Solutions
+
+#### 1. "Unauthenticated" / 401 Errors on Protected Routes
+- **Cause:** Missing or unreadable Passport encryption keys, or incorrect auth middleware guard (`auth:api` must be used; do not use `auth:sanctum`).
+- **Solution:**
+  ```bash
+  cd server
+  php artisan passport:keys
+  chmod 600 storage/oauth-*.key
+  ```
+- Verify `access_token` cookie is present in browser requests and properly attached as `Authorization: Bearer <token>`.
+
+#### 2. NOWPayments IPN Webhook Not Updating Orders
+- **Symptom:** Order remains in `waiting` status after customer sends payment.
+- **Checklist:**
+  - Verify `NOWPAYMENTS_IPN_SECRET` in `.env` matches the IPN secret key configured in the NOWPayments merchant account.
+  - Inspect `/server/storage/logs/laravel.log` for signature mismatch warnings.
+  - Test connectivity and ensure the `/api/payments/webhook` route is publicly reachable without CSRF or auth middleware.
+  - The fallback synchronization (`PaymentController@checkStatus`) will reconcile status when the user views the order status page.
+
+#### 3. Emails Not Sending (Password Reset / Certificates)
+- **Note:** All transactional emails (password reset links and completion certificates) are sent synchronously via `Mail::to(...)->send(...)`.
+- **Checklist:**
+  - Verify SMTP credentials in `server/.env` (`MAIL_HOST`, `MAIL_PORT=465` or `587`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_ENCRYPTION=ssl`).
+  - Ensure the mail host subdomain (e.g. `mail.the-fibonacci-gallery.com`) is set to **DNS Only (Grey Cloud)** in Cloudflare rather than Proxied, as Cloudflare proxies only HTTP/HTTPS traffic and blocks direct SMTP ports.
+  - Check `server/storage/logs/laravel.log` for SMTP connection or authentication errors.
+
+#### 4. Video Files / Thumbnails Throw 404
+- **Solution:** Re-link the public storage directory:
+  ```bash
+  php artisan storage:link
+  ```
+- Ensure the `server/storage` and `server/bootstrap/cache` directories are writable by the PHP process:
+  ```bash
+  chmod -R 775 storage bootstrap/cache
+  ```
+
+#### 5. Clearing System Caches After Updates
+Whenever code changes, environment variables, or config changes are deployed, run:
+```bash
+php artisan optimize:clear
+php artisan config:cache
+php artisan route:cache
+```
+
+---
+
+## Summary Contacts & Ownership
+
+For escalated infrastructure queries or provider API credentials:
+- **Technical Lead / Author:** Nahom Abraham
+- **Platform:** The Fibonacci Gallery
+- **Primary Domain:** `https://the-fibonacci-gallery.com`
+- **Backend API:** `https://back.the-fibonacci-gallery.com`
 
