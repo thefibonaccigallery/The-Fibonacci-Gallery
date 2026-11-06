@@ -89,14 +89,14 @@ const getLevelColor = (level: string) => {
 
 <template>
   <DashboardLayout>
-    <div class="min-h-screen bg-background pt-24">
+    <div class="min-h-screen bg-background">
       <!-- Header -->
-      <div class="border-b border-border/40 bg-card/50 backdrop-blur-sm sticky top-20 z-10">
-        <div class="container mx-auto px-4 py-6">
-          <div class="flex items-center justify-between mb-4">
+      <div class="border-b border-border/40 bg-card/50 backdrop-blur-sm">
+        <div class="container mx-auto px-4 py-5 sm:py-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div>
-              <h1 class="text-3xl font-bold text-foreground">Explore Courses</h1>
-              <p class="text-sm text-muted-foreground mt-1">
+              <h1 class="text-2xl sm:text-3xl font-bold text-foreground">Explore Courses</h1>
+              <p class="text-xs sm:text-sm text-muted-foreground mt-1">
                 Discover new courses to expand your knowledge
               </p>
             </div>
@@ -104,7 +104,8 @@ const getLevelColor = (level: string) => {
               v-if="authStore.isAuthenticated"
               @click="router.push('/my-courses')"
               variant="outline"
-              class="border-primary/30 text-primary hover:bg-primary/10"
+              size="sm"
+              class="border-primary/30 text-primary hover:bg-primary/10 self-start sm:self-auto text-xs sm:text-sm"
             >
               <PhGraduationCap class="h-4 w-4 mr-2" />
               My Courses
