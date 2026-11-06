@@ -83,7 +83,7 @@ Route::middleware('auth:api')->group(function () {
 // Public coupon endpoint (no auth required)
 Route::get('/coupons/homepage', [CouponController::class, 'homepage']);
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:api')->group(function () {
     // Affiliate routes (student-facing)
     Route::get('/affiliate/dashboard', [AffiliateController::class, 'dashboard']);
     Route::get('/affiliate/commissions', [AffiliateController::class, 'commissions']);
