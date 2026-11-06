@@ -180,19 +180,6 @@ import { PhInstagramLogo, PhTelegramLogo, PhEnvelopeSimple } from '@phosphor-ico
           Trading involves risk. Past performance is not indicative of future results.
         </p>
       </div>
-
-      <div class="w-full flex justify-around mt-6">
-        <p class="mx-auto text-sm">
-          Made By
-          <a
-            href="https://linktr.ee/nahomrak"
-            target="_blank"
-            class="font-semibold text-accentGold hover:underline"
-            >RAK</a
-          >
-          with ❤️
-        </p>
-      </div>
     </div>
   </footer>
 </template>
